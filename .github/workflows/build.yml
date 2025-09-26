@@ -1,1 +1,24 @@
+name: Build members from Google Sheets
+on:
+  workflow_dispatch: {}         # lancement manuel
+  schedule:
+    - cron: "*/30 * * * *"      # toutes les 30 min
 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install pandas
+      - name: Generate member pages
+        env:
+          CSV_URL: ${{ secrets.CSV_URL }}
+        run: python scripts/build.py
+      - name: Commit & push if changed
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update members from Google Sheets"
+          branch: main
