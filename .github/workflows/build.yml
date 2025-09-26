@@ -1,4 +1,6 @@
-name: Build members from Google Sheets
+permissions:
+  contents: write
+: Build members from Google Sheets
 on:
   workflow_dispatch: {}         # lancement manuel
   schedule:
