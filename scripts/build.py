@@ -17,7 +17,7 @@ df = pd.read_csv(CSV_URL, header=hdr).dropna(how="all").reset_index(drop=True)
 expected = ["Nom","Prénom","Adresse postale","Numéro de GSM","Adresse mail",
             "Marque du véhicule","Modèle du véhicule","Année",
             "Numéro d'immatriculation","Membre d'un autre club",
-            "Assuré chez BEHVA","Autre véhicule"]
+            "Assuré chez BEHVA","Autre véhicule","Cotisation"]
 for c in expected:
     if c not in df.columns: df[c] = ""
 
