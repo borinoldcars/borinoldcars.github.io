@@ -35,12 +35,13 @@ def slugify(s: str) -> str:
 def esc(x: str) -> str:
     return (str(x).replace("&","&amp;").replace("<","&lt;")
             .replace(">","&gt;").replace('"',"&quot;"))
-    def badge(text, bg, fg):
+
+def badge(text, bg, fg):
     return (f"<span style='display:inline-block;padding:4px 10px;"
             f"border-radius:999px;background:{bg};color:{fg};font-weight:600'>{esc(text)}</span>")
 
 def colorize_cotisation(value: str) -> str:
-    s = norm(value)  # <- 'norm' est déjà défini plus haut dans le script
+    s = norm(value or "")
     oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
     non_vals = {"non","no","0","pas en ordre","impaye","impayee","impayé","impayée","due"}
     if s in oui_vals:
@@ -50,8 +51,7 @@ def colorize_cotisation(value: str) -> str:
     return badge(value or "—", "#FFF4E5", "#B54708")
 
 # ---- 1) Charger CSV & détecter l'en-tête réel ----
-raw = pd.read_csv(CSV_URL, header=None, dtype=str)
-raw = raw.fillna("")
+raw = pd.read_csv(CSV_URL, header=None, dtype=str).fillna("")
 hdr_candidates = raw.index[
     (raw.iloc[:, 0].map(norm) == "nom") &
     (raw.iloc[:, 1].map(norm).isin(["prénom","prenom"]))
@@ -159,7 +159,7 @@ def render_member_html(row: pd.Series) -> str:
     tr("Immatriculation", row["Numéro d'immatriculation"])
     tr("Autre club", row["Membre d'un autre club"])
     tr("Assuré chez BEHVA", row["Assuré chez BEHVA"])
-    tr("Cotisation", colorize_cotisation(row["Cotisation"]), is_html=True)
+    tr("Cotisation", colorize_cotisation(row["Cotisation"]), is_html=True)  # ← vert/rouge
     tr("Autre véhicule", row["Autre véhicule"])
     tr("QR code", qr_block, is_html=True)
 
@@ -192,9 +192,9 @@ for _, row in df.iterrows():
     url = f"{SITE_BASE}/members/{slug}.html"
 
     # QR -> qrs/<slug>.png
-    qr = segno.make(url, error="q")        # niveau de correction
+    qr = segno.make(url, error="q")
     qr_path = QRS_DIR / f"{slug}.png"
-    qr.save(qr_path, scale=6, border=2)    # ajuste scale/border si besoin
+    qr.save(qr_path, scale=6, border=2)
 
     # Page HTML -> members/<slug>.html
     html = render_member_html(row)
@@ -213,7 +213,7 @@ links = "\n".join(
     encoding="utf-8"
 )
 
-# ---- 6) Nettoyage : supprimer les fiches orphelines (optionnel mais utile) ----
+# ---- 6) Nettoyage : supprimer les fiches orphelines ----
 valid = set(generated_slugs) | {"index"}
 for f in OUT_DIR.glob("*.html"):
     if f.stem not in valid:
