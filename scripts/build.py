@@ -159,7 +159,7 @@ def render_member_html(row: pd.Series) -> str:
     tr("Immatriculation", row["Numéro d'immatriculation"])
     tr("Autre club", row["Membre d'un autre club"])
     tr("Assuré chez BEHVA", row["Assuré chez BEHVA"])
-    tr("Cotisation", row["Cotisation"])
+    tr("Cotisation", colorize_cotisation(row["Cotisation"]), is_html=True)
     tr("Autre véhicule", row["Autre véhicule"])
     tr("QR code", qr_block, is_html=True)
 
