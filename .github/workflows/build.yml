@@ -1,3 +1,7 @@
+name: Build members from Google Sheets
+permissions:
+  contents: write
+
 on:
   workflow_dispatch: {}
   push:
@@ -5,13 +9,8 @@ on:
     paths:
       - 'scripts/build.py'
       - '.github/workflows/build.yml'
-:
-  contents: write
-: Build members from Google Sheets
-on:
-  workflow_dispatch: {}         # lancement manuel
   schedule:
-    - cron: "*/30 * * * *"      # toutes les 30 min
+    - cron: "*/30 * * * *"
 
 jobs:
   build:
@@ -20,11 +19,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
       - run: pip install pandas
       - name: Generate member pages
         env:
-          CSV_URL: ${{ secrets.CSV_URL }}
+          CSV_URL: ${{ secrets.CSV_URL }}      # si ton secret s'appelle CSV_URL
+          # CSV_URL: ${{ secrets.MEMBRESBOC }} # ← décommente cette ligne ET commente celle du dessus si ton secret s'appelle MEMBRESBOC
         run: python scripts/build.py
       - name: Commit & push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
