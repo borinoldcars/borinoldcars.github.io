@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install pandas
+      - run: pip install pandas segno
       - name: Generate member pages
         env:
           CSV_URL: ${{ secrets.CSV_URL }}      # si ton secret s'appelle CSV_URL
