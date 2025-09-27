@@ -35,6 +35,19 @@ def slugify(s: str) -> str:
 def esc(x: str) -> str:
     return (str(x).replace("&","&amp;").replace("<","&lt;")
             .replace(">","&gt;").replace('"',"&quot;"))
+    def badge(text, bg, fg):
+    return (f"<span style='display:inline-block;padding:4px 10px;"
+            f"border-radius:999px;background:{bg};color:{fg};font-weight:600'>{esc(text)}</span>")
+
+def colorize_cotisation(value: str) -> str:
+    s = norm(value)  # <- 'norm' est déjà défini plus haut dans le script
+    oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
+    non_vals = {"non","no","0","pas en ordre","impaye","impayee","impayé","impayée","due"}
+    if s in oui_vals:
+        return badge("Oui", "#EAF7EA", "#0F6D0F")
+    if s in non_vals:
+        return badge("Non", "#FDECEC", "#B42318")
+    return badge(value or "—", "#FFF4E5", "#B54708")
 
 # ---- 1) Charger CSV & détecter l'en-tête réel ----
 raw = pd.read_csv(CSV_URL, header=None, dtype=str)
