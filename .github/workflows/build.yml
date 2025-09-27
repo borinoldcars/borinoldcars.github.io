@@ -1,4 +1,11 @@
-permissions:
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/build.py'
+      - '.github/workflows/build.yml'
+:
   contents: write
 : Build members from Google Sheets
 on:
