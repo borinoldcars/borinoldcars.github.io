@@ -36,5 +36,5 @@ Cette journée encouragera : **l’ouverture aux autres**, le **fair-play**, la 
 ---
 
 ### Merci pour votre confiance ✨  
-**Votez Margaux !**  
-*Solidarité, respect, esprit d’équipe.*
+**Voter Margaux !**  
+*C'est gagner le gros lot!*
