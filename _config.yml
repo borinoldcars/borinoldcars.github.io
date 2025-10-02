@@ -1,0 +1,9 @@
+# Active le thème par défaut (ou garde le tien si tu en as un)
+theme: minima
+
+# Vide = n’affiche plus "borinoldcars" en haut
+title: ""
+description: ""
+
+# (optionnel) si tu veux une URL canonique
+# url: "https://borinoldcars.github.io"
