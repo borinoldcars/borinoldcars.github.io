@@ -29,9 +29,7 @@ Cette journée encouragera : **l’ouverture aux autres**, le **fair-play**, la 
 - Je m’engage à **écouter vos idées** et à **travailler en équipe**.
 
 ## 📣 Comment participer ?
-- Parle de ces idées en classe et autour de toi.
-- Propose tes propres activités à ajouter aux visites et à la journée sportive.
-- Le jour du vote, **fais entendre ta voix !**
+- Le 14 Octobre 2025, **fais entendre ta voix !**
 
 ---
 
