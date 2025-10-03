@@ -200,7 +200,7 @@ for _, row in df.iterrows():
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
 
-# ---- 5) Index (amélioré) ----
+# ---- 5) Index (amélioré avec bouton Google Sheet) ----
 def cot_status(value: str) -> str:
     s = norm(value or "")
     oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
@@ -232,6 +232,9 @@ index_tpl = """<!doctype html>
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f8f9fb;margin:24px}
 .container{max-width:1100px;margin:auto;background:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
+.bar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+.btn{background:#0d6efd;color:#fff;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:600}
+.btn:hover{filter:brightness(.95)}
 .top{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 input[type="search"]{flex:1;min-width:240px;padding:10px 12px;border:1px solid #ddd;border-radius:10px}
 .filters label{margin-right:10px}
@@ -241,7 +244,11 @@ th{background:#f6f8fb}
 .count{color:#555;font-size:14px}
 </style></head><body>
 <div class="container">
-  <h1>Annuaire des membres</h1>
+  <div class="bar">
+    <h1>Annuaire des membres</h1>
+    <a class="btn" href="{{SHEET_LINK}}" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+  </div>
+
   <div class="top">
     <input id="q" type="search" placeholder="Rechercher par nom, véhicule…">
     <div class="filters">
@@ -251,6 +258,7 @@ th{background:#f6f8fb}
     </div>
     <div class="count"><span id="count">0</span>/<span id="total">0</span> membres</div>
   </div>
+
   <table>
     <thead><tr><th>Nom</th><th>Véhicule</th><th>Cotisation</th><th></th></tr></thead>
     <tbody id="rows">
@@ -286,7 +294,11 @@ apply();
 </script>
 </body></html>"""
 
-index_html = index_tpl.replace("{{ROWS}}", "\n".join(rows))
+index_html = (
+    index_tpl
+    .replace("{{ROWS}}", "\n".join(rows))
+    .replace("{{SHEET_LINK}}", esc(SHEET_LINK))
+)
 (OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
 # ---- 6) Nettoyage : supprimer les fiches orphelines ----
