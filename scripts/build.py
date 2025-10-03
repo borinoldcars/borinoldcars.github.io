@@ -1,4 +1,5 @@
 # scripts/build.py
+import hashlib
 import os, re, unicodedata
 from pathlib import Path
 import pandas as pd
@@ -14,6 +15,14 @@ QRS_DIR.mkdir(parents=True, exist_ok=True)
 CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL (ou MEMBRESBOC).")
+    # Bouton "Ouvrir le Google Sheet"
+SHEET_LINK = os.environ.get("SHEET_LINK") or CSV_URL
+# (option : tu peux forcer ton lien ici)
+# SHEET_LINK = "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
+
+# Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
+ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or "").strip()
+ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
 
 # Lien du bouton "Ouvrir le Google Sheet"
 SHEET_LINK = os.environ.get("SHEET_LINK") or \
@@ -203,7 +212,7 @@ for _, row in df.iterrows():
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
 
-# ---- 5) Index (amélioré avec bouton Google Sheet) ----
+# ---- 5) Index (protégé par code + bouton Google Sheet + recherche/filtre) ----
 def cot_status(value: str) -> str:
     s = norm(value or "")
     oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
@@ -232,6 +241,7 @@ index_tpl = """<!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Annuaire des membres · Borin'Old Cars</title>
+<meta name="robots" content="noindex">
 <style>
 body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f8f9fb;margin:24px}
 .container{max-width:1100px;margin:auto;background:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
@@ -245,8 +255,32 @@ table{width:100%;border-collapse:collapse;margin-top:12px}
 th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
 th{background:#f6f8fb}
 .count{color:#555;font-size:14px}
-</style></head><body>
-<div class="container">
+
+/* Écran de verrouillage */
+.locked .protected{filter:blur(6px);pointer-events:none;user-select:none}
+#gate{position:fixed;inset:0;background:rgba(248,249,251,.96);display:none;align-items:center;justify-content:center;padding:16px}
+.locked #gate{display:flex}
+.gcard{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:22px;max-width:420px;width:100%;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.gcard h2{margin:0 0 8px 0}
+.grow{display:flex;gap:8px;margin-top:12px}
+.grow input{flex:1;padding:10px 12px;border:1px solid #ddd;border-radius:10px}
+.grow button{background:#0d6efd;color:#fff;border:0;border-radius:10px;padding:10px 14px;font-weight:600;cursor:pointer}
+#err{color:#b42318;font-size:14px;margin-top:8px;display:none}
+</style></head>
+<body>
+<div id="gate">
+  <div class="gcard">
+    <h2>Accès réservé</h2>
+    <p>Entrez le code pour accéder à l'annuaire des membres.</p>
+    <div class="grow">
+      <input id="code" type="password" placeholder="Code d'accès">
+      <button id="go">Entrer</button>
+    </div>
+    <div id="err">Code incorrect.</div>
+  </div>
+</div>
+
+<div class="container protected">
   <div class="bar">
     <h1>Annuaire des membres</h1>
     <a class="btn" href="{{SHEET_LINK}}" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
@@ -269,7 +303,42 @@ th{background:#f6f8fb}
     </tbody>
   </table>
 </div>
+
 <script>
+// Empreinte SHA-256 du code (côté build)
+const EXPECTED = "{{CODE_HASH}}";
+
+function setLocked(on){ document.body.classList.toggle('locked', !!on); }
+function savedOK(){ const s = localStorage.getItem('members_access'); return s && EXPECTED && s === EXPECTED; }
+
+async function sha256(txt){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryUnlock(){
+  const input = document.getElementById('code');
+  const err = document.getElementById('err');
+  const h = await sha256((input.value||'').trim());
+  if(h === EXPECTED){
+    localStorage.setItem('members_access', h);
+    err.style.display = 'none';
+    setLocked(false);
+  }else{
+    err.style.display = 'block';
+    input.select();
+  }
+}
+
+(function initGate(){
+  if(!EXPECTED){ setLocked(false); return; }    // pas de code → pas de verrou
+  if(savedOK()){ setLocked(false); return; }
+  setLocked(true);
+  document.getElementById('go').addEventListener('click', tryUnlock);
+  document.getElementById('code').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+})();
+
+// Recherche / filtres
 const q = document.getElementById('q');
 const rows = Array.from(document.querySelectorAll('#rows tr'));
 const radios = Array.from(document.querySelectorAll('input[name="cot"]'));
@@ -278,7 +347,7 @@ const totalEl = document.getElementById('total');
 totalEl.textContent = rows.length;
 
 function apply(){
-  const term = q.value.trim().toLowerCase();
+  const term = (q.value||'').trim().toLowerCase();
   const cot = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
   let shown = 0;
   rows.forEach(tr=>{
@@ -287,7 +356,8 @@ function apply(){
     const scot = tr.dataset.cot;
     const okTerm = !term || name.includes(term) || veh.includes(term);
     const okCot = cot === 'all' || scot === cot;
-    if(okTerm && okCot){ tr.style.display=''; shown++; } else { tr.style.display='none'; }
+    tr.style.display = (okTerm && okCot) ? '' : 'none';
+    if(okTerm && okCot) shown++;
   });
   countEl.textContent = shown;
 }
@@ -301,6 +371,7 @@ index_html = (
     index_tpl
     .replace("{{ROWS}}", "\n".join(rows))
     .replace("{{SHEET_LINK}}", esc(SHEET_LINK))
+    .replace("{{CODE_HASH}}", ACCESS_CODE_HASH)
 )
 (OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
