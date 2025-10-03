@@ -217,7 +217,7 @@ for _, row in df.iterrows():
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
 
-# ---- 5) Index (protégé par code + bouton Google Sheet + recherche/filtre) ----
+# ---- 5) Index (protégé par code + bouton Google Sheet + recherche/filtre + logout) ----
 def cot_status(value: str) -> str:
     s = norm(value or "")
     oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
@@ -297,7 +297,10 @@ th{background:#f6f8fb}
 <div class="container protected">
   <div class="bar">
     <h1>Annuaire des membres</h1>
-    <a class="btn" href="{{SHEET_LINK}}" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+    <div style="display:flex; gap:8px;">
+      <a class="btn" href="{{SHEET_LINK}}" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+      <a class="btn" id="logout" href="#">Se déconnecter</a>
+    </div>
   </div>
 
   <div class="top">
@@ -322,8 +325,16 @@ th{background:#f6f8fb}
 // Empreinte SHA-256 du code (côté build)
 const EXPECTED = "{{CODE_HASH}}";
 
+// Reset via URL : .../members/?logout=1
+if (new URLSearchParams(location.search).get('logout') === '1') {
+  localStorage.removeItem('members_access');
+}
+
 function setLocked(on){ document.body.classList.toggle('locked', !!on); }
-function savedOK(){ const s = localStorage.getItem('members_access'); return s && EXPECTED && s === EXPECTED; }
+function savedOK(){
+  const s = localStorage.getItem('members_access');
+  return s && EXPECTED && s === EXPECTED;
+}
 
 async function sha256(txt){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
@@ -345,11 +356,23 @@ async function tryUnlock(){
 }
 
 (function initGate(){
-  if(!EXPECTED){ setLocked(false); return; }    // pas de code → pas de verrou
-  if(savedOK()){ setLocked(false); return; }
-  setLocked(true);
-  document.getElementById('go').addEventListener('click', tryUnlock);
-  document.getElementById('code').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+  if(!EXPECTED){ setLocked(false); }           // pas de code → pas de verrou
+  else if(savedOK()){ setLocked(false); }      // déjà autorisé
+  else { setLocked(true); }                    // afficher le portail
+
+  const go = document.getElementById('go');
+  const code = document.getElementById('code');
+  if(go) go.addEventListener('click', tryUnlock);
+  if(code) code.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+
+  const logoutBtn = document.getElementById('logout');
+  if (logoutBtn){
+    logoutBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      localStorage.removeItem('members_access');
+      location.reload();
+    });
+  }
 })();
 
 // Recherche / filtres
@@ -394,5 +417,8 @@ valid = set(generated_slugs) | {"index"}
 for f in OUT_DIR.glob("*.html"):
     if f.stem not in valid:
         f.unlink(missing_ok=True)
+
+print(f"Généré {len(generated_slugs)} fiches et QR.")
+
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")
