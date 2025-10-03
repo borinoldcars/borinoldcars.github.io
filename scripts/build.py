@@ -11,10 +11,13 @@ QRS_DIR = Path("qrs")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 QRS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Secret: accepte CSV_URL ou (fallback) MEMBRESBOC
 CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL (ou MEMBRESBOC).")
+
+# Lien du bouton "Ouvrir le Google Sheet"
+SHEET_LINK = os.environ.get("SHEET_LINK") or \
+    "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
 
 # ---- Helpers ----
 def norm(s: str) -> str:
