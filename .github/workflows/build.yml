@@ -30,11 +30,8 @@ jobs:
       - name: Generate member pages
         env:
           CSV_URL: ${{ secrets.CSV_URL }}
-          # CSV_URL: ${{ secrets.MEMBRESBOC }}  # ← décommente si ton secret CSV s'appelle MEMBRESBOC
-
-          # --- code d'accès + lien du bouton (optionnel) ---
-          MEMBERS_CODE: ${{ secrets.MEMBRES_CODE }}   # ton secret "code" (tu l'as déjà créé)
-          SHEET_LINK: ${{ secrets.SHEET_LINK }}       # optionnel : lien explicite du Google Sheet
+          MEMBERS_CODE: ${{ secrets.MEMBERS_CODE }}   # ton secret code (anglais)
+          # SHEET_LINK: ${{ secrets.SHEET_LINK }}     # optionnel si tu le crées
         run: python scripts/build.py
 
       - name: Commit & push if changed
