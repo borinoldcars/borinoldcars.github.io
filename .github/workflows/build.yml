@@ -22,11 +22,14 @@ jobs:
           python-version: '3.11'
       - run: pip install pandas segno
       - name: Generate member pages
-        env:
-          CSV_URL: ${{ secrets.CSV_URL }}      # si ton secret s'appelle CSV_URL
-          # CSV_URL: ${{ secrets.MEMBRESBOC }} # ← décommente cette ligne ET commente celle du dessus si ton secret s'appelle MEMBRESBOC
-        run: python scripts/build.py
-      - name: Commit & push if changed
+  env:
+    CSV_URL: ${{ secrets.CSV_URL }}
+    # CSV_URL: ${{ secrets.MEMBRESBOC }}  # à utiliser si ton secret CSV s'appelle MEMBRESBOC
+
+    # >>> AJOUTS POUR LE CODE ET (optionnel) LE LIEN DU BOUTON <<<
+    MEMBERS_CODE: ${{ secrets.MEMBRES_CODE }}   # ton secret s'appelle MEMBRES_CODE (avec R)
+    SHEET_LINK: ${{ secrets.SHEET_LINK }}       # optionnel, seulement si tu as créé ce secret
+  run: python scripts/build.py
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update members from Google Sheets"
