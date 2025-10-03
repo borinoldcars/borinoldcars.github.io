@@ -5,28 +5,33 @@ from pathlib import Path
 import pandas as pd
 import segno
 
-# ---- Config ----
+# ---- Config de sortie ----
 SITE_BASE = "https://borinoldcars.github.io"
 OUT_DIR = Path("members")
-QRS_DIR = Path("qrs")
+QRS_DIR  = Path("qrs")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 QRS_DIR.mkdir(parents=True, exist_ok=True)
 
+# ---- Sources / Secrets ----
+# CSV (obligatoire) : secret CSV_URL (ou ancien nom MEMBRESBOC)
 CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL (ou MEMBRESBOC).")
-    # Bouton "Ouvrir le Google Sheet"
-SHEET_LINK = os.environ.get("SHEET_LINK") or CSV_URL
-# (option : tu peux forcer ton lien ici)
-# SHEET_LINK = "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
-
-# Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
-ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
-ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
 
 # Lien du bouton "Ouvrir le Google Sheet"
-SHEET_LINK = os.environ.get("SHEET_LINK") or \
-    "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
+# 1) secret SHEET_LINK si défini
+# 2) sinon, le CSV_URL
+# 3) sinon, ton lien d’édition (fallback)
+SHEET_LINK = (
+    os.environ.get("SHEET_LINK")
+    or CSV_URL
+    or "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
+)
+
+# Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
+# On accepte MEMBERS_CODE OU MEMBRES_CODE (selon le nom de ton secret).
+ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
+ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
 
 # ---- Helpers ----
 def norm(s: str) -> str:
@@ -171,7 +176,7 @@ def render_member_html(row: pd.Series) -> str:
     tr("Immatriculation", row["Numéro d'immatriculation"])
     tr("Autre club", row["Membre d'un autre club"])
     tr("Assuré chez BEHVA", row["Assuré chez BEHVA"])
-    tr("Cotisation", colorize_cotisation(row["Cotisation"]), is_html=True)  # ← vert/rouge
+    tr("Cotisation", colorize_cotisation(row["Cotisation"]), is_html=True)
     tr("Autre véhicule", row["Autre véhicule"])
     tr("QR code", qr_block, is_html=True)
 
@@ -226,7 +231,7 @@ for s, p, n, marque, modele, cot in zip(
     df["slug"], df["Prénom"], df["Nom"], df["Marque du véhicule"], df["Modèle du véhicule"], df["Cotisation"]
 ):
     name = f"{p} {n}".strip()
-    veh = f"{marque} {modele}".strip()
+    veh  = f"{marque} {modele}".strip()
     status = cot_status(cot)
     rows.append(
         f"<tr data-name='{esc(name)}' data-veh='{esc(veh)}' data-cot='{status}'>"
