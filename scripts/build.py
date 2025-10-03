@@ -200,18 +200,94 @@ for _, row in df.iterrows():
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
 
-# ---- 5) Index ----
-links = "\n".join(
-    f"<li><a href='{esc(s)}.html'>{esc(p)} {esc(n)}</a></li>"
-    for s, p, n in zip(df["slug"], df["Prénom"], df["Nom"])
-)
-(OUT_DIR / "index.html").write_text(
-    "<!doctype html><meta charset='utf-8'>"
-    "<title>Membres · Borin'Old Cars</title>"
-    "<h1>Annuaire des membres · Borin'Old Cars</h1>"
-    f"<ul>{links}</ul>",
-    encoding="utf-8"
-)
+# ---- 5) Index (amélioré) ----
+def cot_status(value: str) -> str:
+    s = norm(value or "")
+    oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
+    non_vals = {"non","no","0","pas en ordre","impaye","impayee","impayé","impayée","due"}
+    if s in oui_vals: return "oui"
+    if s in non_vals: return "non"
+    return "na"
+
+rows = []
+for s, p, n, marque, modele, cot in zip(
+    df["slug"], df["Prénom"], df["Nom"], df["Marque du véhicule"], df["Modèle du véhicule"], df["Cotisation"]
+):
+    name = f"{p} {n}".strip()
+    veh = f"{marque} {modele}".strip()
+    status = cot_status(cot)
+    rows.append(
+        f"<tr data-name='{esc(name)}' data-veh='{esc(veh)}' data-cot='{status}'>"
+        f"<td><a href='{esc(s)}.html'>{esc(name)}</a></td>"
+        f"<td>{esc(veh)}</td>"
+        f"<td>{colorize_cotisation(cot)}</td>"
+        f"<td><a href='{esc(s)}.html'>Ouvrir</a></td>"
+        f"</tr>"
+    )
+
+index_tpl = """<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Annuaire des membres · Borin'Old Cars</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f8f9fb;margin:24px}
+.container{max-width:1100px;margin:auto;background:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 8px 20px rgba(0,0,0,.06)}
+.top{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+input[type="search"]{flex:1;min-width:240px;padding:10px 12px;border:1px solid #ddd;border-radius:10px}
+.filters label{margin-right:10px}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{padding:10px;border-bottom:1px solid #eee;text-align:left}
+th{background:#f6f8fb}
+.count{color:#555;font-size:14px}
+</style></head><body>
+<div class="container">
+  <h1>Annuaire des membres</h1>
+  <div class="top">
+    <input id="q" type="search" placeholder="Rechercher par nom, véhicule…">
+    <div class="filters">
+      <label><input type="radio" name="cot" value="all" checked> Tous</label>
+      <label><input type="radio" name="cot" value="oui"> Cotisation OK</label>
+      <label><input type="radio" name="cot" value="non"> Cotisation NON</label>
+    </div>
+    <div class="count"><span id="count">0</span>/<span id="total">0</span> membres</div>
+  </div>
+  <table>
+    <thead><tr><th>Nom</th><th>Véhicule</th><th>Cotisation</th><th></th></tr></thead>
+    <tbody id="rows">
+      {{ROWS}}
+    </tbody>
+  </table>
+</div>
+<script>
+const q = document.getElementById('q');
+const rows = Array.from(document.querySelectorAll('#rows tr'));
+const radios = Array.from(document.querySelectorAll('input[name="cot"]'));
+const countEl = document.getElementById('count');
+const totalEl = document.getElementById('total');
+totalEl.textContent = rows.length;
+
+function apply(){
+  const term = q.value.trim().toLowerCase();
+  const cot = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
+  let shown = 0;
+  rows.forEach(tr=>{
+    const name = tr.dataset.name.toLowerCase();
+    const veh = tr.dataset.veh.toLowerCase();
+    const scot = tr.dataset.cot;
+    const okTerm = !term || name.includes(term) || veh.includes(term);
+    const okCot = cot === 'all' || scot === cot;
+    if(okTerm && okCot){ tr.style.display=''; shown++; } else { tr.style.display='none'; }
+  });
+  countEl.textContent = shown;
+}
+q.addEventListener('input', apply);
+radios.forEach(r=>r.addEventListener('change', apply));
+apply();
+</script>
+</body></html>"""
+
+index_html = index_tpl.replace("{{ROWS}}", "\n".join(rows))
+(OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
 # ---- 6) Nettoyage : supprimer les fiches orphelines ----
 valid = set(generated_slugs) | {"index"}
