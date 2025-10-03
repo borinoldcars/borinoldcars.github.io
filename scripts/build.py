@@ -21,7 +21,7 @@ SHEET_LINK = os.environ.get("SHEET_LINK") or CSV_URL
 # SHEET_LINK = "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit?gid=27480806#gid=27480806"
 
 # Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
-ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or "").strip()
+ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
 ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
 
 # Lien du bouton "Ouvrir le Google Sheet"
