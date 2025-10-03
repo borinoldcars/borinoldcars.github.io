@@ -53,7 +53,10 @@ th{background:#f6f8fb}
 <div class="container protected">
   <div class="bar">
     <h1>Annuaire des membres</h1>
-    <a class="btn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6oJpza2MevO_5zSaKDXqdljiJZeBedGow3MROmJqIz6_r_TT8kt4Xz-TWIPxHY3ChG4dqKo7z5gt/pub?gid=27480806&amp;single=true&amp;output=csv" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+    <div style="display:flex; gap:8px;">
+      <a class="btn" href="https://docs.google.com/spreadsheets/d/e/2PACX-1vTD6oJpza2MevO_5zSaKDXqdljiJZeBedGow3MROmJqIz6_r_TT8kt4Xz-TWIPxHY3ChG4dqKo7z5gt/pub?gid=27480806&amp;single=true&amp;output=csv" target="_blank" rel="noopener">Ouvrir le Google Sheet</a>
+      <a class="btn" id="logout" href="#">Se déconnecter</a>
+    </div>
   </div>
 
   <div class="top">
@@ -88,8 +91,16 @@ th{background:#f6f8fb}
 // Empreinte SHA-256 du code (côté build)
 const EXPECTED = "58c2eaf78e8ac6ab1e4cc85e332c15446b8a7771947fc073a5bbc2c400aab0a2";
 
+// Reset via URL : .../members/?logout=1
+if (new URLSearchParams(location.search).get('logout') === '1') {
+  localStorage.removeItem('members_access');
+}
+
 function setLocked(on){ document.body.classList.toggle('locked', !!on); }
-function savedOK(){ const s = localStorage.getItem('members_access'); return s && EXPECTED && s === EXPECTED; }
+function savedOK(){
+  const s = localStorage.getItem('members_access');
+  return s && EXPECTED && s === EXPECTED;
+}
 
 async function sha256(txt){
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(txt));
@@ -111,11 +122,23 @@ async function tryUnlock(){
 }
 
 (function initGate(){
-  if(!EXPECTED){ setLocked(false); return; }    // pas de code → pas de verrou
-  if(savedOK()){ setLocked(false); return; }
-  setLocked(true);
-  document.getElementById('go').addEventListener('click', tryUnlock);
-  document.getElementById('code').addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+  if(!EXPECTED){ setLocked(false); }           // pas de code → pas de verrou
+  else if(savedOK()){ setLocked(false); }      // déjà autorisé
+  else { setLocked(true); }                    // afficher le portail
+
+  const go = document.getElementById('go');
+  const code = document.getElementById('code');
+  if(go) go.addEventListener('click', tryUnlock);
+  if(code) code.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
+
+  const logoutBtn = document.getElementById('logout');
+  if (logoutBtn){
+    logoutBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      localStorage.removeItem('members_access');
+      location.reload();
+    });
+  }
 })();
 
 // Recherche / filtres
