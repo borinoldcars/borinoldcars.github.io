@@ -3,12 +3,12 @@ permissions:
   contents: write
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
-      - 'scripts/build.py'
-      - '.github/workflows/build.yml'
+      - scripts/build.py
+      - .github/workflows/build.yml
   schedule:
     - cron: "*/30 * * * *"
 
@@ -16,20 +16,28 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: pip install pandas segno
-      - name: Generate member pages
-  env:
-    CSV_URL: ${{ secrets.CSV_URL }}
-    # CSV_URL: ${{ secrets.MEMBRESBOC }}  # à utiliser si ton secret CSV s'appelle MEMBRESBOC
 
-    # >>> AJOUTS POUR LE CODE ET (optionnel) LE LIEN DU BOUTON <<<
-    MEMBERS_CODE: ${{ secrets.MEMBRES_CODE }}   # ton secret s'appelle MEMBRES_CODE (avec R)
-    SHEET_LINK: ${{ secrets.SHEET_LINK }}       # optionnel, seulement si tu as créé ce secret
-  run: python scripts/build.py
+      - name: Install dependencies
+        run: pip install pandas segno
+
+      - name: Generate member pages
+        env:
+          CSV_URL: ${{ secrets.CSV_URL }}
+          # CSV_URL: ${{ secrets.MEMBRESBOC }}  # ← décommente si ton secret CSV s'appelle MEMBRESBOC
+
+          # --- code d'accès + lien du bouton (optionnel) ---
+          MEMBERS_CODE: ${{ secrets.MEMBRES_CODE }}   # ton secret "code" (tu l'as déjà créé)
+          SHEET_LINK: ${{ secrets.SHEET_LINK }}       # optionnel : lien explicite du Google Sheet
+        run: python scripts/build.py
+
+      - name: Commit & push if changed
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update members from Google Sheets"
