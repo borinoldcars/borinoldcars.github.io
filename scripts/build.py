@@ -104,85 +104,82 @@ df = df[~((df.get("Nom", "") == "") & (df.get("Prénom", "") == ""))].reset_inde
 
 # ---- 2) Harmoniser les intitulés (alias) ----
 aliases = {
-    # Nom / Prénom
+    # nom / prénom
     "nom": "Nom",
-    "prenom": "Prénom", "prénom": "Prénom",
+    "prenom": "Prénom",
+    "prénom": "Prénom",
 
-    # Adresse postale
-    "adresse postale ( rue, numero, cp, ville)": "Adresse postale",
-    "adresse postale (rue, numero, cp, ville)": "Adresse postale",
+    # adresse
     "adresse postale": "Adresse postale",
-    "adresse": "Adresse postale",
+    "adresse postale (rue, numero, cp, ville)": "Adresse postale",
+    "adresse postale ( rue, numero, cp, ville )": "Adresse postale",
 
-    # Téléphone (GSM)
-    "n° de gsm (+324........)": "Numéro de GSM",
-    "no de gsm (+324........)": "Numéro de GSM",
-    "n de gsm (+324........)": "Numéro de GSM",
-    "numero de gsm": "Numéro de GSM", "numéro de gsm": "Numéro de GSM",
-    "telephone": "Numéro de GSM", "téléphone": "Numéro de GSM",
-    "telephone (gsm)": "Numéro de GSM", "téléphone (gsm)": "Numéro de GSM",
-    "gsm": "Numéro de GSM", "tel": "Numéro de GSM", "tél": "Numéro de GSM",
-
-    # Email
+    # tel / mail
+    "numero de gsm": "Numéro de GSM",
+    "numéro de gsm": "Numéro de GSM",
+    "telephone": "Numéro de GSM",
+    "téléphone": "Numéro de GSM",
+    "telephone (gsm)": "Numéro de GSM",
+    "téléphone (gsm)": "Numéro de GSM",
+    "gsm": "Numéro de GSM",
     "adresse email": "Adresse mail",
-    "email": "Adresse mail", "e-mail": "Adresse mail",
-    "mail": "Adresse mail", "courriel": "Adresse mail",
+    "email": "Adresse mail",
+    "e-mail": "Adresse mail",
     "adresse mail": "Adresse mail",
 
-    # Véhicule (marque + modèle)
-    "marque du véhicule": "Marque du véhicule",
-    "marque du vehicule": "Marque du véhicule",
+    # véhicule
     "marque": "Marque du véhicule",
-
-    "modèle du véhicule": "Modèle du véhicule",
-    "modele du vehicule": "Modèle du véhicule",
+    "marque du vehicule": "Marque du véhicule",
     "modele": "Modèle du véhicule",
-
-    # Année
+    "modele du vehicule": "Modèle du véhicule",
+    "modèle du véhicule": "Modèle du véhicule",
+    "annee": "Année",
+    "année": "Année",
     "année de la première mise en circulation": "Année",
-    "annee de la premiere mise en circulation": "Année",
-    "annee": "Année", "année": "Année",
 
-    # Immatriculation
-    "numéro d'immatriculation": "Numéro d'immatriculation",
+    # immatriculation
+    "immatriculation": "Numéro d'immatriculation",
     "numero dimmatriculation": "Numéro d'immatriculation",
-    "numéro d'immatriculation  ": "Numéro d'immatriculation",  # avec espace final éventuel
-    "plaque": "Numéro d'immatriculation",
+    "numéro d'immatriculation": "Numéro d'immatriculation",
+    "numero d'immatriculation": "Numéro d'immatriculation",
 
-    # Autre club
+    # autres
     "etes-vous déja membre d'un autre club oldtimers?": "Membre d'un autre club",
     "etes-vous deja membre d'un autre club oldtimers?": "Membre d'un autre club",
-    "membre d'un autre club": "Membre d'un autre club",
     "autre club": "Membre d'un autre club",
+    "membre d'un autre club": "Membre d'un autre club",
 
-    # BEHVA
     "etes-vous assuré auprès de la behva?": "Assuré chez BEHVA",
     "etes-vous assure aupres de la behva?": "Assuré chez BEHVA",
     "assure chez behva": "Assuré chez BEHVA",
     "assuré chez behva": "Assuré chez BEHVA",
 
-    # Autre véhicule
     "possédez-vous d’autres véhicules old ou youngtimers que celui mentionné ci-dessus?": "Autre véhicule",
     "possedez-vous d'autres vehicules old ou youngtimers que celui mentionne ci-dessus?": "Autre véhicule",
     "autre vehicule": "Autre véhicule",
     "autre véhicule": "Autre véhicule",
 
-    # Cotisation / Statut
+    # cotisation
     "cotisation": "Cotisation",
-    "carte de membre": "Carte de membre",        # non affichée mais gardée au cas où
-    "statut": "Cotisation",                       # si Oui/Non, traité comme cotisation
     "cotisation 2025": "Cotisation",
     "statut cotisation": "Cotisation",
-    "cotisation payee": "Cotisation", "cotisation payée": "Cotisation",
-    "a jour de cotisation": "Cotisation", "à jour de cotisation": "Cotisation",
+    "cotisation payee": "Cotisation",
+    "cotisation payée": "Cotisation",
+    "a jour de cotisation": "Cotisation",
+    "à jour de cotisation": "Cotisation",
 }
+
+# On crée une version "normalisée" des clés pour matcher ce que renvoie norm()
+aliases_norm = {norm(k): v for k, v in aliases.items()}
 
 rename_map = {}
 for col in list(df.columns):
     key = norm(col)
-    if key in aliases:
-        rename_map[col] = aliases[key]
+    if key in aliases_norm:
+        rename_map[col] = aliases_norm[key]
+
 df = df.rename(columns=rename_map)
+
 
 # colonnes attendues
 expected = [
