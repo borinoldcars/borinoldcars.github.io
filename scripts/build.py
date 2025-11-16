@@ -1,27 +1,31 @@
 # scripts/build.py
 import hashlib
-import os, re, unicodedata
+import os
+import re
+import unicodedata
 from pathlib import Path
+
 import pandas as pd
 import segno
 
-# ---- Config de sortie ----
+# -------------------------------------------------
+# 0. CONFIG DOSSIERS
+# -------------------------------------------------
 SITE_BASE = "https://borinoldcars.github.io"
 OUT_DIR = Path("members")
-QRS_DIR  = Path("qrs")
+QRS_DIR = Path("qrs")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 QRS_DIR.mkdir(parents=True, exist_ok=True)
 
-# ---- Sources / Secrets ----
+# -------------------------------------------------
+# 1. SOURCES / SECRETS
+# -------------------------------------------------
 # CSV (obligatoire) : secret CSV_URL (ou ancien nom MEMBRESBOC)
 CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL (ou MEMBRESBOC).")
 
 # Lien du bouton "Ouvrir le Google Sheet"
-# 1) secret SHEET_LINK si défini
-# 2) sinon, le CSV_URL
-# 3) sinon, lien d’édition de secours
 SHEET_LINK = (
     os.environ.get("SHEET_LINK")
     or CSV_URL
@@ -29,132 +33,213 @@ SHEET_LINK = (
 )
 
 # Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
-# On accepte MEMBERS_CODE OU MEMBRES_CODE (selon le nom du secret).
-ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
-ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
+# On accepte MEMBERS_CODE OU MEMBRES_CODE (selon le nom de ton secret).
+ACCESS_CODE = (
+    os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or ""
+).strip()
+ACCESS_CODE_HASH = (
+    hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
+)
 
-# ---- Helpers ----
+# -------------------------------------------------
+# 2. HELPERS
+# -------------------------------------------------
 def norm(s: str) -> str:
+    """Normalisation douce pour comparer les noms de colonnes."""
     s = str(s).strip().lower()
-    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
     s = s.replace("’", "'")
     s = re.sub(r"\s+", " ", s)
     return s
 
+
 def slugify(s: str) -> str:
     s = (s or "").strip().lower()
-    for a, b in {"é":"e","è":"e","ê":"e","ë":"e","à":"a","â":"a","ä":"a",
-                 "î":"i","ï":"i","ô":"o","ö":"o","ù":"u","û":"u","ü":"u","ç":"c"}.items():
+    for a, b in {
+        "é": "e",
+        "è": "e",
+        "ê": "e",
+        "ë": "e",
+        "à": "a",
+        "â": "a",
+        "ä": "a",
+        "î": "i",
+        "ï": "i",
+        "ô": "o",
+        "ö": "o",
+        "ù": "u",
+        "û": "u",
+        "ü": "u",
+        "ç": "c",
+    }.items():
         s = s.replace(a, b)
     s = re.sub(r"[^a-z0-9]+", "-", s)
-    return re.sub(r"-+","-", s).strip("-") or "membre"
+    return re.sub(r"-+", "-", s).strip("-") or "membre"
+
 
 def esc(x: str) -> str:
-    return (str(x).replace("&","&amp;").replace("<","&lt;")
-            .replace(">","&gt;").replace('"',"&quot;"))
+    return (
+        str(x)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+    )
+
 
 def badge(text, bg, fg):
-    return (f"<span style='display:inline-block;padding:4px 10px;"
-            f"border-radius:999px;background:{bg};color:{fg};font-weight:600'>{esc(text)}</span>")
+    return (
+        "<span style='display:inline-block;padding:4px 10px;"
+        f"border-radius:999px;background:{bg};color:{fg};font-weight:600'>"
+        f"{esc(text)}</span>"
+    )
 
-def colorize_cotisation(value) -> str:
-    """
-    Colorise la valeur de cotisation (vert / rouge / orange).
-    On évite d'utiliser "value or ''" pour ne pas déclencher
-    l'erreur "truth value of a Series is ambiguous".
-    """
-    import pandas as pd
 
-    # Si jamais on reçoit une Series (cas tordu), on prend la première valeur
-    if isinstance(value, pd.Series):
-        value = value.iloc[0] if not value.empty else ""
-
-    # On convertit proprement en texte
-    if value is None:
-        text = ""
-    else:
-        text = str(value)
-
-    s = norm(text)
-    oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
-    non_vals = {"non","no","0","pas en ordre","impaye","impayee","impayé","impayée","due"}
-
+def colorize_cotisation(value: str) -> str:
+    s = norm(value or "")
+    oui_vals = {
+        "oui",
+        "ok",
+        "o",
+        "payee",
+        "payee",
+        "payee ",
+        "payee ",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "payee",
+        "en ordre",
+        "a jour",
+        "a jour de cotisation",
+        "a jour de cotisation 2025",
+        "a jour cotisation",
+        "a jour cotisation 2025",
+        "à jour",
+        "yes",
+        "1",
+        "x",
+    }
+    non_vals = {
+        "non",
+        "no",
+        "0",
+        "pas en ordre",
+        "impaye",
+        "impayee",
+        "impaye ",
+        "impayee ",
+        "impaye",
+        "impayee",
+        "due",
+    }
     if s in oui_vals:
         return badge("Oui", "#EAF7EA", "#0F6D0F")
     if s in non_vals:
         return badge("Non", "#FDECEC", "#B42318")
+    return badge(value or "—", "#FFF4E5", "#B54708")
 
-    return badge(text or "—", "#FFF4E5", "#B54708")
 
-
-# ---- 1) Charger CSV & détecter l'en-tête réel ----
+# -------------------------------------------------
+# 3. LECTURE CSV & DÉTECTION ENTÊTE
+# -------------------------------------------------
 raw = pd.read_csv(CSV_URL, header=None, dtype=str).fillna("")
 
-# Cherche une ligne qui contient à la fois "nom" et "prénom" (où qu’ils soient)
-hdr_candidates = []
-for i in range(len(raw)):
-    row_norm = [norm(x) for x in raw.iloc[i].tolist()]
-    if "nom" in row_norm and ("prénom" in row_norm or "prenom" in row_norm):
-        hdr_candidates.append(i)
+hdr_candidates = raw.index[
+    (raw.iloc[:, 0].map(norm) == "nom")
+    & (raw.iloc[:, 1].map(norm).isin(["prenom", "prénom", "prénom "]))
+].tolist()
 hdr = hdr_candidates[0] if hdr_candidates else 0
 
 df = pd.read_csv(CSV_URL, header=hdr, dtype=str).fillna("")
-# supprimer lignes vides (Nom & Prénom manquants)
-df = df[~((df.get("Nom", "") == "") & (df.get("Prénom", "") == ""))].reset_index(drop=True)
 
-# ---- 2) Harmoniser les intitulés (alias) ----
+# supprimer lignes totalement vides (Nom & Prénom manquants)
+df = df[
+    ~((df.get("Nom", "") == "") & (df.get("Prénom", "") == ""))
+].reset_index(drop=True)
+
+# -------------------------------------------------
+# 4. HARMONISER LES INTITULÉS (ALIASES)
+# -------------------------------------------------
 aliases = {
     # nom / prénom
     "nom": "Nom",
-    "prenom": "Prénom",
     "prénom": "Prénom",
+    "prenom": "Prénom",
 
-    # adresse
+    # adresse postale
     "adresse postale": "Adresse postale",
     "adresse postale (rue, numero, cp, ville)": "Adresse postale",
+    "adresse postale ( rue, numero, cp, ville)": "Adresse postale",
     "adresse postale ( rue, numero, cp, ville )": "Adresse postale",
 
-    # tel / mail
+    # gsm / téléphone
+    "n de gsm (+324........)": "Numéro de GSM",
+    "n de gsm": "Numéro de GSM",
     "numero de gsm": "Numéro de GSM",
-    "numéro de gsm": "Numéro de GSM",
+    "numero de gsm (+324........)": "Numéro de GSM",
     "telephone": "Numéro de GSM",
-    "téléphone": "Numéro de GSM",
     "telephone (gsm)": "Numéro de GSM",
-    "téléphone (gsm)": "Numéro de GSM",
     "gsm": "Numéro de GSM",
+
+    # email
+    "adresse mail": "Adresse mail",
     "adresse email": "Adresse mail",
     "email": "Adresse mail",
     "e-mail": "Adresse mail",
-    "adresse mail": "Adresse mail",
 
     # véhicule
     "marque": "Marque du véhicule",
     "marque du vehicule": "Marque du véhicule",
+    "marque du véhicule": "Marque du véhicule",
+
     "modele": "Modèle du véhicule",
     "modele du vehicule": "Modèle du véhicule",
+    "modele du véhicule": "Modèle du véhicule",
     "modèle du véhicule": "Modèle du véhicule",
+
+    # année
     "annee": "Année",
-    "année": "Année",
-    "année de la première mise en circulation": "Année",
+    "annee de la premiere mise en circulation": "Année",
 
     # immatriculation
-    "immatriculation": "Numéro d'immatriculation",
-    "numero dimmatriculation": "Numéro d'immatriculation",
-    "numéro d'immatriculation": "Numéro d'immatriculation",
     "numero d'immatriculation": "Numéro d'immatriculation",
+    "numero dimmatriculation": "Numéro d'immatriculation",
 
-    # autres
-    "etes-vous déja membre d'un autre club oldtimers?": "Membre d'un autre club",
+    # autres colonnes "Oui/Non"
     "etes-vous deja membre d'un autre club oldtimers?": "Membre d'un autre club",
-    "autre club": "Membre d'un autre club",
     "membre d'un autre club": "Membre d'un autre club",
+    "autre club": "Membre d'un autre club",
 
-    "etes-vous assuré auprès de la behva?": "Assuré chez BEHVA",
     "etes-vous assure aupres de la behva?": "Assuré chez BEHVA",
     "assure chez behva": "Assuré chez BEHVA",
     "assuré chez behva": "Assuré chez BEHVA",
 
-    "possédez-vous d’autres véhicules old ou youngtimers que celui mentionné ci-dessus?": "Autre véhicule",
     "possedez-vous d'autres vehicules old ou youngtimers que celui mentionne ci-dessus?": "Autre véhicule",
     "autre vehicule": "Autre véhicule",
     "autre véhicule": "Autre véhicule",
@@ -169,41 +254,53 @@ aliases = {
     "à jour de cotisation": "Cotisation",
 }
 
-# On crée une version "normalisée" des clés pour matcher ce que renvoie norm()
-aliases_norm = {norm(k): v for k, v in aliases.items()}
-
 rename_map = {}
 for col in list(df.columns):
     key = norm(col)
-    if key in aliases_norm:
-        rename_map[col] = aliases_norm[key]
+    if key in aliases:
+        rename_map[col] = aliases[key]
 
 df = df.rename(columns=rename_map)
 
-
 # colonnes attendues
 expected = [
-    "Nom","Prénom","Adresse postale","Numéro de GSM","Adresse mail",
-    "Marque du véhicule","Modèle du véhicule","Année",
-    "Numéro d'immatriculation","Membre d'un autre club",
-    "Assuré chez BEHVA","Cotisation","Autre véhicule"
+    "Nom",
+    "Prénom",
+    "Adresse postale",
+    "Numéro de GSM",
+    "Adresse mail",
+    "Marque du véhicule",
+    "Modèle du véhicule",
+    "Année",
+    "Numéro d'immatriculation",
+    "Membre d'un autre club",
+    "Assuré chez BEHVA",
+    "Cotisation",
+    "Autre véhicule",
 ]
 for c in expected:
     if c not in df.columns:
         df[c] = ""
 
-# ---- 3) Slugs uniques ----
+# -------------------------------------------------
+# 5. SLUGS UNIQUES
+# -------------------------------------------------
 base = (df["Nom"].fillna("") + "-" + df["Prénom"].fillna("")).map(slugify)
-counts, slugs = {}, []
+counts = {}
+slugs = []
 for b in base:
     counts[b] = counts.get(b, 0) + 1
     slugs.append(b if counts[b] == 1 else f"{b}-{counts[b]}")
 df["slug"] = slugs
 
-# ---- 4) Génération des fiches + QR ----
+# -------------------------------------------------
+# 6. FICHES MEMBRE + QR
+# -------------------------------------------------
 def render_member_html(row: pd.Series) -> str:
     email_val = str(row["Adresse mail"]).strip()
-    email_html = f"<a href='mailto:{esc(email_val)}'>{esc(email_val)}</a>" if email_val else ""
+    email_html = (
+        f"<a href='mailto:{esc(email_val)}'>{esc(email_val)}</a>" if email_val else ""
+    )
 
     vehicule = f'{row["Marque du véhicule"]} {row["Modèle du véhicule"]}'.strip()
 
@@ -215,6 +312,7 @@ def render_member_html(row: pd.Series) -> str:
     )
 
     rows_html = []
+
     def tr(key, value, is_html=False):
         val = value if is_html else esc(value)
         rows_html.append(f"<tr><th>{esc(key)}</th><td>{val}</td></tr>")
@@ -253,40 +351,60 @@ table{{border-collapse:collapse;width:100%}}
 </div>
 </body></html>"""
 
+
 generated_slugs = []
 for _, row in df.iterrows():
     slug = row["slug"]
     generated_slugs.append(slug)
 
-    # URL publique de la fiche
     url = f"{SITE_BASE}/members/{slug}.html"
 
-    # QR -> qrs/<slug>.png
     qr = segno.make(url, error="q")
     qr_path = QRS_DIR / f"{slug}.png"
     qr.save(qr_path, scale=6, border=2)
 
-    # Page HTML -> members/<slug>.html
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
 
-# ---- 5) Index (protégé par code + bouton Google Sheet + recherche/filtre + logout) ----
+# -------------------------------------------------
+# 7. INDEX (ANNULAIRE PROTÉGÉ)
+# -------------------------------------------------
 def cot_status(value: str) -> str:
     s = norm(value or "")
-    oui_vals = {"oui","ok","o","payee","payée","en ordre","a jour","à jour","yes","1","x"}
-    non_vals = {"non","no","0","pas en ordre","impaye","impayee","impayé","impayée","due"}
-    if s in oui_vals: return "oui"
-    if s in non_vals: return "non"
+    oui_vals = {
+        "oui",
+        "ok",
+        "o",
+        "payee",
+        "payee",
+        "en ordre",
+        "a jour",
+        "à jour",
+        "yes",
+        "1",
+        "x",
+    }
+    non_vals = {"non", "no", "0", "pas en ordre", "impaye", "impayee", "due"}
+    if s in oui_vals:
+        return "oui"
+    if s in non_vals:
+        return "non"
     return "na"
 
-rows = []
+
+rows_html = []
 for s, p, n, marque, modele, cot in zip(
-    df["slug"], df["Prénom"], df["Nom"], df["Marque du véhicule"], df["Modèle du véhicule"], df["Cotisation"]
+    df["slug"],
+    df["Prénom"],
+    df["Nom"],
+    df["Marque du véhicule"],
+    df["Modèle du véhicule"],
+    df["Cotisation"],
 ):
     name = f"{p} {n}".strip()
-    veh  = f"{marque} {modele}".strip()
+    veh = f"{marque} {modele}".strip()
     status = cot_status(cot)
-    rows.append(
+    rows_html.append(
         f"<tr data-name='{esc(name)}' data-veh='{esc(veh)}' data-cot='{status}'>"
         f"<td><a href='{esc(s)}.html'>{esc(name)}</a></td>"
         f"<td>{esc(veh)}</td>"
@@ -409,13 +527,13 @@ async function tryUnlock(){
 }
 
 (function initGate(){
-  if(!EXPECTED){ setLocked(false); }           // pas de code → pas de verrou
-  else if(savedOK()){ setLocked(false); }      // déjà autorisé
-  else { setLocked(true); }                    // afficher le portail
+  if(!EXPECTED){ setLocked(false); }
+  else if(savedOK()){ setLocked(false); }
+  else { setLocked(true); }
 
   const go = document.getElementById('go');
   const code = document.getElementById('code');
-  if(go) go.addEventListener('click', tryUnlock);
+  if(go)   go.addEventListener('click', tryUnlock);
   if(code) code.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
 
   const logoutBtn = document.getElementById('logout');
@@ -429,23 +547,23 @@ async function tryUnlock(){
 })();
 
 // Recherche / filtres
-const q = document.getElementById('q');
-const rows = Array.from(document.querySelectorAll('#rows tr'));
-const radios = Array.from(document.querySelectorAll('input[name="cot"]'));
+const q       = document.getElementById('q');
+const rows    = Array.from(document.querySelectorAll('#rows tr'));
+const radios  = Array.from(document.querySelectorAll('input[name="cot"]'));
 const countEl = document.getElementById('count');
 const totalEl = document.getElementById('total');
 totalEl.textContent = rows.length;
 
 function apply(){
   const term = (q.value||'').trim().toLowerCase();
-  const cot = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
-  let shown = 0;
+  const cot  = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
+  let shown  = 0;
   rows.forEach(tr=>{
     const name = tr.dataset.name.toLowerCase();
-    const veh = tr.dataset.veh.toLowerCase();
+    const veh  = tr.dataset.veh.toLowerCase();
     const scot = tr.dataset.cot;
     const okTerm = !term || name.includes(term) || veh.includes(term);
-    const okCot = cot === 'all' || scot === cot;
+    const okCot  = cot === 'all' || scot === cot;
     tr.style.display = (okTerm && okCot) ? '' : 'none';
     if(okTerm && okCot) shown++;
   });
@@ -458,14 +576,15 @@ apply();
 </body></html>"""
 
 index_html = (
-    index_tpl
-    .replace("{{ROWS}}", "\n".join(rows))
+    index_tpl.replace("{{ROWS}}", "\n".join(rows_html))
     .replace("{{SHEET_LINK}}", esc(SHEET_LINK))
     .replace("{{CODE_HASH}}", ACCESS_CODE_HASH)
 )
 (OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
 
-# ---- 6) Nettoyage : supprimer les fiches orphelines ----
+# -------------------------------------------------
+# 8. NETTOYAGE DES FICHES ORPHELINES
+# -------------------------------------------------
 valid = set(generated_slugs) | {"index"}
 for f in OUT_DIR.glob("*.html"):
     if f.stem not in valid:
