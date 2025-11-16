@@ -21,7 +21,7 @@ if not CSV_URL:
 # Lien du bouton "Ouvrir le Google Sheet"
 # 1) secret SHEET_LINK si défini
 # 2) sinon, le CSV_URL
-# 3) sinon, ton lien d’édition (fallback)
+# 3) sinon, lien d’édition de secours
 SHEET_LINK = (
     os.environ.get("SHEET_LINK")
     or CSV_URL
@@ -29,7 +29,7 @@ SHEET_LINK = (
 )
 
 # Code d'accès (facultatif). Si non défini, la page NE sera PAS verrouillée.
-# On accepte MEMBERS_CODE OU MEMBRES_CODE (selon le nom de ton secret).
+# On accepte MEMBERS_CODE OU MEMBRES_CODE (selon le nom du secret).
 ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
 ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
 
@@ -69,58 +69,94 @@ def colorize_cotisation(value: str) -> str:
 
 # ---- 1) Charger CSV & détecter l'en-tête réel ----
 raw = pd.read_csv(CSV_URL, header=None, dtype=str).fillna("")
-hdr_candidates = raw.index[
-    (raw.iloc[:, 0].map(norm) == "nom") &
-    (raw.iloc[:, 1].map(norm).isin(["prénom","prenom"]))
-].tolist()
+
+# Cherche une ligne qui contient à la fois "nom" et "prénom" (où qu’ils soient)
+hdr_candidates = []
+for i in range(len(raw)):
+    row_norm = [norm(x) for x in raw.iloc[i].tolist()]
+    if "nom" in row_norm and ("prénom" in row_norm or "prenom" in row_norm):
+        hdr_candidates.append(i)
 hdr = hdr_candidates[0] if hdr_candidates else 0
 
 df = pd.read_csv(CSV_URL, header=hdr, dtype=str).fillna("")
 # supprimer lignes vides (Nom & Prénom manquants)
-df = df[~((df.get("Nom","")== "") & (df.get("Prénom","")== "") )].reset_index(drop=True)
+df = df[~((df.get("Nom", "") == "") & (df.get("Prénom", "") == ""))].reset_index(drop=True)
 
 # ---- 2) Harmoniser les intitulés (alias) ----
 aliases = {
-    # nom / prénom
+    # Nom / Prénom
     "nom": "Nom",
     "prenom": "Prénom", "prénom": "Prénom",
 
-    # adresse
-    "adresse postale": "Adresse postale",
+    # Adresse postale
+    "adresse postale ( rue, numero, cp, ville)": "Adresse postale",
     "adresse postale (rue, numero, cp, ville)": "Adresse postale",
-    "adresse postale ( rue, numero, cp, ville )": "Adresse postale",
+    "adresse postale": "Adresse postale",
+    "adresse": "Adresse postale",
 
-    # tel / mail
+    # Téléphone (GSM)
+    "n° de gsm (+324........)": "Numéro de GSM",
+    "no de gsm (+324........)": "Numéro de GSM",
+    "n de gsm (+324........)": "Numéro de GSM",
     "numero de gsm": "Numéro de GSM", "numéro de gsm": "Numéro de GSM",
     "telephone": "Numéro de GSM", "téléphone": "Numéro de GSM",
     "telephone (gsm)": "Numéro de GSM", "téléphone (gsm)": "Numéro de GSM",
-    "gsm": "Numéro de GSM",
-    "email": "Adresse mail", "e-mail": "Adresse mail", "adresse mail": "Adresse mail",
+    "gsm": "Numéro de GSM", "tel": "Numéro de GSM", "tél": "Numéro de GSM",
 
-    # véhicule
-    "marque": "Marque du véhicule", "marque du vehicule": "Marque du véhicule",
-    "modele": "Modèle du véhicule", "modele du vehicule": "Modèle du véhicule",
+    # Email
+    "adresse email": "Adresse mail",
+    "email": "Adresse mail", "e-mail": "Adresse mail",
+    "mail": "Adresse mail", "courriel": "Adresse mail",
+    "adresse mail": "Adresse mail",
+
+    # Véhicule (marque + modèle)
+    "marque du véhicule": "Marque du véhicule",
+    "marque du vehicule": "Marque du véhicule",
+    "marque": "Marque du véhicule",
+
     "modèle du véhicule": "Modèle du véhicule",
+    "modele du vehicule": "Modèle du véhicule",
+    "modele": "Modèle du véhicule",
+
+    # Année
+    "année de la première mise en circulation": "Année",
+    "annee de la premiere mise en circulation": "Année",
     "annee": "Année", "année": "Année",
 
-    # immatriculation
-    "immatriculation": "Numéro d'immatriculation",
-    "numero dimmatriculation": "Numéro d'immatriculation",
+    # Immatriculation
     "numéro d'immatriculation": "Numéro d'immatriculation",
+    "numero dimmatriculation": "Numéro d'immatriculation",
+    "numéro d'immatriculation  ": "Numéro d'immatriculation",  # avec espace final éventuel
+    "plaque": "Numéro d'immatriculation",
 
-    # autres
-    "autre club": "Membre d'un autre club",
+    # Autre club
+    "etes-vous déja membre d'un autre club oldtimers?": "Membre d'un autre club",
+    "etes-vous deja membre d'un autre club oldtimers?": "Membre d'un autre club",
     "membre d'un autre club": "Membre d'un autre club",
-    "assure chez behva": "Assuré chez BEHVA", "assuré chez behva": "Assuré chez BEHVA",
-    "autre vehicule": "Autre véhicule", "autre véhicule": "Autre véhicule",
+    "autre club": "Membre d'un autre club",
 
-    # cotisation
+    # BEHVA
+    "etes-vous assuré auprès de la behva?": "Assuré chez BEHVA",
+    "etes-vous assure aupres de la behva?": "Assuré chez BEHVA",
+    "assure chez behva": "Assuré chez BEHVA",
+    "assuré chez behva": "Assuré chez BEHVA",
+
+    # Autre véhicule
+    "possédez-vous d’autres véhicules old ou youngtimers que celui mentionné ci-dessus?": "Autre véhicule",
+    "possedez-vous d'autres vehicules old ou youngtimers que celui mentionne ci-dessus?": "Autre véhicule",
+    "autre vehicule": "Autre véhicule",
+    "autre véhicule": "Autre véhicule",
+
+    # Cotisation / Statut
     "cotisation": "Cotisation",
+    "carte de membre": "Carte de membre",        # non affichée mais gardée au cas où
+    "statut": "Cotisation",                       # si Oui/Non, traité comme cotisation
     "cotisation 2025": "Cotisation",
     "statut cotisation": "Cotisation",
     "cotisation payee": "Cotisation", "cotisation payée": "Cotisation",
     "a jour de cotisation": "Cotisation", "à jour de cotisation": "Cotisation",
 }
+
 rename_map = {}
 for col in list(df.columns):
     key = norm(col)
@@ -417,8 +453,5 @@ valid = set(generated_slugs) | {"index"}
 for f in OUT_DIR.glob("*.html"):
     if f.stem not in valid:
         f.unlink(missing_ok=True)
-
-print(f"Généré {len(generated_slugs)} fiches et QR.")
-
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")
