@@ -126,13 +126,13 @@ async function tryUnlock(){
 }
 
 (function initGate(){
-  if(!EXPECTED){ setLocked(false); }           // pas de code → pas de verrou
-  else if(savedOK()){ setLocked(false); }      // déjà autorisé
-  else { setLocked(true); }                    // afficher le portail
+  if(!EXPECTED){ setLocked(false); }
+  else if(savedOK()){ setLocked(false); }
+  else { setLocked(true); }
 
   const go = document.getElementById('go');
   const code = document.getElementById('code');
-  if(go) go.addEventListener('click', tryUnlock);
+  if(go)   go.addEventListener('click', tryUnlock);
   if(code) code.addEventListener('keydown', e=>{ if(e.key==='Enter') tryUnlock(); });
 
   const logoutBtn = document.getElementById('logout');
@@ -146,23 +146,23 @@ async function tryUnlock(){
 })();
 
 // Recherche / filtres
-const q = document.getElementById('q');
-const rows = Array.from(document.querySelectorAll('#rows tr'));
-const radios = Array.from(document.querySelectorAll('input[name="cot"]'));
+const q       = document.getElementById('q');
+const rows    = Array.from(document.querySelectorAll('#rows tr'));
+const radios  = Array.from(document.querySelectorAll('input[name="cot"]'));
 const countEl = document.getElementById('count');
 const totalEl = document.getElementById('total');
 totalEl.textContent = rows.length;
 
 function apply(){
   const term = (q.value||'').trim().toLowerCase();
-  const cot = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
-  let shown = 0;
+  const cot  = (document.querySelector('input[name="cot"]:checked')||{}).value || 'all';
+  let shown  = 0;
   rows.forEach(tr=>{
     const name = tr.dataset.name.toLowerCase();
-    const veh = tr.dataset.veh.toLowerCase();
+    const veh  = tr.dataset.veh.toLowerCase();
     const scot = tr.dataset.cot;
     const okTerm = !term || name.includes(term) || veh.includes(term);
-    const okCot = cot === 'all' || scot === cot;
+    const okCot  = cot === 'all' || scot === cot;
     tr.style.display = (okTerm && okCot) ? '' : 'none';
     if(okTerm && okCot) shown++;
   });
