@@ -196,7 +196,7 @@ table{{width:100%;border-collapse:collapse}}
 <p><small>Borin'Old Cars</small></p>
 <table>{''.join(rows_html)}</table>
 <p>Contact club : <a href="mailto:vanhollebeke.pierre@icloud.com">
-vanhollebeke.pierre@icloud.com</a></p>
+borinoldcars@gmail.com</a></p>
 </div>
 </body></html>"""
 
