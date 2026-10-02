@@ -492,11 +492,23 @@ def same_car(main, fiche):
     b = slugify(f"{fiche['marque']} {fiche['modele']} {fiche['version']}").split("-")
     return set(a) <= set(b) or "".join(a) in "".join(b) or slugify(f"{fiche['marque']} {fiche['modele']}").replace("-", "") in "".join(a)
 
-vehicules = [
-    c for slug, c in main_cars.items()
-    if not any(f["slug"] == slug and same_car(c, f) for f in sheet_cars.values())
-]
-vehicules += list(sheet_cars.values())
+if GARAGE_CSV_URL:
+    vehicules = [
+        c for slug, c in main_cars.items()
+        if not any(f["slug"] == slug and same_car(c, f) for f in sheet_cars.values())
+    ]
+    vehicules += list(sheet_cars.values())
+else:
+    # Sans GARAGE_CSV_URL, on garde le garage déjà publié (fiches comprises) et on
+    # ajoute seulement le véhicule des nouveaux membres.
+    try:
+        previous = json.loads((APP_DATA_DIR / "members.json").read_text(encoding="utf-8")).get("vehicules", [])
+    except (OSError, ValueError):
+        previous = []
+    members_slugs = {m["slug"] for m in app_members}
+    vehicules = [v for v in previous if not v.get("slug") or v["slug"] in members_slugs]
+    known = {v.get("slug") for v in vehicules}
+    vehicules += [c for slug, c in main_cars.items() if slug not in known]
 print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche Véhicule).")
 
 (APP_DATA_DIR / "members.json").write_text(
