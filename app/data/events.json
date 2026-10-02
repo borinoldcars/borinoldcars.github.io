@@ -1,0 +1,32 @@
+{
+ "events": [
+  {
+   "id": "exemple-balade",
+   "exemple": true,
+   "date": "2026-10-18",
+   "heure": "09:30",
+   "fin": "17:00",
+   "titre": "Balade d'automne (exemple)",
+   "lieu": "Lieu de rendez-vous à préciser",
+   "description": "Exemple d'événement : remplacez-le dans app/data/events.json ou via l'onglet Agenda du Google Sheet.",
+   "prix": "",
+   "places": "",
+   "inscription": "",
+   "image": ""
+  },
+  {
+   "id": "exemple-reunion",
+   "exemple": true,
+   "date": "2026-11-07",
+   "heure": "19:00",
+   "fin": "",
+   "titre": "Réunion mensuelle (exemple)",
+   "lieu": "Local du club",
+   "description": "Exemple d'événement à remplacer.",
+   "prix": "",
+   "places": "",
+   "inscription": "",
+   "image": ""
+  }
+ ]
+}

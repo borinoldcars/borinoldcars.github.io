@@ -1,0 +1,254 @@
+{
+ "members": [
+  {
+   "slug": "colmant-patrice",
+   "prenom": "Patrice",
+   "nom": "Colmant",
+   "marque": "Renault",
+   "modele": "16 TL Automatic",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "jeunieaux-olivier",
+   "prenom": "Olivier",
+   "nom": "Jeunieaux",
+   "marque": "VW",
+   "modele": "Passat B35I",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "grasso-frederic",
+   "prenom": "Frédéric",
+   "nom": "Grasso",
+   "marque": "BMW",
+   "modele": "318is",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "saussez-emmanuel",
+   "prenom": "Emmanuël",
+   "nom": "Saussez",
+   "marque": "Alfa",
+   "modele": "Roméo Giulia 1300ti",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "jeunieaux-marc",
+   "prenom": "Marc",
+   "nom": "Jeunieaux",
+   "marque": "Vw",
+   "modele": "Golf 2",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "vanhollebeke-pierre",
+   "prenom": "Pierre",
+   "nom": "Vanhollebeke",
+   "marque": "Citroën",
+   "modele": "AMI8",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "mottry-jean",
+   "prenom": "Jean",
+   "nom": "Mottry",
+   "marque": "Opel",
+   "modele": "Rekord",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "heyckmans-steven",
+   "prenom": "Steven",
+   "nom": "Heyckmans",
+   "marque": "Citroën",
+   "modele": "2 CV",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "denis-claude",
+   "prenom": "Claude",
+   "nom": "Denis",
+   "marque": "Porsche",
+   "modele": "996 4S",
+   "annee": "",
+   "cotisation": "non",
+   "photo": ""
+  },
+  {
+   "slug": "knippenberg-fabrice",
+   "prenom": "Fabrice",
+   "nom": "knippenberg",
+   "marque": "Lotus",
+   "modele": "Catheram",
+   "annee": "",
+   "cotisation": "non",
+   "photo": ""
+  },
+  {
+   "slug": "bonnot-philippe",
+   "prenom": "Philippe",
+   "nom": "Bonnot",
+   "marque": "Opel",
+   "modele": "Calibra",
+   "annee": "",
+   "cotisation": "non",
+   "photo": ""
+  },
+  {
+   "slug": "glineur-olivier",
+   "prenom": "Olivier",
+   "nom": "Glineur",
+   "marque": "Pontiac",
+   "modele": "Cheftain Catalina",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "grasso-hugo",
+   "prenom": "Hugo",
+   "nom": "Grasso",
+   "marque": "Fiat",
+   "modele": "127",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "lagniau-henri",
+   "prenom": "Henri",
+   "nom": "Lagniau",
+   "marque": "Renault",
+   "modele": "Super 5 GT Turbo",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "vellemans-hubert",
+   "prenom": "Hubert",
+   "nom": "Vellemans",
+   "marque": "Vw",
+   "modele": "Golf cabriolet",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "berteaux-damien",
+   "prenom": "Damien",
+   "nom": "Berteaux",
+   "marque": "Chevrolet",
+   "modele": "Camaro",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "lombardi-vincent",
+   "prenom": "Vincent",
+   "nom": "Lombardi",
+   "marque": "Alfa",
+   "modele": "roméo Alfetta GTV",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "olivier-deruytter",
+   "prenom": "Deruytter",
+   "nom": "Olivier",
+   "marque": "VW",
+   "modele": "Coccinelle",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "mespouille-sebastien",
+   "prenom": "Sebastien",
+   "nom": "Mespouille",
+   "marque": "Triumph",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": ""
+  },
+  {
+   "slug": "zimmer-olivier",
+   "prenom": "Olivier",
+   "nom": "Zimmer",
+   "marque": "Kawasaki",
+   "modele": "",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "vansnick-patricia",
+   "prenom": "Patricia",
+   "nom": "Vansnick",
+   "marque": "Volkswagen",
+   "modele": "",
+   "annee": "",
+   "cotisation": "oui",
+   "photo": ""
+  },
+  {
+   "slug": "urbain-claude",
+   "prenom": "Claude",
+   "nom": "Urbain",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": ""
+  },
+  {
+   "slug": "tilkin-denis",
+   "prenom": "Denis",
+   "nom": "Tilkin",
+   "marque": "Peugeot",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": ""
+  },
+  {
+   "slug": "glineur-philippe",
+   "prenom": "Philippe",
+   "nom": "Glineur",
+   "marque": "Peugeot",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": ""
+  },
+  {
+   "slug": "signore-philippo",
+   "prenom": "Philippo",
+   "nom": "Signore",
+   "marque": "Jaguar",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": ""
+  }
+ ]
+}

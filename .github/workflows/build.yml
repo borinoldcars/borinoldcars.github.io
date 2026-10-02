@@ -31,6 +31,7 @@ jobs:
         env:
           CSV_URL: ${{ secrets.CSV_URL }}
           MEMBERS_CODE: ${{ secrets.MEMBERS_CODE }}   # ton secret code (anglais)
+          EVENTS_CSV_URL: ${{ secrets.EVENTS_CSV_URL }} # optionnel : onglet "Agenda" publié en CSV
           # SHEET_LINK: ${{ secrets.SHEET_LINK }}     # optionnel si tu le crées
         run: python scripts/build.py
 

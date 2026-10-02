@@ -1,5 +1,6 @@
 # scripts/build.py
 import hashlib
+import json
 import os, re, unicodedata
 from pathlib import Path
 import pandas as pd
@@ -9,6 +10,7 @@ import segno
 SITE_BASE = "https://borinoldcars.github.io"
 OUT_DIR = Path("members")
 QRS_DIR  = Path("qrs")
+APP_DATA_DIR = Path("app/data")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 QRS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -114,6 +116,10 @@ aliases = {
 
     # Cotisation
     "cotisation": "Cotisation",
+
+    # Photo du véhicule (lien vers une image, pour la galerie de l'app)
+    "photo": "Photo",
+    "photo du véhicule": "Photo",
 }
 
 rename_map = {}
@@ -127,7 +133,7 @@ expected = [
     "Nom","Prénom","Adresse postale","Numéro de GSM","Adresse mail",
     "Marque du véhicule","Modèle du véhicule","Année",
     "Numéro d'immatriculation","Membre d'un autre club",
-    "Assuré chez BEHVA","Cotisation","Autre véhicule"
+    "Assuré chez BEHVA","Cotisation","Autre véhicule","Photo"
 ]
 for c in expected:
     if c not in df.columns:
@@ -352,5 +358,75 @@ index_html = (
 )
 
 (OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
+
+# ---- 6) Données pour l'application (carte de membre + garage) ----
+# Uniquement des infos non sensibles : pas d'adresse, téléphone, email ni plaque.
+def clean(x):
+    return re.sub(r"\s+", " ", str(x)).strip()
+
+APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+app_members = [
+    {
+        "slug": row["slug"],
+        "prenom": clean(row["Prénom"]),
+        "nom": clean(row["Nom"]),
+        "marque": clean(row["Marque du véhicule"]),
+        "modele": clean(row["Modèle du véhicule"]),
+        "annee": clean(row["Année"]),
+        "cotisation": cot_status(row["Cotisation"]),
+        "photo": clean(row["Photo"]),
+    }
+    for _, row in df.iterrows()
+]
+(APP_DATA_DIR / "members.json").write_text(
+    json.dumps({"members": app_members}, ensure_ascii=False, indent=1),
+    encoding="utf-8",
+)
+
+# ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
+# Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
+# Prix, Inscription (lien vers un formulaire), Places, Image
+EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
+if EVENTS_CSV_URL:
+    ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
+    ev.columns = [norm(c) for c in ev.columns]
+
+    def col(r, *names):
+        for n in names:
+            if n in r and clean(r[n]):
+                return clean(r[n])
+        return ""
+
+    def iso_date(d):
+        m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$", d)
+        if m:
+            return f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+        return d
+
+    events = []
+    for i, r in ev.iterrows():
+        titre = col(r, "titre", "evenement", "nom")
+        date = iso_date(col(r, "date"))
+        if not titre or not date:
+            continue
+        events.append({
+            "id": slugify(f"{date}-{titre}"),
+            "date": date,
+            "heure": col(r, "heure", "debut"),
+            "fin": col(r, "fin"),
+            "titre": titre,
+            "lieu": col(r, "lieu", "adresse"),
+            "description": col(r, "description"),
+            "prix": col(r, "prix", "tarif"),
+            "places": col(r, "places"),
+            "inscription": col(r, "inscription", "formulaire", "lien"),
+            "image": col(r, "image", "photo"),
+        })
+    events.sort(key=lambda e: e["date"])
+    (APP_DATA_DIR / "events.json").write_text(
+        json.dumps({"events": events}, ensure_ascii=False, indent=1),
+        encoding="utf-8",
+    )
+    print(f"Agenda : {len(events)} événements.")
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")
