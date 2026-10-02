@@ -386,9 +386,9 @@
     const cta = order ? `<a class="btn block" href="${esc(order)}" target="_blank" rel="noopener">Commander</a>` : "";
     return `
       <div class="page-head"><h1>Boutique du club</h1><p>${esc(shop.note || "")}</p></div>
-      ${items.length ? `<div class="grid">${items.map((a) => `
+      ${items.length ? `<div class="grid shop-grid">${items.map((a) => `
         <div class="card product">
-          <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" loading="lazy">` : ICON.shirt}</div>
+          <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" width="600" height="600" decoding="async">` : ICON.shirt}</div>
           <div class="info">
             <strong>${esc(a.nom)}${exBadge(a)}</strong>
             <span class="price">${fmtPrice(a.prix)}</span>
