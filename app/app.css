@@ -186,6 +186,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brass); out
 .quick svg { width: 26px; height: 26px; flex: none; fill: none; stroke: var(--brass); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
 
 /* ---------- Agenda ---------- */
+.event-card { display: flex; flex-direction: column; gap: 12px; }
 .event { display: flex; gap: 14px; text-decoration: none; }
 .datebox {
   flex: none; width: 58px; text-align: center; border-radius: 12px; overflow: hidden;
@@ -197,7 +198,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brass); out
 .event-body { min-width: 0; flex: 1; }
 .event-body h3 { margin: 0 0 2px; }
 .event-meta { color: var(--muted); font-size: .875rem; }
-.event.past { opacity: .6; }
+.event-card.past { opacity: .6; }
+.event-cta { min-height: 40px; }
 .detail-img { border-radius: var(--radius); margin-bottom: 16px; width: 100%; max-height: 280px; object-fit: cover; }
 dl.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 16px; }
 dl.facts dt { color: var(--muted); font-size: .875rem; }

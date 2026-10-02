@@ -34,7 +34,9 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 ## Agenda depuis Google Sheets (optionnel)
 
 1. Ajouter un onglet « Agenda » avec les colonnes : `Date` (JJ/MM/AAAA), `Heure`, `Fin`, `Titre`, `Lieu`,
-   `Description`, `Prix`, `Places`, `Inscription`, `Image`.
+   `Description`, `Prix`, `Inscription` (lien du formulaire Tally), `Image`.
+   Quand `Inscription` contient un lien, un bouton « S'inscrire » l'ouvre (dans l'agenda, sur l'accueil et
+   sur la page de la sortie) ; sinon, l'inscription se fait par email pré-rempli.
 2. Fichier → Partager → Publier sur le web → cet onglet au format CSV, copier le lien.
 3. Dans GitHub : Settings → Secrets and variables → Actions → nouveau secret `EVENTS_CSV_URL`.
 

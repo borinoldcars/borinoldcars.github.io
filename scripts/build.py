@@ -494,7 +494,7 @@ print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche 
 
 # ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
 # Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
-# Prix, Inscription (lien vers un formulaire), Places, Image
+# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Image
 EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
 if EVENTS_CSV_URL:
     ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
@@ -528,7 +528,7 @@ if EVENTS_CSV_URL:
             "description": col(r, "description"),
             "prix": col(r, "prix", "tarif"),
             "places": col(r, "places"),
-            "inscription": col(r, "inscription", "formulaire", "lien"),
+            "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
             "image": col(r, "image", "photo"),
         })
     events.sort(key=lambda e: e["date"])

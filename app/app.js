@@ -93,7 +93,8 @@
     const d = parseDate(ev.date);
     const past = d && d < today();
     const meta = [ev.heure, ev.lieu].filter(Boolean).map(esc).join(" · ");
-    return `<a class="card event${past ? " past" : ""}" href="#/agenda/${encodeURIComponent(ev.id)}">
+    const form = !past && formLink(ev);
+    return `<div class="card event-card${past ? " past" : ""}"><a class="event" href="#/agenda/${encodeURIComponent(ev.id)}">
       <div class="datebox">
         <div class="m">${d ? MONTHS[d.getMonth()] : ""}</div>
         <div class="d">${d ? d.getDate() : "?"}</div>
@@ -104,8 +105,11 @@
         <div class="event-meta">${meta}</div>
         ${isRegistered(ev.id) ? '<span class="badge ok">Inscrit</span>' : ""}
       </div>
-    </a>`;
+    </a>${form ? `<a class="btn block event-cta" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : ""}</div>`;
   }
+
+  // Lien d'inscription (formulaire Tally, Google Forms…) : uniquement une adresse web.
+  function formLink(ev) { return /^https?:\/\//i.test(ev.inscription || "") ? ev.inscription : ""; }
 
   function carName(m) { return [m.marque, m.modele].filter(Boolean).join(" ") || "Véhicule"; }
   function carFullName(v) { return [carName(v), v.version && v.version.length <= 24 ? v.version : ""].filter(Boolean).join(" "); }
@@ -199,11 +203,11 @@
     let inscription = "";
     if (past) {
       inscription = `<div class="card muted">Cet événement est terminé.</div>`;
-    } else if (ev.inscription) {
+    } else if (formLink(ev)) {
       inscription = `<div class="card stack">
         <h2>Inscription</h2>
-        <p class="muted">L'inscription se fait via le formulaire de l'organisateur.</p>
-        <a class="btn block" href="${esc(ev.inscription)}" target="_blank" rel="noopener">S'inscrire</a>
+        <p class="muted">Le formulaire d'inscription s'ouvre dans une nouvelle page.</p>
+        <a class="btn block" href="${esc(formLink(ev))}" target="_blank" rel="noopener">S'inscrire</a>
       </div>`;
     } else {
       inscription = `<form class="card" id="reg-form">
