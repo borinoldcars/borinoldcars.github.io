@@ -1,12 +1,13 @@
 /* Service worker : l'app fonctionne hors ligne (carte de membre comprise). */
-const CACHE = "boc-v1";
+const CACHE = "boc-v2";
 const SHELL = [
   "./",
   "index.html",
   "manifest.webmanifest",
   "app/app.css",
   "app/app.js",
-  "app/icons/icon.svg",
+  "app/icons/logo.png",
+  "app/icons/favicon.png",
   "app/icons/icon-192.png",
   "app/data/config.json",
   "app/data/events.json",

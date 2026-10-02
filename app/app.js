@@ -497,7 +497,7 @@
       <div class="page-head"><h1>Ma carte de membre</h1></div>
       <div class="member-card">
         <div class="mc-head">
-          <div class="mc-club"><img src="app/icons/icon.svg" alt="" width="32" height="32" style="border-radius:50%">${esc(cfg.club || "Borin'Old Cars")}</div>
+          <div class="mc-club"><img src="app/icons/logo.png" alt="" width="45" height="40">${esc(cfg.club || "Borin'Old Cars")}</div>
           <div class="mc-year">Membre ${esc(cfg.annee_carte || new Date().getFullYear())}</div>
         </div>
         <div class="mc-body">
