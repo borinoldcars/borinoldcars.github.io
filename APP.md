@@ -69,8 +69,10 @@ Chaque membre ouvre **sa** carte avec un lien personnel (`https://borinoldcars.g
 Il l'ouvre une fois sur son téléphone ; la carte y reste enregistrée. Sans ce lien, l'application n'affiche
 aucune carte et ne propose pas la liste des membres.
 
-- La clé est calculée à partir du secret GitHub **`CARD_SECRET`** ; le site ne publie qu'une empreinte
-  de la clé, pas la clé. Changer `CARD_SECRET` invalide tous les liens (à renvoyer ensuite).
+- La clé est calculée à partir d'un secret (**`CARD_SECRET`**) ; le site ne publie qu'une empreinte de la
+  clé, pas la clé. Sans le secret GitHub `CARD_SECRET`, la mise à jour garde les empreintes déjà publiées
+  (les liens envoyés restent valides) ; avec, elle calcule aussi celles des nouveaux membres.
+  Changer `CARD_SECRET` invalide tous les liens (à renvoyer ensuite).
 - Pour obtenir les liens (y compris ceux des nouveaux membres) : script `scripts/liens-cartes.gs`, à coller
   dans le Google Sheet des membres (Extensions → Apps Script, propriété de script `CARD_SECRET` = même
   valeur que le secret GitHub). Il remplit un onglet « Liens cartes », **à ne jamais publier**.

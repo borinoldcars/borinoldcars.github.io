@@ -34,8 +34,18 @@ CARD_SECRET = os.environ.get("CARD_SECRET", "").strip()
 def card_key(slug):
     return hmac.new(CARD_SECRET.encode(), f"carte:{slug}".encode(), hashlib.sha256).hexdigest()[:20]
 
+# Sans CARD_SECRET, on garde les empreintes déjà publiées : les liens envoyés restent valides
+# (seuls les nouveaux membres n'ont pas encore de lien).
+try:
+    _previous = json.loads(Path("app/data/members.json").read_text(encoding="utf-8"))
+    PREVIOUS_LOCKS = {m["slug"]: m.get("cle", "") for m in _previous.get("members", [])}
+except (OSError, ValueError):
+    PREVIOUS_LOCKS = {}
+
 def card_lock(slug):
-    return hashlib.sha256(card_key(slug).encode()).hexdigest() if CARD_SECRET else ""
+    if CARD_SECRET:
+        return hashlib.sha256(card_key(slug).encode()).hexdigest()
+    return PREVIOUS_LOCKS.get(slug, "")
 
 # ---- Helpers ----
 def norm(s: str) -> str:
