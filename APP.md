@@ -12,7 +12,7 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
 | Boutique | Vêtements, panier, commande | `app/data/boutique.json` |
-| Ma carte | Carte de membre avec QR code (fonctionne hors ligne) | Automatique ; année dans `config.json` → `annee_carte` |
+| Ma carte | Carte de membre avec QR code (fonctionne hors ligne), visible seulement via le lien personnel du membre | Voir « Cartes de membre » ; année dans `config.json` → `annee_carte` |
 
 Les inscriptions aux sorties se font uniquement sur le formulaire Tally dont le lien est noté dans la
 colonne `Inscription` : l'application affiche un bouton « S'inscrire » qui ouvre ce lien. Sans lien, pas de
@@ -62,3 +62,17 @@ Ensuite, chaque nouvelle réponse au formulaire apparaît dans l'application à 
 (toutes les 30 min). Si un nom ne correspond à aucun membre, le véhicule est quand même affiché et le
 journal du workflow « Build members » le signale. Une colonne d'envoi de fichier (photo) contenant un
 lien d'image est utilisée comme photo du véhicule.
+
+## Cartes de membre : liens personnels
+
+Chaque membre ouvre **sa** carte avec un lien personnel (`https://borinoldcars.github.io/#/carte/<clé>`).
+Il l'ouvre une fois sur son téléphone ; la carte y reste enregistrée. Sans ce lien, l'application n'affiche
+aucune carte et ne propose pas la liste des membres.
+
+- La clé est calculée à partir du secret GitHub **`CARD_SECRET`** ; le site ne publie qu'une empreinte
+  de la clé, pas la clé. Changer `CARD_SECRET` invalide tous les liens (à renvoyer ensuite).
+- Pour obtenir les liens (y compris ceux des nouveaux membres) : script `scripts/liens-cartes.gs`, à coller
+  dans le Google Sheet des membres (Extensions → Apps Script, propriété de script `CARD_SECRET` = même
+  valeur que le secret GitHub). Il remplit un onglet « Liens cartes », **à ne jamais publier**.
+- Le QR code de la carte ouvre une fiche de vérification publique limitée au nom, prénom, véhicule et
+  état de la cotisation (plus d'adresse, GSM, email ni plaque).

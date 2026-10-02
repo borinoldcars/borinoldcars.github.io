@@ -298,12 +298,6 @@ dl.facts.card { padding: 14px 16px; }
 .member-card .mc-car { font-size: .95rem; opacity: .9; margin-bottom: 10px; }
 .member-card .qr { flex: none; background: #fff; padding: 6px; border-radius: 10px; width: 118px; }
 .member-card .qr img { width: 100%; image-rendering: pixelated; }
-.pick-list { max-height: 50vh; overflow-y: auto; }
-.pick-list button {
-  display: block; width: 100%; text-align: left; padding: 12px 4px; border: 0; border-bottom: 1px solid var(--line);
-  background: none; color: var(--ink); font: 500 1rem var(--sans); cursor: pointer;
-}
-.pick-list button small { color: var(--muted); display: block; font-weight: 400; }
 
 /* ---------- Toast ---------- */
 #toast {

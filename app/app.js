@@ -127,7 +127,7 @@
     const [cfg, evs] = await Promise.all([load("config"), load("events")]);
     const upcoming = (evs.events || []).filter((e) => { const d = parseDate(e.date); return d && d >= today(); })
       .sort((a, b) => a.date.localeCompare(b.date));
-    const me = store.get("member", null);
+    const me = memberFromStore();
     return `
       <section class="hero">
         <h1>${esc(cfg.club || "Borin'Old Cars")}</h1>
@@ -488,24 +488,42 @@
     });
   }
 
-  function memberFromStore() {
-    const slug = store.get("member", null);
-    return slug && state.members ? (state.members.members || []).find((m) => m.slug === slug) : null;
+  // Carte de membre : le membre ouvre une fois son lien personnel (#/carte/<clé>).
+  // La clé reste sur ce téléphone ; l'app ne publie que son empreinte (members.json → "cle").
+  async function sha256(text) {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
   }
+  async function memberForKey(key) {
+    if (!key || !window.crypto || !crypto.subtle) return null;
+    const lock = await sha256(key);
+    return ((state.members && state.members.members) || []).find((m) => m.cle && m.cle === lock) || null;
+  }
+  async function resolveMe() {
+    store.del("member"); // ancien choix « par nom », abandonné
+    state.me = await memberForKey(store.get("carte", null));
+    return state.me;
+  }
+  function memberFromStore() { return state.me || null; }
 
-  async function pageCard(slugParam) {
+  async function pageCard(key) {
     const [cfg, data] = await Promise.all([load("config"), load("members")]);
-    const ms = data.members || [];
-    if (slugParam && ms.some((m) => m.slug === slugParam)) store.set("member", slugParam);
-    const me = memberFromStore();
+    let invalid = false;
+    if (key) {
+      const m = await memberForKey(key);
+      if (m) { store.set("carte", key); state.me = m; } else invalid = true;
+      history.replaceState(null, "", "#/carte"); // la clé ne reste pas dans la barre d'adresse
+    }
+    const me = await resolveMe();
     if (!me) {
+      const mail = esc(cfg.email || "borinoldcars@gmail.com");
       return `
-        <div class="page-head"><h1>Ma carte de membre</h1><p>Choisissez votre nom une seule fois : votre carte restera sur ce téléphone.</p></div>
-        <div class="card">
-          <div class="search"><input id="pick-q" type="search" placeholder="Tapez votre nom…" aria-label="Rechercher votre nom" autocomplete="off"></div>
-          <div class="pick-list" id="pick">
-            ${ms.slice().sort((a, b) => a.nom.localeCompare(b.nom, "fr")).map((m) => `<button data-slug="${esc(m.slug)}" data-s="${esc((m.prenom + " " + m.nom).toLowerCase())}">${esc(m.prenom)} ${esc(m.nom)}<small>${esc(carName(m))}</small></button>`).join("")}
-          </div>
+        <div class="page-head"><h1>Ma carte de membre</h1></div>
+        ${invalid ? '<div class="card" style="margin-bottom:12px"><span class="badge ko">Lien non reconnu</span> <span class="small">Ce lien de carte n\'est pas (ou plus) valide.</span></div>' : ""}
+        <div class="card stack">
+          <p>Votre carte s'ouvre avec le <strong>lien personnel</strong> que le club vous a envoyé.</p>
+          <p>Ouvrez ce lien une fois sur ce téléphone : la carte y restera enregistrée, même sans connexion.</p>
+          <p class="small muted">Pas reçu de lien ? Demandez-le à <a href="mailto:${mail}">${mail}</a>.</p>
         </div>`;
     }
     const myCars = vehicles(data).filter((v) => v.slug === me.slug);
@@ -530,27 +548,18 @@
         </div>
       </div>
       <p class="small muted" style="margin-top:14px">Présentez ce QR code lors des événements : il ouvre votre fiche officielle et l'état de votre cotisation.</p>
-      <p class="small"><button class="linkbtn" id="forget">Ce n'est pas moi / changer de membre</button></p>
+      <p class="small"><button class="linkbtn" id="forget">Retirer ma carte de ce téléphone</button></p>
     `;
   }
   function bindCard() {
-    const q = document.getElementById("pick-q");
-    if (q) {
-      q.addEventListener("input", () => {
-        const t = q.value.trim().toLowerCase();
-        view.querySelectorAll("#pick button").forEach((b) => { b.hidden = !!t && !b.dataset.s.includes(t); });
-      });
-      view.querySelectorAll("#pick button").forEach((b) => b.addEventListener("click", () => {
-        store.set("member", b.dataset.slug);
-        render();
-      }));
-    }
     const forget = document.getElementById("forget");
     if (forget) forget.addEventListener("click", () => {
-      store.del("member");
-      if (location.hash !== "#/carte") location.hash = "#/carte"; else render();
+      store.del("carte");
+      state.me = null;
+      render();
     });
   }
+
 
   // ---------- Routeur ----------
   const routes = [
@@ -574,7 +583,8 @@
     if (!match) { location.hash = "#/"; return; }
     const [[, tab, page, bind], m] = match;
     const arg = m[1] ? decodeURIComponent(m[1]) : undefined;
-    await load("members"); // utile pour pré-remplir les formulaires
+    await load("members");
+    if (state.me === undefined) await resolveMe(); // carte de ce téléphone (pré-remplit la commande)
     const html = await page(arg);
     if (id !== renderId) return;
     const y = window.scrollY;

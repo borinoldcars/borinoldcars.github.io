@@ -1,5 +1,6 @@
 # scripts/build.py
 import hashlib
+import hmac
 import json
 import os, re, unicodedata
 from pathlib import Path
@@ -19,14 +20,22 @@ CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL.")
 
-SHEET_LINK = (
-    os.environ.get("SHEET_LINK")
-    or CSV_URL
-    or "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit"
-)
+# Lien « Ouvrir Google Sheet » de l'annuaire : seulement s'il est fourni
+# explicitement (le CSV publié contient les coordonnées des membres).
+SHEET_LINK = os.environ.get("SHEET_LINK", "").strip()
 
 ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
 ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
+
+# Carte de membre : chaque membre a un lien personnel .../#/carte/<clé>.
+# La clé = HMAC(CARD_SECRET, slug) ; seule son empreinte SHA-256 est publiée.
+CARD_SECRET = os.environ.get("CARD_SECRET", "").strip()
+
+def card_key(slug):
+    return hmac.new(CARD_SECRET.encode(), f"carte:{slug}".encode(), hashlib.sha256).hexdigest()[:20]
+
+def card_lock(slug):
+    return hashlib.sha256(card_key(slug).encode()).hexdigest() if CARD_SECRET else ""
 
 # ---- Helpers ----
 def norm(s: str) -> str:
@@ -149,60 +158,43 @@ df["slug"] = slugs
 
 # ---- 4) Fiches membres + QR ----
 def render_member_html(row: pd.Series) -> str:
-    email_val = row["Adresse mail"].strip()
-    email_html = f"<a href='mailto:{esc(email_val)}'>{esc(email_val)}</a>" if email_val else ""
-
-    vehicule = f"{row['Marque du véhicule']} {row['Modèle du véhicule']}".strip()
-
-    qr_rel = f"../qrs/{row['slug']}.png"
-    qr_block = (
-        f"<img src='{qr_rel}' style='width:160px;height:auto'>"
-        f"<div><a href='{qr_rel}' download>Télécharger le QR</a></div>"
-    )
-
+    # Fiche publique ouverte par le QR code : uniquement de quoi vérifier l'affiliation.
+    # Pas d'adresse, GSM, email, plaque ni autres réponses du formulaire.
+    vehicule = re.sub(r"\s+", " ", f"{row['Marque du véhicule']} {row['Modèle du véhicule']}").strip()
     rows_html = []
     def tr(label, value, html=False):
         if str(value).strip() == "":
             return
-        v = value if html else esc(value)
+        v = value if html else esc(re.sub(r"\s+", " ", str(value)).strip())
         rows_html.append(f"<tr><th>{esc(label)}</th><td>{v}</td></tr>")
 
     tr("Nom", row["Nom"])
     tr("Prénom", row["Prénom"])
-    tr("Adresse postale", row["Adresse postale"])
-
-    phone = row["Numéro de GSM"].strip()
-    if phone:
-        tr("Téléphone (GSM)", phone)
-
-    tr("Email", email_html, html=True)
     tr("Véhicule", vehicule)
-    tr("Année", row["Année"])
-    tr("Immatriculation", row["Numéro d'immatriculation"])
-    tr("Autre club", row["Membre d'un autre club"])
-    tr("Assuré chez BEHVA", row["Assuré chez BEHVA"])
     tr("Cotisation", colorize_cotisation(row["Cotisation"]), html=True)
-    tr("Autre véhicule", row["Autre véhicule"])
-    tr("QR code", qr_block, html=True)
 
-    title = f"{row['Prénom']} {row['Nom']}"
+    title = re.sub(r"\s+", " ", f"{row['Prénom']} {row['Nom']}").strip()
     return f"""<!doctype html><html lang="fr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fiche membre · {esc(title)}</title>
+<meta name="robots" content="noindex">
+<title>Membre · {esc(title)}</title>
 <style>
-body{{font-family:system-ui;background:#f8f9fb;margin:24px}}
-.card{{background:#fff;max-width:900px;margin:auto;padding:24px;border-radius:16px}}
-th{{background:#f1f4f8;width:220px}}
-td,th{{padding:8px;border-bottom:1px solid #eee}}
+body{{font-family:Georgia,"Times New Roman",serif;background:#e5decf;color:#222;margin:0;padding:24px 16px}}
+.card{{background:#f4efe5;max-width:520px;margin:auto;padding:24px;border-radius:12px;border:1px solid #cdc1a8;box-shadow:0 4px 14px rgba(47,33,24,.12)}}
+.head{{display:flex;align-items:center;gap:12px;margin-bottom:16px}}
+.head img{{height:56px;width:auto}}
+h1{{font-size:1.3rem;margin:0}}
+small{{color:#5c5244}}
+th{{text-align:left;color:#5c5244;font-weight:normal;width:120px}}
+td,th{{padding:10px 6px;border-bottom:1px solid #ddd3bf}}
 table{{width:100%;border-collapse:collapse}}
+a{{color:#8a6538}}
 </style></head><body>
 <div class="card">
-<h1>Fiche membre</h1>
-<p><small>Borin'Old Cars</small></p>
+<div class="head"><img src="../app/icons/logo.png" alt=""><div><h1>Membre du club</h1><small>Borin'Old Cars</small></div></div>
 <table>{''.join(rows_html)}</table>
-<p>Contact club : <a href="mailto:vanhollebeke.pierre@icloud.com">
-borinoldcars@gmail.com</a></p>
+<p><small>Contact club : <a href="mailto:borinoldcars@gmail.com">borinoldcars@gmail.com</a></small></p>
 </div>
 </body></html>"""
 
@@ -217,6 +209,15 @@ for _, row in df.iterrows():
 
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
+
+# Supprime les fiches et QR de personnes qui ne sont plus dans la liste.
+keep = set(generated_slugs)
+for f in OUT_DIR.glob("*.html"):
+    if f.stem != "index" and f.stem not in keep:
+        f.unlink()
+for f in QRS_DIR.glob("*.png"):
+    if f.stem not in keep:
+        f.unlink()
 
 # ---- 5) Index (template + remplacements) ----
 def cot_status(val):
@@ -269,7 +270,7 @@ display:none;align-items:center;justify-content:center}
 
 <div class="container protected">
 <h1>Annuaire des membres</h1>
-<a href="{{SHEET_LINK}}" target="_blank">Ouvrir Google Sheet</a> ·
+{{SHEET_LINK}}
 <a href="#" id="logout">Se déconnecter</a>
 <br><br>
 
@@ -353,7 +354,7 @@ async function unlock(){
 index_html = (
     index_tpl
     .replace("{{ROWS}}", "\n".join(index_rows))
-    .replace("{{SHEET_LINK}}", esc(SHEET_LINK))
+    .replace("{{SHEET_LINK}}", f'<a href="{esc(SHEET_LINK)}" target="_blank">Ouvrir Google Sheet</a> ·' if SHEET_LINK else "")
     .replace("{{CODE_HASH}}", ACCESS_CODE_HASH)
 )
 
@@ -375,6 +376,7 @@ app_members = [
         "annee": clean(row["Année"]),
         "cotisation": cot_status(row["Cotisation"]),
         "photo": clean(row["Photo"]),
+        "cle": card_lock(row["slug"]),
     }
     for _, row in df.iterrows()
 ]
