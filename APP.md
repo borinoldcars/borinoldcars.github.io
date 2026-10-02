@@ -11,13 +11,13 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 | Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, bouton d'inscription Tally | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
-| Boutique | Vêtements, panier, commande | `app/data/boutique.json` |
+| Boutique | Articles du club (photos, prix, tailles) et bouton « Commander » vers le bon de commande Tally | `app/data/boutique.json` (+ photos dans `app/boutique/`) |
 | Ma carte | Carte de membre avec QR code (fonctionne hors ligne), visible seulement via le lien personnel du membre | Voir « Cartes de membre » ; année dans `config.json` → `annee_carte` |
 
 Les inscriptions aux sorties se font uniquement sur le formulaire Tally dont le lien est noté dans la
 colonne `Inscription` : l'application affiche un bouton « S'inscrire » qui ouvre ce lien. Sans lien, pas de
-bouton. Les commandes de vêtements ouvrent l'application email du membre avec un message pré-rempli vers
-l'adresse `email` de `config.json`.
+bouton. Les commandes de la boutique se font de même sur le bon de commande Tally (`commande` dans
+`boutique.json`).
 
 Les entrées marquées `"exemple": true` sont des exemples à remplacer ou supprimer.
 
@@ -29,8 +29,9 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 **Album** (`photos.json`) : `id`, `titre`, `date`, `lien` (album Google Photos complet, optionnel),
 `photos` : liste de liens d'images (ex. fichiers déposés dans `app/photos/<album>/`).
 
-**Article** (`boutique.json`) : `id`, `nom`, `description`, `prix` (nombre, 0 = « à confirmer »),
-`tailles` et `couleurs` (listes, vides si sans objet), `image`.
+**Boutique** (`boutique.json`) : `commande` (lien du bon de commande Tally), `note`, et `articles` :
+`id`, `nom`, `prix` (nombre), `tailles` (liste, vide si sans objet), `image`. Garder les articles et prix
+identiques à ceux du bon de commande Tally.
 
 ## Agenda depuis Google Sheets (optionnel)
 
