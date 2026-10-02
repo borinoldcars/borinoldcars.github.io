@@ -494,7 +494,7 @@ print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche 
 
 # ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
 # Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
-# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Image
+# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive)
 EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
 if EVENTS_CSV_URL:
     ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
@@ -518,6 +518,13 @@ if EVENTS_CSV_URL:
         m = re.match(r"^(\d{1,2})\s*[hH:.]\s*(\d{2})?$", t)
         return f"{int(m.group(1)):02d}:{m.group(2) or '00'}" if m else t
 
+    def image_url(u):
+        # Un lien de partage Google Drive (…/file/d/ID/view ou ?id=ID) devient une image affichable.
+        m = re.search(r"drive\.google\.com/(?:file/d/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)", u)
+        if m:
+            return f"https://drive.google.com/thumbnail?id={m.group(1)}&sz=w1600"
+        return u if u.startswith("http") else ""
+
     events = []
     for i, r in ev.iterrows():
         titre = col(r, "titre", "evenement", "nom")
@@ -534,7 +541,7 @@ if EVENTS_CSV_URL:
             "description": col(r, "description"),
             "prix": col(r, "prix", "tarif"),
             "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
-            "image": col(r, "image", "photo"),
+            "image": image_url(col(r, "affiche", "image", "photo")),
         })
     events.sort(key=lambda e: e["date"])
     (APP_DATA_DIR / "events.json").write_text(

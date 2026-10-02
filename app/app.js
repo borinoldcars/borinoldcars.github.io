@@ -203,7 +203,6 @@
 
     return `
       <a class="back" href="#/agenda">‹ Agenda</a>
-      ${ev.image ? `<img class="detail-img" src="${esc(ev.image)}" alt="">` : ""}
       <h1>${esc(ev.titre)}${exBadge(ev)}</h1>
       <dl class="facts">${facts.map((f) => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join("")}</dl>
       ${ev.description ? `<p>${esc(ev.description).replace(/\n/g, "<br>")}</p>` : ""}
@@ -212,6 +211,7 @@
         ${mapLink ? `<a class="btn secondary" href="${mapLink}" target="_blank" rel="noopener">Itinéraire</a>` : ""}
       </div>
       ${inscription}
+      ${ev.image ? `<button class="poster" id="poster" aria-label="Agrandir l'affiche"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}"></button>` : ""}
     `;
   }
   function bindEvent(id) {
@@ -219,6 +219,8 @@
     if (!ev) return;
     const ics = document.getElementById("ics");
     if (ics) ics.addEventListener("click", () => downloadIcs(ev));
+    const poster = document.getElementById("poster");
+    if (poster) poster.addEventListener("click", () => openLightbox([ev.image], 0));
   }
 
   function downloadIcs(ev) {

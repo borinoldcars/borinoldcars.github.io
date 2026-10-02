@@ -35,7 +35,8 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 ## Agenda depuis Google Sheets (optionnel)
 
 1. Ajouter un onglet « Agenda » avec les colonnes : `Date` (JJ/MM/AAAA), `Heure`, `Fin`, `Titre`, `Lieu`,
-   `Description`, `Prix`, `Inscription` (lien du formulaire Tally), `Image`.
+   `Description`, `Prix`, `Inscription` (lien du formulaire Tally), `Affiche` (lien de l'image : un lien de
+   partage Google Drive fonctionne, à condition que le fichier soit partagé « Tous les utilisateurs disposant du lien »).
    Quand `Inscription` contient un lien, un bouton « S'inscrire » l'ouvre (dans l'agenda, sur l'accueil et
    sur la page de la sortie) ; sans lien, pas de bouton.
 2. Fichier → Partager → Publier sur le web → cet onglet au format CSV, copier le lien.

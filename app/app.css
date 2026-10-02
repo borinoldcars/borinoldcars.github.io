@@ -200,7 +200,8 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brass); out
 .event-meta { color: var(--muted); font-size: .875rem; }
 .event-card.past { opacity: .6; }
 .event-cta { min-height: 40px; }
-.detail-img { border-radius: var(--radius); margin-bottom: 16px; width: 100%; max-height: 280px; object-fit: cover; }
+.poster { display: block; width: 100%; max-width: 420px; margin: 20px auto 0; padding: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface-2); cursor: zoom-in; box-shadow: var(--shadow); }
+.poster img { width: 100%; height: auto; }
 dl.facts { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 16px; }
 dl.facts dt { color: var(--muted); font-size: .875rem; }
 dl.facts dd { margin: 0; font-weight: 500; }
