@@ -1,29 +1,15 @@
 {
  "events": [
   {
-   "id": "exemple-balade",
-   "exemple": true,
-   "date": "2026-10-18",
-   "heure": "09:30",
-   "fin": "17:00",
-   "titre": "Balade d'automne (exemple)",
-   "lieu": "Lieu de rendez-vous à préciser",
-   "description": "Exemple d'événement : remplacez-le dans app/data/events.json ou via l'onglet Agenda du Google Sheet.",
-   "prix": "",
-   "inscription": "",
-   "image": ""
-  },
-  {
-   "id": "exemple-reunion",
-   "exemple": true,
-   "date": "2026-11-07",
-   "heure": "19:00",
-   "fin": "",
-   "titre": "Réunion mensuelle (exemple)",
-   "lieu": "Local du club",
-   "description": "Exemple d'événement à remplacer.",
-   "prix": "",
-   "inscription": "",
+   "id": "2026-12-18-dour-by-lights",
+   "date": "2026-12-18",
+   "heure": "16:30",
+   "fin": "21:00",
+   "titre": "Dour By Lights",
+   "lieu": "Place de Blaugie",
+   "description": "Balade lumineuse au départ de Blaugie pour rejoindre la parade de la commune de Dour",
+   "prix": "5€",
+   "inscription": "https://tally.so/r/2EpMy9",
    "image": ""
   }
  ]

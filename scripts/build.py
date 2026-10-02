@@ -507,10 +507,16 @@ if EVENTS_CSV_URL:
         return ""
 
     def iso_date(d):
-        m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$", d)
+        m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$", d)
         if m:
-            return f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+            y = m.group(3) if len(m.group(3)) == 4 else "20" + m.group(3)
+            return f"{y}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
         return d
+
+    def hhmm(t):
+        # « 16H30 », « 16h », « 9:30 » -> « 16:30 », « 16:00 », « 09:30 »
+        m = re.match(r"^(\d{1,2})\s*[hH:.]\s*(\d{2})?$", t)
+        return f"{int(m.group(1)):02d}:{m.group(2) or '00'}" if m else t
 
     events = []
     for i, r in ev.iterrows():
@@ -521,8 +527,8 @@ if EVENTS_CSV_URL:
         events.append({
             "id": slugify(f"{date}-{titre}"),
             "date": date,
-            "heure": col(r, "heure", "debut"),
-            "fin": col(r, "fin"),
+            "heure": hhmm(col(r, "heure", "debut")),
+            "fin": hhmm(col(r, "fin")),
             "titre": titre,
             "lieu": col(r, "lieu", "adresse"),
             "description": col(r, "description"),
@@ -535,6 +541,6 @@ if EVENTS_CSV_URL:
         json.dumps({"events": events}, ensure_ascii=False, indent=1),
         encoding="utf-8",
     )
-    print(f"Agenda : {len(events)} événements.")
+    print(f"Agenda : {len(events)} événement(s).")
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")
