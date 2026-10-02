@@ -1,0 +1,34 @@
+{
+ "club": "Borin'Old Cars",
+ "slogan": "Le charme de l'ancien, l'esprit de la passion",
+ "email": "borinoldcars@gmail.com",
+ "annee_carte": "2026",
+ "liens": [
+  {
+   "titre": "Facebook du club",
+   "url": ""
+  }
+ ],
+ "comite": [
+  {
+   "membre": "grasso-frederic",
+   "fonction": "Président du club"
+  },
+  {
+   "membre": "saussez-emmanuel",
+   "fonction": "Vice-président"
+  },
+  {
+   "membre": "colmant-patrice",
+   "fonction": "Secrétaire & trésorier"
+  },
+  {
+   "membre": "jeunieaux-olivier",
+   "fonction": "Responsable logistique"
+  },
+  {
+   "membre": "vanhollebeke-pierre",
+   "fonction": "Responsable communication"
+  }
+ ]
+}

@@ -1,5 +1,7 @@
 # scripts/build.py
 import hashlib
+import hmac
+import json
 import os, re, unicodedata
 from pathlib import Path
 import pandas as pd
@@ -9,6 +11,7 @@ import segno
 SITE_BASE = "https://borinoldcars.github.io"
 OUT_DIR = Path("members")
 QRS_DIR  = Path("qrs")
+APP_DATA_DIR = Path("app/data")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 QRS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -17,14 +20,32 @@ CSV_URL = os.environ.get("CSV_URL") or os.environ.get("MEMBRESBOC")
 if not CSV_URL:
     raise RuntimeError("Aucun lien CSV. Définis le secret CSV_URL.")
 
-SHEET_LINK = (
-    os.environ.get("SHEET_LINK")
-    or CSV_URL
-    or "https://docs.google.com/spreadsheets/d/1j1eBg_7-i4KWuuR1DMA1oYpCN7bq8z1uM3cA2NsLtyY/edit"
-)
+# Lien « Ouvrir Google Sheet » de l'annuaire : seulement s'il est fourni
+# explicitement (le CSV publié contient les coordonnées des membres).
+SHEET_LINK = os.environ.get("SHEET_LINK", "").strip()
 
 ACCESS_CODE = (os.environ.get("MEMBERS_CODE") or os.environ.get("MEMBRES_CODE") or "").strip()
 ACCESS_CODE_HASH = hashlib.sha256(ACCESS_CODE.encode("utf-8")).hexdigest() if ACCESS_CODE else ""
+
+# Carte de membre : chaque membre a un lien personnel .../#/carte/<clé>.
+# La clé = HMAC(CARD_SECRET, slug) ; seule son empreinte SHA-256 est publiée.
+CARD_SECRET = os.environ.get("CARD_SECRET", "").strip()
+
+def card_key(slug):
+    return hmac.new(CARD_SECRET.encode(), f"carte:{slug}".encode(), hashlib.sha256).hexdigest()[:20]
+
+# Sans CARD_SECRET, on garde les empreintes déjà publiées : les liens envoyés restent valides
+# (seuls les nouveaux membres n'ont pas encore de lien).
+try:
+    _previous = json.loads(Path("app/data/members.json").read_text(encoding="utf-8"))
+    PREVIOUS_LOCKS = {m["slug"]: m.get("cle", "") for m in _previous.get("members", [])}
+except (OSError, ValueError):
+    PREVIOUS_LOCKS = {}
+
+def card_lock(slug):
+    if CARD_SECRET:
+        return hashlib.sha256(card_key(slug).encode()).hexdigest()
+    return PREVIOUS_LOCKS.get(slug, "")
 
 # ---- Helpers ----
 def norm(s: str) -> str:
@@ -114,6 +135,10 @@ aliases = {
 
     # Cotisation
     "cotisation": "Cotisation",
+
+    # Photo du véhicule (lien vers une image, pour la galerie de l'app)
+    "photo": "Photo",
+    "photo du véhicule": "Photo",
 }
 
 rename_map = {}
@@ -127,7 +152,7 @@ expected = [
     "Nom","Prénom","Adresse postale","Numéro de GSM","Adresse mail",
     "Marque du véhicule","Modèle du véhicule","Année",
     "Numéro d'immatriculation","Membre d'un autre club",
-    "Assuré chez BEHVA","Cotisation","Autre véhicule"
+    "Assuré chez BEHVA","Cotisation","Autre véhicule","Photo"
 ]
 for c in expected:
     if c not in df.columns:
@@ -143,60 +168,43 @@ df["slug"] = slugs
 
 # ---- 4) Fiches membres + QR ----
 def render_member_html(row: pd.Series) -> str:
-    email_val = row["Adresse mail"].strip()
-    email_html = f"<a href='mailto:{esc(email_val)}'>{esc(email_val)}</a>" if email_val else ""
-
-    vehicule = f"{row['Marque du véhicule']} {row['Modèle du véhicule']}".strip()
-
-    qr_rel = f"../qrs/{row['slug']}.png"
-    qr_block = (
-        f"<img src='{qr_rel}' style='width:160px;height:auto'>"
-        f"<div><a href='{qr_rel}' download>Télécharger le QR</a></div>"
-    )
-
+    # Fiche publique ouverte par le QR code : uniquement de quoi vérifier l'affiliation.
+    # Pas d'adresse, GSM, email, plaque ni autres réponses du formulaire.
+    vehicule = re.sub(r"\s+", " ", f"{row['Marque du véhicule']} {row['Modèle du véhicule']}").strip()
     rows_html = []
     def tr(label, value, html=False):
         if str(value).strip() == "":
             return
-        v = value if html else esc(value)
+        v = value if html else esc(re.sub(r"\s+", " ", str(value)).strip())
         rows_html.append(f"<tr><th>{esc(label)}</th><td>{v}</td></tr>")
 
     tr("Nom", row["Nom"])
     tr("Prénom", row["Prénom"])
-    tr("Adresse postale", row["Adresse postale"])
-
-    phone = row["Numéro de GSM"].strip()
-    if phone:
-        tr("Téléphone (GSM)", phone)
-
-    tr("Email", email_html, html=True)
     tr("Véhicule", vehicule)
-    tr("Année", row["Année"])
-    tr("Immatriculation", row["Numéro d'immatriculation"])
-    tr("Autre club", row["Membre d'un autre club"])
-    tr("Assuré chez BEHVA", row["Assuré chez BEHVA"])
     tr("Cotisation", colorize_cotisation(row["Cotisation"]), html=True)
-    tr("Autre véhicule", row["Autre véhicule"])
-    tr("QR code", qr_block, html=True)
 
-    title = f"{row['Prénom']} {row['Nom']}"
+    title = re.sub(r"\s+", " ", f"{row['Prénom']} {row['Nom']}").strip()
     return f"""<!doctype html><html lang="fr"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Fiche membre · {esc(title)}</title>
+<meta name="robots" content="noindex">
+<title>Membre · {esc(title)}</title>
 <style>
-body{{font-family:system-ui;background:#f8f9fb;margin:24px}}
-.card{{background:#fff;max-width:900px;margin:auto;padding:24px;border-radius:16px}}
-th{{background:#f1f4f8;width:220px}}
-td,th{{padding:8px;border-bottom:1px solid #eee}}
+body{{font-family:Georgia,"Times New Roman",serif;background:#e5decf;color:#222;margin:0;padding:24px 16px}}
+.card{{background:#f4efe5;max-width:520px;margin:auto;padding:24px;border-radius:12px;border:1px solid #cdc1a8;box-shadow:0 4px 14px rgba(47,33,24,.12)}}
+.head{{display:flex;align-items:center;gap:12px;margin-bottom:16px}}
+.head img{{height:56px;width:auto}}
+h1{{font-size:1.3rem;margin:0}}
+small{{color:#5c5244}}
+th{{text-align:left;color:#5c5244;font-weight:normal;width:120px}}
+td,th{{padding:10px 6px;border-bottom:1px solid #ddd3bf}}
 table{{width:100%;border-collapse:collapse}}
+a{{color:#8a6538}}
 </style></head><body>
 <div class="card">
-<h1>Fiche membre</h1>
-<p><small>Borin'Old Cars</small></p>
+<div class="head"><img src="../app/icons/logo.png" alt=""><div><h1>Membre du club</h1><small>Borin'Old Cars</small></div></div>
 <table>{''.join(rows_html)}</table>
-<p>Contact club : <a href="mailto:vanhollebeke.pierre@icloud.com">
-borinoldcars@gmail.com</a></p>
+<p><small>Contact club : <a href="mailto:borinoldcars@gmail.com">borinoldcars@gmail.com</a></small></p>
 </div>
 </body></html>"""
 
@@ -211,6 +219,15 @@ for _, row in df.iterrows():
 
     html = render_member_html(row)
     (OUT_DIR / f"{slug}.html").write_text(html, encoding="utf-8")
+
+# Supprime les fiches et QR de personnes qui ne sont plus dans la liste.
+keep = set(generated_slugs)
+for f in OUT_DIR.glob("*.html"):
+    if f.stem != "index" and f.stem not in keep:
+        f.unlink()
+for f in QRS_DIR.glob("*.png"):
+    if f.stem not in keep:
+        f.unlink()
 
 # ---- 5) Index (template + remplacements) ----
 def cot_status(val):
@@ -263,7 +280,7 @@ display:none;align-items:center;justify-content:center}
 
 <div class="container protected">
 <h1>Annuaire des membres</h1>
-<a href="{{SHEET_LINK}}" target="_blank">Ouvrir Google Sheet</a> ·
+{{SHEET_LINK}}
 <a href="#" id="logout">Se déconnecter</a>
 <br><br>
 
@@ -347,10 +364,214 @@ async function unlock(){
 index_html = (
     index_tpl
     .replace("{{ROWS}}", "\n".join(index_rows))
-    .replace("{{SHEET_LINK}}", esc(SHEET_LINK))
+    .replace("{{SHEET_LINK}}", f'<a href="{esc(SHEET_LINK)}" target="_blank">Ouvrir Google Sheet</a> ·' if SHEET_LINK else "")
     .replace("{{CODE_HASH}}", ACCESS_CODE_HASH)
 )
 
 (OUT_DIR / "index.html").write_text(index_html, encoding="utf-8")
+
+# ---- 6) Données pour l'application (carte de membre + garage) ----
+# Uniquement des infos non sensibles : pas d'adresse, téléphone, email ni plaque.
+def clean(x):
+    return re.sub(r"\s+", " ", str(x)).strip()
+
+APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+app_members = [
+    {
+        "slug": row["slug"],
+        "prenom": clean(row["Prénom"]),
+        "nom": clean(row["Nom"]),
+        "marque": clean(row["Marque du véhicule"]),
+        "modele": clean(row["Modèle du véhicule"]),
+        "annee": clean(row["Année"]),
+        "cotisation": cot_status(row["Cotisation"]),
+        "photo": clean(row["Photo"]),
+        "cle": card_lock(row["slug"]),
+    }
+    for _, row in df.iterrows()
+]
+# Garage. Source : la « Fiche Véhicule » (réponses au formulaire, une ligne par
+# véhicule) publiée en CSV dans le secret GARAGE_CSV_URL. Chaque ligne est
+# rattachée à un membre par son nom et son prénom. Le véhicule de la liste des
+# membres reste affiché, sauf s'il est déjà décrit par une de ses fiches.
+BRANDS = {
+    "vw": "Volkswagen", "volkswagen": "Volkswagen",
+    "alfa romeo": "Alfa Romeo",
+    "citroen": "Citroën", "mercedes": "Mercedes-Benz", "mercedes benz": "Mercedes-Benz",
+    "rolls royce": "Rolls-Royce",
+}
+
+def brand(x):
+    x = clean(x)
+    if norm(x) in BRANDS:
+        return BRANDS[norm(x)]
+    return x.title() if (x.isupper() or x.islower()) and len(x) > 3 else x
+
+def year(x):
+    x = clean(x)
+    m = re.search(r"\b(\d{4})\b", x)
+    if m:
+        return m.group(1)
+    if re.fullmatch(r"\d{2}", x):
+        return ("19" if int(x) > 30 else "20") + x
+    return x
+
+def car_key(marque, modele):
+    return slugify(f"{brand(marque)} {modele}")
+
+def vehicle_id(owner, nom, prenom, marque, modele):
+    who = owner["slug"] if owner else slugify(f"{nom}-{prenom}")
+    return slugify(f"{who}-{brand(marque)}-{modele}")
+
+main_cars = {
+    m["slug"]: {
+        "id": vehicle_id(m, "", "", m["marque"], m["modele"]),
+        "slug": m["slug"], "prenom": m["prenom"], "nom": m["nom"],
+        "marque": brand(m["marque"]), "modele": m["modele"],
+        "annee": year(m["annee"]), "photo": m["photo"],
+    }
+    for m in app_members if m["marque"] or m["modele"]
+}
+
+sheet_cars = {}  # clé (propriétaire, véhicule) -> fiche ; la réponse la plus récente l'emporte
+GARAGE_CSV_URL = os.environ.get("GARAGE_CSV_URL", "").strip()
+if GARAGE_CSV_URL:
+    gr = pd.read_csv(GARAGE_CSV_URL, dtype=str).fillna("")
+    gr.columns = [norm(c) for c in gr.columns]
+    by_name = {}
+    for m in app_members:
+        by_name[slugify(f"{m['nom']}-{m['prenom']}")] = m
+        by_name.setdefault(slugify(f"{m['prenom']}-{m['nom']}"), m)
+    unmatched = []
+    for _, r in gr.iterrows():
+        def get(*names):
+            for n in names:
+                if n in r and clean(r[n]) not in ("", "."):
+                    return clean(r[n])
+            return ""
+        nom, prenom = get("nom"), get("prenom")
+        marque = get("marque du vehicule", "marque")
+        modele = get("modele du vehicule", "modele")
+        if not (marque or modele):
+            continue
+        owner = by_name.get(slugify(f"{nom}-{prenom}"))
+        if not owner:
+            unmatched.append(f"{prenom} {nom}")
+        photo = get("photo", "photo du vehicule", "untitled file upload field")
+        photo = photo.split(",")[0].strip() if photo.startswith("http") else ""
+        lien = get("facebook / instagram / ... du vehicule", "lien")
+        car = {
+            "id": vehicle_id(owner, nom, prenom, marque, modele),
+            "slug": owner["slug"] if owner else "",
+            "prenom": owner["prenom"] if owner else prenom.title(),
+            "nom": owner["nom"] if owner else nom.title(),
+            "marque": brand(marque),
+            "modele": modele,
+            "version": get("version"),
+            "couleur": get("couleur"),
+            "annee": year(get("date de la premiere mise en circulation", "annee")),
+            "moteur": get("motorisation"),
+            "cylindres": get("nombre de cylindres"),
+            "puissance": get("puissance"),
+            "carburant": get("carburant"),
+            "boite": get("type de boite de vitesse"),
+            "rapports": get("nombre de rapports"),
+            "pays": get("pays d'origine du vehicule"),
+            "etat": get("etat"),
+            "histoire": str(r.get("histoire / anecdote", "")).strip(),
+            "photo": photo,
+            "lien": lien if lien.startswith("http") else "",
+        }
+        sheet_cars[(car["slug"] or car["id"], car_key(marque, modele))] = car
+    if unmatched:
+        print("Garage : propriétaires introuvables dans la liste des membres :", ", ".join(sorted(set(unmatched))))
+
+def same_car(main, fiche):
+    """Le véhicule de la liste des membres est-il déjà décrit par une fiche ?"""
+    a = slugify(f"{main['marque']} {main['modele']}").split("-")
+    b = slugify(f"{fiche['marque']} {fiche['modele']} {fiche['version']}").split("-")
+    return set(a) <= set(b) or "".join(a) in "".join(b) or slugify(f"{fiche['marque']} {fiche['modele']}").replace("-", "") in "".join(a)
+
+if GARAGE_CSV_URL:
+    vehicules = [
+        c for slug, c in main_cars.items()
+        if not any(f["slug"] == slug and same_car(c, f) for f in sheet_cars.values())
+    ]
+    vehicules += list(sheet_cars.values())
+else:
+    # Sans GARAGE_CSV_URL, on garde le garage déjà publié (fiches comprises) et on
+    # ajoute seulement le véhicule des nouveaux membres.
+    try:
+        previous = json.loads((APP_DATA_DIR / "members.json").read_text(encoding="utf-8")).get("vehicules", [])
+    except (OSError, ValueError):
+        previous = []
+    members_slugs = {m["slug"] for m in app_members}
+    vehicules = [v for v in previous if not v.get("slug") or v["slug"] in members_slugs]
+    known = {v.get("slug") for v in vehicules}
+    vehicules += [c for slug, c in main_cars.items() if slug not in known]
+print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche Véhicule).")
+
+(APP_DATA_DIR / "members.json").write_text(
+    json.dumps({"members": app_members, "vehicules": vehicules}, ensure_ascii=False, indent=1),
+    encoding="utf-8",
+)
+
+# ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
+# Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
+# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive)
+EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
+if EVENTS_CSV_URL:
+    ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
+    ev.columns = [norm(c) for c in ev.columns]
+
+    def col(r, *names):
+        for n in names:
+            if n in r and clean(r[n]):
+                return clean(r[n])
+        return ""
+
+    def iso_date(d):
+        m = re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$", d)
+        if m:
+            y = m.group(3) if len(m.group(3)) == 4 else "20" + m.group(3)
+            return f"{y}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+        return d
+
+    def hhmm(t):
+        # « 16H30 », « 16h », « 9:30 » -> « 16:30 », « 16:00 », « 09:30 »
+        m = re.match(r"^(\d{1,2})\s*[hH:.]\s*(\d{2})?$", t)
+        return f"{int(m.group(1)):02d}:{m.group(2) or '00'}" if m else t
+
+    def image_url(u):
+        # Un lien de partage Google Drive (…/file/d/ID/view ou ?id=ID) devient une image affichable.
+        m = re.search(r"drive\.google\.com/(?:file/d/|open\?id=|uc\?(?:export=\w+&)?id=)([\w-]+)", u)
+        if m:
+            return f"https://drive.google.com/thumbnail?id={m.group(1)}&sz=w1600"
+        return u if u.startswith("http") else ""
+
+    events = []
+    for i, r in ev.iterrows():
+        titre = col(r, "titre", "evenement", "nom")
+        date = iso_date(col(r, "date"))
+        if not titre or not date:
+            continue
+        events.append({
+            "id": slugify(f"{date}-{titre}"),
+            "date": date,
+            "heure": hhmm(col(r, "heure", "debut")),
+            "fin": hhmm(col(r, "fin")),
+            "titre": titre,
+            "lieu": col(r, "lieu", "adresse"),
+            "description": col(r, "description"),
+            "prix": col(r, "prix", "tarif"),
+            "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
+            "image": image_url(col(r, "affiche", "image", "photo")),
+        })
+    events.sort(key=lambda e: e["date"])
+    (APP_DATA_DIR / "events.json").write_text(
+        json.dumps({"events": events}, ensure_ascii=False, indent=1),
+        encoding="utf-8",
+    )
+    print(f"Agenda : {len(events)} événement(s).")
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")

@@ -1,0 +1,12 @@
+{
+ "albums": [
+  {
+   "id": "exemple",
+   "exemple": true,
+   "titre": "Premier album (exemple)",
+   "date": "2026-09-01",
+   "lien": "",
+   "photos": []
+  }
+ ]
+}

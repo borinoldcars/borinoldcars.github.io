@@ -1,0 +1,9 @@
+{
+ "note": "Les commandes sont envoyées par email au club. Paiement et retrait à convenir avec le comité.",
+ "articles": [
+  { "id": "polo", "exemple": true, "nom": "Polo brodé (exemple)", "description": "Logo du club brodé sur le cœur.", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir", "Bleu marine"], "image": "" },
+  { "id": "tshirt", "exemple": true, "nom": "T-shirt (exemple)", "description": "Logo du club imprimé dans le dos.", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir", "Blanc"], "image": "" },
+  { "id": "sweat", "exemple": true, "nom": "Sweat à capuche (exemple)", "description": "", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir"], "image": "" },
+  { "id": "casquette", "exemple": true, "nom": "Casquette (exemple)", "description": "Taille unique réglable.", "prix": 0, "tailles": [], "couleurs": ["Noir"], "image": "" }
+ ]
+}
