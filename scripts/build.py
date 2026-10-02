@@ -378,17 +378,50 @@ app_members = [
     }
     for _, row in df.iterrows()
 ]
-# Garage : le véhicule principal de chaque membre, puis ses autres véhicules
-# listés dans l'onglet "Garage" du Google Sheet (une ligne par véhicule).
-# Colonnes reconnues : Nom, Prénom, Marque, Modèle, Année, Photo
+# Garage. Source : la « Fiche Véhicule » (réponses au formulaire, une ligne par
+# véhicule) publiée en CSV dans le secret GARAGE_CSV_URL. Chaque ligne est
+# rattachée à un membre par son nom et son prénom. Le véhicule de la liste des
+# membres reste affiché, sauf s'il est déjà décrit par une de ses fiches.
+BRANDS = {
+    "vw": "Volkswagen", "volkswagen": "Volkswagen",
+    "alfa romeo": "Alfa Romeo",
+    "citroen": "Citroën", "mercedes": "Mercedes-Benz", "mercedes benz": "Mercedes-Benz",
+    "rolls royce": "Rolls-Royce",
+}
+
+def brand(x):
+    x = clean(x)
+    if norm(x) in BRANDS:
+        return BRANDS[norm(x)]
+    return x.title() if (x.isupper() or x.islower()) and len(x) > 3 else x
+
+def year(x):
+    x = clean(x)
+    m = re.search(r"\b(\d{4})\b", x)
+    if m:
+        return m.group(1)
+    if re.fullmatch(r"\d{2}", x):
+        return ("19" if int(x) > 30 else "20") + x
+    return x
+
 def car_key(marque, modele):
-    return slugify(f"{marque} {modele}")
+    return slugify(f"{brand(marque)} {modele}")
 
-vehicules = [
-    {k: m[k] for k in ("slug", "prenom", "nom", "marque", "modele", "annee", "photo")}
+def vehicle_id(owner, nom, prenom, marque, modele):
+    who = owner["slug"] if owner else slugify(f"{nom}-{prenom}")
+    return slugify(f"{who}-{brand(marque)}-{modele}")
+
+main_cars = {
+    m["slug"]: {
+        "id": vehicle_id(m, "", "", m["marque"], m["modele"]),
+        "slug": m["slug"], "prenom": m["prenom"], "nom": m["nom"],
+        "marque": brand(m["marque"]), "modele": m["modele"],
+        "annee": year(m["annee"]), "photo": m["photo"],
+    }
     for m in app_members if m["marque"] or m["modele"]
-]
+}
 
+sheet_cars = {}  # clé (propriétaire, véhicule) -> fiche ; la réponse la plus récente l'emporte
 GARAGE_CSV_URL = os.environ.get("GARAGE_CSV_URL", "").strip()
 if GARAGE_CSV_URL:
     gr = pd.read_csv(GARAGE_CSV_URL, dtype=str).fillna("")
@@ -397,34 +430,62 @@ if GARAGE_CSV_URL:
     for m in app_members:
         by_name[slugify(f"{m['nom']}-{m['prenom']}")] = m
         by_name.setdefault(slugify(f"{m['prenom']}-{m['nom']}"), m)
-    seen = {(v["slug"], car_key(v["marque"], v["modele"])) for v in vehicules}
     unmatched = []
     for _, r in gr.iterrows():
-        get = lambda *names: next((clean(r[n]) for n in names if n in r and clean(r[n])), "")
+        def get(*names):
+            for n in names:
+                if n in r and clean(r[n]) not in ("", "."):
+                    return clean(r[n])
+            return ""
         nom, prenom = get("nom"), get("prenom")
-        marque = get("marque", "marque du vehicule")
-        modele = get("modele", "modele du vehicule")
+        marque = get("marque du vehicule", "marque")
+        modele = get("modele du vehicule", "modele")
         if not (marque or modele):
             continue
         owner = by_name.get(slugify(f"{nom}-{prenom}"))
         if not owner:
             unmatched.append(f"{prenom} {nom}")
-        slug = owner["slug"] if owner else ""
-        if (slug, car_key(marque, modele)) in seen:
-            continue
-        seen.add((slug, car_key(marque, modele)))
-        vehicules.append({
-            "slug": slug,
-            "prenom": owner["prenom"] if owner else prenom,
-            "nom": owner["nom"] if owner else nom,
-            "marque": marque,
+        photo = get("photo", "photo du vehicule", "untitled file upload field")
+        photo = photo.split(",")[0].strip() if photo.startswith("http") else ""
+        lien = get("facebook / instagram / ... du vehicule", "lien")
+        car = {
+            "id": vehicle_id(owner, nom, prenom, marque, modele),
+            "slug": owner["slug"] if owner else "",
+            "prenom": owner["prenom"] if owner else prenom.title(),
+            "nom": owner["nom"] if owner else nom.title(),
+            "marque": brand(marque),
             "modele": modele,
-            "annee": get("annee", "annee de la premiere mise en circulation"),
-            "photo": get("photo", "photo du vehicule"),
-        })
-    print(f"Garage : {len(vehicules)} véhicules.")
+            "version": get("version"),
+            "couleur": get("couleur"),
+            "annee": year(get("date de la premiere mise en circulation", "annee")),
+            "moteur": get("motorisation"),
+            "cylindres": get("nombre de cylindres"),
+            "puissance": get("puissance"),
+            "carburant": get("carburant"),
+            "boite": get("type de boite de vitesse"),
+            "rapports": get("nombre de rapports"),
+            "pays": get("pays d'origine du vehicule"),
+            "etat": get("etat"),
+            "histoire": str(r.get("histoire / anecdote", "")).strip(),
+            "photo": photo,
+            "lien": lien if lien.startswith("http") else "",
+        }
+        sheet_cars[(car["slug"] or car["id"], car_key(marque, modele))] = car
     if unmatched:
-        print("Garage : propriétaires introuvables dans la liste des membres :", ", ".join(unmatched))
+        print("Garage : propriétaires introuvables dans la liste des membres :", ", ".join(sorted(set(unmatched))))
+
+def same_car(main, fiche):
+    """Le véhicule de la liste des membres est-il déjà décrit par une fiche ?"""
+    a = slugify(f"{main['marque']} {main['modele']}").split("-")
+    b = slugify(f"{fiche['marque']} {fiche['modele']} {fiche['version']}").split("-")
+    return set(a) <= set(b) or "".join(a) in "".join(b) or slugify(f"{fiche['marque']} {fiche['modele']}").replace("-", "") in "".join(a)
+
+vehicules = [
+    c for slug, c in main_cars.items()
+    if not any(f["slug"] == slug and same_car(c, f) for f in sheet_cars.values())
+]
+vehicules += list(sheet_cars.values())
+print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche Véhicule).")
 
 (APP_DATA_DIR / "members.json").write_text(
     json.dumps({"members": app_members, "vehicules": vehicules}, ensure_ascii=False, indent=1),

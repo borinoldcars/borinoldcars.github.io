@@ -41,15 +41,20 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 Le workflow (toutes les 30 min) régénère alors `app/data/events.json`, ainsi que `app/data/members.json`
 (nom, véhicule, statut de cotisation — sans adresse, téléphone, email ni plaque).
 
-## Plusieurs véhicules par membre (optionnel)
+## Garage : la « Fiche Véhicule »
 
-Le véhicule principal vient de la fiche du membre. Pour ses autres véhicules :
+Le garage se remplit à partir du Google Sheet **« Fiche Véhicule »** (les réponses au formulaire, une
+ligne par véhicule : marque, modèle, version, couleur, motorisation, état, anecdote…). Chaque ligne est
+rattachée à un membre par son **nom et prénom** ; un membre peut donc avoir plusieurs véhicules.
+Le véhicule indiqué dans la liste des membres reste affiché, sauf s'il est déjà décrit par une fiche.
 
-1. Ajouter un onglet « Garage » au Google Sheet, **une ligne par véhicule supplémentaire**, colonnes :
-   `Nom`, `Prénom`, `Marque`, `Modèle`, `Année`, `Photo` (lien d'image, optionnel).
-   Nom et prénom doivent être écrits comme dans la liste des membres.
-2. Publier cet onglet en CSV (Fichier → Partager → Publier sur le web) et copier le lien.
-3. GitHub : Settings → Secrets and variables → Actions → nouveau secret `GARAGE_CSV_URL`.
+Mise en place (une seule fois) :
 
-Un véhicule déjà présent sur la fiche n'est pas compté deux fois. Si un nom n'est pas reconnu, le véhicule
-est quand même affiché et le journal du workflow « Build members » le signale.
+1. Ouvrir « Fiche Véhicule » → Fichier → Partager → Publier sur le web → choisir la feuille,
+   format **CSV** → Publier, puis copier le lien.
+2. GitHub : Settings → Secrets and variables → Actions → nouveau secret `GARAGE_CSV_URL` = ce lien.
+
+Ensuite, chaque nouvelle réponse au formulaire apparaît dans l'application à la mise à jour suivante
+(toutes les 30 min). Si un nom ne correspond à aucun membre, le véhicule est quand même affiché et le
+journal du workflow « Build members » le signale. Une colonne d'envoi de fichier (photo) contenant un
+lien d'image est utilisée comme photo du véhicule.

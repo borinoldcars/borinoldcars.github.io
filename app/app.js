@@ -108,6 +108,8 @@
   }
 
   function carName(m) { return [m.marque, m.modele].filter(Boolean).join(" ") || "Véhicule"; }
+  function carFullName(v) { return [carName(v), v.version && v.version.length <= 24 ? v.version : ""].filter(Boolean).join(" "); }
+  const cap = (x) => (x ? String(x).charAt(0).toUpperCase() + String(x).slice(1) : x);
 
   // Fonction au sein du club (config.json → "comite"), dans l'ordre où le comité y est listé.
   function roleOf(m) {
@@ -297,7 +299,7 @@
   // Un véhicule par carte : data.vehicules (généré par build.py) ou, à défaut, le véhicule principal de chaque membre.
   function vehicles(data) {
     if (Array.isArray(data.vehicules)) return data.vehicules;
-    return (data.members || []).filter((m) => m.marque || m.modele);
+    return (data.members || []).filter((m) => m.marque || m.modele).map((m) => Object.assign({ id: m.slug }, m));
   }
 
   async function pageGarage() {
@@ -322,17 +324,45 @@
           const featured = r && r.rang === 0 && !featuredDone;
           if (featured) featuredDone = true;
           return `
-          <div class="card car${r ? " comite" : ""}${featured ? " featured" : ""}" data-s="${esc((carName(v) + " " + v.prenom + " " + v.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc((v.marque || "").trim().toLowerCase())}">
+          <a class="card car${r ? " comite" : ""}${featured ? " featured" : ""}" href="#/garage/${encodeURIComponent(v.id)}" data-s="${esc([carName(v), v.version, v.couleur, v.annee, v.prenom, v.nom, r ? r.fonction : ""].join(" ").toLowerCase())}" data-b="${esc((v.marque || "").trim().toLowerCase())}">
             <div class="ph">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}" loading="lazy">` : ICON.car}</div>
             <div class="info">
               ${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}
-              <strong>${esc(carName(v))}</strong><span>${v.annee ? esc(v.annee) + " · " : ""}${esc(v.prenom)} ${esc(v.nom)}</span>
+              <strong>${esc(carFullName(v))}</strong><span>${v.annee ? esc(v.annee) + " · " : ""}${esc(v.prenom)} ${esc(v.nom)}</span>
             </div>
-          </div>`; }).join("")}
+          </a>`; }).join("")}
       </div>
       <div class="card empty" id="nocar" hidden>Aucun véhicule ne correspond.</div>
     `;
   }
+  async function pageCar(id) {
+    await load("config");
+    const v = vehicles(await load("members")).find((x) => x.id === id);
+    if (!v) return `<a class="back" href="#/garage">‹ Garage</a><div class="card empty">Véhicule introuvable.</div>`;
+    const r = roleOf(v);
+    const moteur = [
+      v.moteur ? (/[,.]/.test(v.moteur) || +v.moteur < 20 ? v.moteur + " L" : v.moteur + " cm³") : "",
+      v.cylindres ? v.cylindres + " cylindres" : "",
+      v.puissance ? v.puissance + " ch" : "",
+    ].filter(Boolean).join(" · ");
+    const boite = [v.boite, v.rapports ? v.rapports + " rapports" : ""].filter(Boolean).join(", ");
+    const facts = [
+      ["Année", v.annee], ["Couleur", cap(v.couleur)], ["Moteur", moteur],
+      ["Carburant", cap(v.carburant)], ["Boîte", cap(boite)], ["Origine", cap(v.pays)], ["État", cap(v.etat)],
+    ].filter((f) => f[1]);
+    const autres = vehicles(state.members).filter((x) => x.slug && x.slug === v.slug && x.id !== v.id);
+    return `
+      <a class="back" href="#/garage">‹ Garage</a>
+      <div class="car-hero">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}">` : ICON.car}</div>
+      <h1>${esc(carName(v))}${v.version ? ` <span class="muted" style="font-weight:400">${esc(v.version)}</span>` : ""}</h1>
+      <p class="owner">${r ? `<span class="badge role-badge">${esc(r.fonction)}</span> ` : ""}${esc(v.prenom)} ${esc(v.nom)}</p>
+      ${facts.length ? `<dl class="facts card">${facts.map((f) => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join("")}</dl>` : ""}
+      ${v.histoire ? `<section class="section"><h2>Son histoire</h2><p class="story">${esc(v.histoire).replace(/\n/g, "<br>")}</p></section>` : ""}
+      ${v.lien ? `<p><a class="btn secondary" href="${esc(v.lien)}" target="_blank" rel="noopener">Voir sur les réseaux</a></p>` : ""}
+      ${autres.length ? `<section class="section"><h2>Aussi dans son garage</h2><div class="stack">${autres.map((x) => `<a class="card other-car" href="#/garage/${encodeURIComponent(x.id)}"><strong>${esc(carFullName(x))}</strong><span class="muted small">${esc(x.annee || "")}</span></a>`).join("")}</div></section>` : ""}
+    `;
+  }
+
   function bindGarage() {
     const q = document.getElementById("q");
     let brand = "";
@@ -569,6 +599,7 @@
     [/^agenda$/, "agenda", pageAgenda, bindAgenda],
     [/^agenda\/(.+)$/, "agenda", pageEvent, bindEvent],
     [/^garage$/, "garage", pageGarage, bindGarage],
+    [/^garage\/(.+)$/, "garage", pageCar, null],
     [/^photos$/, "photos", pagePhotos, null],
     [/^photos\/(.+)$/, "photos", pageAlbum, bindAlbum],
     [/^boutique$/, "boutique", pageShop, bindShop],
