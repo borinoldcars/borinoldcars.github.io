@@ -10,7 +10,6 @@
    "lieu": "Lieu de rendez-vous à préciser",
    "description": "Exemple d'événement : remplacez-le dans app/data/events.json ou via l'onglet Agenda du Google Sheet.",
    "prix": "",
-   "places": "",
    "inscription": "",
    "image": ""
   },
@@ -24,7 +23,6 @@
    "lieu": "Local du club",
    "description": "Exemple d'événement à remplacer.",
    "prix": "",
-   "places": "",
    "inscription": "",
    "image": ""
   }

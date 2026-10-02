@@ -103,7 +103,6 @@
       <div class="event-body">
         <h3>${esc(ev.titre)}${exBadge(ev)}</h3>
         <div class="event-meta">${meta}</div>
-        ${isRegistered(ev.id) ? '<span class="badge ok">Inscrit</span>' : ""}
       </div>
     </a>${form ? `<a class="btn block event-cta" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : ""}</div>`;
   }
@@ -181,7 +180,6 @@
     }));
   }
 
-  function isRegistered(id) { return (store.get("inscriptions", [])).includes(id); }
 
   async function pageEvent(id) {
     await load("config");
@@ -189,44 +187,19 @@
     if (!ev) return `<a class="back" href="#/agenda">‹ Agenda</a><div class="card empty">Événement introuvable.</div>`;
     const d = parseDate(ev.date);
     const past = d && d < today();
-    const profile = store.get("profil", {});
-    const me = memberFromStore();
     const facts = [
       ["Date", longDate(ev.date)],
       ["Heure", [ev.heure, ev.fin].filter(Boolean).join(" – ")],
       ["Lieu", ev.lieu],
       ["Prix", ev.prix],
-      ["Places", ev.places],
     ].filter((f) => f[1]);
     const mapLink = ev.lieu ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.lieu)}` : "";
 
-    let inscription = "";
-    if (past) {
-      inscription = `<div class="card muted">Cet événement est terminé.</div>`;
-    } else if (formLink(ev)) {
-      inscription = `<div class="card stack">
-        <h2>Inscription</h2>
-        <p class="muted">Le formulaire d'inscription s'ouvre dans une nouvelle page.</p>
-        <a class="btn block" href="${esc(formLink(ev))}" target="_blank" rel="noopener">S'inscrire</a>
-      </div>`;
-    } else {
-      inscription = `<form class="card" id="reg-form">
-        <h2>Inscription</h2>
-        ${isRegistered(ev.id) ? '<p><span class="badge ok">Demande d\'inscription envoyée</span></p>' : ""}
-        <div class="row-2">
-          <label class="field"><span>Prénom</span><input name="prenom" required autocomplete="given-name" value="${esc(profile.prenom || (me && me.prenom) || "")}"></label>
-          <label class="field"><span>Nom</span><input name="nom" required autocomplete="family-name" value="${esc(profile.nom || (me && me.nom) || "")}"></label>
-        </div>
-        <div class="row-2">
-          <label class="field"><span>Participants</span><input name="nb" type="number" min="1" max="20" value="1" required></label>
-          <label class="field"><span>GSM</span><input name="gsm" type="tel" autocomplete="tel" value="${esc(profile.gsm || "")}"></label>
-        </div>
-        <label class="field"><span>Véhicule</span><input name="vehicule" value="${esc(profile.vehicule || (me ? carName(me) : ""))}"></label>
-        <label class="field"><span>Remarque</span><textarea name="remarque" placeholder="Repas, allergies, passagers…"></textarea></label>
-        <button class="btn block" type="submit">Envoyer mon inscription</button>
-        <p class="small muted" style="margin:10px 0 0">Votre application email s'ouvre avec la demande pré-remplie : il suffit d'appuyer sur Envoyer.</p>
-      </form>`;
-    }
+    // L'inscription se fait uniquement sur le formulaire (Tally) noté dans le Sheet.
+    const form = !past && formLink(ev);
+    const inscription = past
+      ? `<div class="card muted">Cet événement est terminé.</div>`
+      : form ? `<a class="btn block" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : "";
 
     return `
       <a class="back" href="#/agenda">‹ Agenda</a>
@@ -246,27 +219,6 @@
     if (!ev) return;
     const ics = document.getElementById("ics");
     if (ics) ics.addEventListener("click", () => downloadIcs(ev));
-    const form = document.getElementById("reg-form");
-    if (form) form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const f = Object.fromEntries(new FormData(form));
-      store.set("profil", { prenom: f.prenom, nom: f.nom, gsm: f.gsm, vehicule: f.vehicule });
-      const lines = [
-        "Bonjour,", "",
-        "Je souhaite m'inscrire à l'événement suivant :",
-        `• ${ev.titre} — ${longDate(ev.date)}${ev.heure ? " à " + ev.heure : ""}`, "",
-        `Nom : ${f.prenom} ${f.nom}`,
-        `Nombre de participants : ${f.nb}`,
-        f.gsm ? `GSM : ${f.gsm}` : "",
-        f.vehicule ? `Véhicule : ${f.vehicule}` : "",
-        f.remarque ? `Remarque : ${f.remarque}` : "",
-        "", "Merci !",
-      ].filter((l, i, a) => l !== "" || a[i - 1] !== "");
-      const ids = store.get("inscriptions", []);
-      if (!ids.includes(ev.id)) { ids.push(ev.id); store.set("inscriptions", ids); }
-      location.href = mailto(`Inscription : ${ev.titre} (${ev.date})`, lines);
-      setTimeout(render, 600);
-    });
   }
 
   function downloadIcs(ev) {

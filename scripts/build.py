@@ -527,7 +527,6 @@ if EVENTS_CSV_URL:
             "lieu": col(r, "lieu", "adresse"),
             "description": col(r, "description"),
             "prix": col(r, "prix", "tarif"),
-            "places": col(r, "places"),
             "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
             "image": col(r, "image", "photo"),
         })

@@ -8,22 +8,23 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 | Onglet | Contenu | Où modifier |
 |---|---|---|
 | Accueil | Prochaine sortie, raccourcis | `app/data/config.json` (nom, slogan, email, liens) |
-| Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, inscription | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
+| Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, bouton d'inscription Tally | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
 | Boutique | Vêtements, panier, commande | `app/data/boutique.json` |
 | Ma carte | Carte de membre avec QR code (fonctionne hors ligne) | Automatique ; année dans `config.json` → `annee_carte` |
 
-Les inscriptions et commandes ouvrent l'application email du membre avec un message
-pré-rempli vers l'adresse `email` de `config.json` (aucun serveur nécessaire).
-Si un événement a un champ `inscription` (lien Google Forms / Tally), le bouton ouvre ce formulaire à la place.
+Les inscriptions aux sorties se font uniquement sur le formulaire Tally dont le lien est noté dans la
+colonne `Inscription` : l'application affiche un bouton « S'inscrire » qui ouvre ce lien. Sans lien, pas de
+bouton. Les commandes de vêtements ouvrent l'application email du membre avec un message pré-rempli vers
+l'adresse `email` de `config.json`.
 
 Les entrées marquées `"exemple": true` sont des exemples à remplacer ou supprimer.
 
 ## Formats
 
 **Événement** (`events.json`) : `id` (unique), `date` (`AAAA-MM-JJ`), `heure`, `fin` (`HH:MM`), `titre`, `lieu`,
-`description`, `prix`, `places`, `inscription` (lien), `image` (lien).
+`description`, `prix`, `inscription` (lien Tally), `image` (lien).
 
 **Album** (`photos.json`) : `id`, `titre`, `date`, `lien` (album Google Photos complet, optionnel),
 `photos` : liste de liens d'images (ex. fichiers déposés dans `app/photos/<album>/`).
@@ -36,7 +37,7 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 1. Ajouter un onglet « Agenda » avec les colonnes : `Date` (JJ/MM/AAAA), `Heure`, `Fin`, `Titre`, `Lieu`,
    `Description`, `Prix`, `Inscription` (lien du formulaire Tally), `Image`.
    Quand `Inscription` contient un lien, un bouton « S'inscrire » l'ouvre (dans l'agenda, sur l'accueil et
-   sur la page de la sortie) ; sinon, l'inscription se fait par email pré-rempli.
+   sur la page de la sortie) ; sans lien, pas de bouton.
 2. Fichier → Partager → Publier sur le web → cet onglet au format CSV, copier le lien.
 3. Dans GitHub : Settings → Secrets and variables → Actions → nouveau secret `EVENTS_CSV_URL`.
 
