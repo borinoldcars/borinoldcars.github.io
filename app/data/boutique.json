@@ -1,9 +1,11 @@
 {
- "note": "Les commandes sont envoyées par email au club. Paiement et retrait à convenir avec le comité.",
+ "commande": "https://tally.so/r/obWkOx",
+ "note": "Commandez via le bon de commande en ligne : le total est calculé automatiquement et vous recevez par email un QR code pour le paiement.",
  "articles": [
-  { "id": "polo", "exemple": true, "nom": "Polo brodé (exemple)", "description": "Logo du club brodé sur le cœur.", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir", "Bleu marine"], "image": "" },
-  { "id": "tshirt", "exemple": true, "nom": "T-shirt (exemple)", "description": "Logo du club imprimé dans le dos.", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir", "Blanc"], "image": "" },
-  { "id": "sweat", "exemple": true, "nom": "Sweat à capuche (exemple)", "description": "", "prix": 0, "tailles": ["S", "M", "L", "XL", "XXL"], "couleurs": ["Noir"], "image": "" },
-  { "id": "casquette", "exemple": true, "nom": "Casquette (exemple)", "description": "Taille unique réglable.", "prix": 0, "tailles": [], "couleurs": ["Noir"], "image": "" }
+  { "id": "casquette", "nom": "Casquette", "prix": 10, "tailles": [], "image": "app/boutique/casquette.png" },
+  { "id": "tshirt-beige", "nom": "T-shirt beige", "prix": 20, "tailles": ["S", "M", "L", "XL", "XXL", "XXXL"], "image": "app/boutique/tshirt-beige.png" },
+  { "id": "sweat-capuche", "nom": "Sweat à capuche", "prix": 45, "tailles": ["XS", "S", "M", "L", "XL", "XXL", "XXXL", "XXXXL"], "image": "app/boutique/sweat-capuche.png" },
+  { "id": "veste-soft-shell", "nom": "Veste soft shell", "prix": 70, "tailles": ["S", "M", "L", "XL", "XXL"], "image": "app/boutique/veste-soft-shell.png" },
+  { "id": "cache-plaque", "nom": "Cache-plaque", "prix": 18, "tailles": [], "image": "app/boutique/cache-plaque.png" }
  ]
 }

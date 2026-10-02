@@ -53,11 +53,6 @@
     return n > 0 ? n.toLocaleString("fr-BE", { style: "currency", currency: "EUR" }) : "Prix à confirmer";
   }
 
-  function mailto(subject, lines) {
-    const to = (state.config && state.config.email) || "borinoldcars@gmail.com";
-    return "mailto:" + to + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(lines.join("\r\n"));
-  }
-
   const exBadge = (o) => (o && o.exemple ? ' <span class="badge ex">Exemple</span>' : "");
 
   const ICON = {
@@ -69,24 +64,7 @@
     card: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M6 15h5M6 11.5h3"/><rect x="14" y="9" width="4.5" height="4.5" rx=".5"/></svg>',
   };
 
-  // ---------- Panier ----------
-  const cart = {
-    items() { return store.get("cart", []); },
-    save(items) { store.set("cart", items); updateCartBadge(); },
-    add(item) {
-      const items = this.items();
-      const same = items.find((i) => i.id === item.id && i.taille === item.taille && i.couleur === item.couleur);
-      if (same) same.qte += item.qte; else items.push(item);
-      this.save(items);
-    },
-    count() { return this.items().reduce((n, i) => n + i.qte, 0); },
-  };
-  function updateCartBadge() {
-    const b = document.querySelector(".cart-count");
-    const n = cart.count();
-    b.hidden = n === 0;
-    b.textContent = n;
-  }
+
 
   // ---------- Rendu des éléments ----------
   function eventItem(ev) {
@@ -104,7 +82,7 @@
         <h3>${esc(ev.titre)}${exBadge(ev)}</h3>
         <div class="event-meta">${meta}</div>
       </div>
-      ${ev.image ? `<img class="event-thumb" src="${esc(ev.image)}" alt="Affiche" loading="lazy">` : ""}
+      ${ev.image ? `<img class="event-thumb" src="${esc(ev.image)}" alt="Affiche" loading="lazy" onerror="this.remove()">` : ""}
     </a>${form ? `<a class="btn block event-cta" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : ""}</div>`;
   }
 
@@ -145,7 +123,7 @@
           <a class="card" href="#/carte">${ICON.card}${me ? "Ma carte" : "Ma carte de membre"}</a>
           <a class="card" href="#/garage">${ICON.garage}Le garage</a>
           <a class="card" href="#/photos">${ICON.photo}Photos</a>
-          <a class="card" href="#/boutique">${ICON.shirt}Vêtements</a>
+          <a class="card" href="#/boutique">${ICON.shirt}Boutique</a>
         </div>
       </section>
 
@@ -212,7 +190,7 @@
         ${mapLink ? `<a class="btn secondary" href="${mapLink}" target="_blank" rel="noopener">Itinéraire</a>` : ""}
       </div>
       ${inscription}
-      ${ev.image ? `<button class="poster" id="poster" aria-label="Agrandir l'affiche"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}"></button>` : ""}
+      ${ev.image ? `<button class="poster" id="poster" aria-label="Agrandir l'affiche"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}" onerror="this.parentNode.remove()"></button>` : ""}
     `;
   }
   function bindEvent(id) {
@@ -404,88 +382,21 @@
   async function pageShop() {
     const shop = await load("shop");
     const items = shop.articles || [];
-    const lines = cart.items();
-    const total = lines.reduce((s, l) => s + (Number(l.prix) || 0) * l.qte, 0);
-    const unknown = lines.some((l) => !(Number(l.prix) > 0));
-    const profile = store.get("profil", {});
-    const me = memberFromStore();
-    const opt = (arr, name, label) => arr && arr.length ? `<label class="field"><span>${label}</span><select name="${name}">${arr.map((v) => `<option>${esc(v)}</option>`).join("")}</select></label>` : "";
+    const order = /^https?:\/\//i.test(shop.commande || "") ? shop.commande : "";
+    const cta = order ? `<a class="btn block" href="${esc(order)}" target="_blank" rel="noopener">Commander</a>` : "";
     return `
-      <div class="page-head"><h1>Vêtements du club</h1><p>${esc(shop.note || "")}</p></div>
+      <div class="page-head"><h1>Boutique du club</h1><p>${esc(shop.note || "")}</p></div>
       ${items.length ? `<div class="grid">${items.map((a) => `
-        <form class="card product" data-id="${esc(a.id)}">
+        <div class="card product">
           <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" loading="lazy">` : ICON.shirt}</div>
           <div class="info">
             <strong>${esc(a.nom)}${exBadge(a)}</strong>
-            ${a.description ? `<span class="small muted">${esc(a.description)}</span>` : ""}
             <span class="price">${fmtPrice(a.prix)}</span>
-            ${opt(a.tailles, "taille", "Taille")}
-            ${opt(a.couleurs, "couleur", "Couleur")}
-            <button class="btn" type="submit">Ajouter</button>
+            ${a.tailles && a.tailles.length ? `<span class="small muted">Tailles ${esc(a.tailles[0])} à ${esc(a.tailles[a.tailles.length - 1])}</span>` : ""}
           </div>
-        </form>`).join("")}</div>` : '<div class="card empty">La boutique est vide pour le moment.</div>'}
-
-      <section class="section" id="panier">
-        <h2>Ma commande</h2>
-        ${lines.length ? `
-        <div class="card">
-          ${lines.map((l, i) => `<div class="cart-line">
-            <div class="txt"><strong>${esc(l.nom)}</strong><div class="small muted">${[l.taille, l.couleur].filter(Boolean).map(esc).join(" · ")} — ${fmtPrice(l.prix)}</div></div>
-            <div class="qty"><button type="button" data-q="${i}" data-d="-1" aria-label="Retirer un">−</button><span>${l.qte}</span><button type="button" data-q="${i}" data-d="1" aria-label="Ajouter un">+</button></div>
-          </div>`).join("")}
-          <div class="total"><span>Total</span><span>${total > 0 ? fmtPrice(total) : "—"}${unknown && total > 0 ? " + à confirmer" : ""}</span></div>
-        </div>
-        <form class="card" id="order-form" style="margin-top:12px">
-          <div class="row-2">
-            <label class="field"><span>Prénom</span><input name="prenom" required autocomplete="given-name" value="${esc(profile.prenom || (me && me.prenom) || "")}"></label>
-            <label class="field"><span>Nom</span><input name="nom" required autocomplete="family-name" value="${esc(profile.nom || (me && me.nom) || "")}"></label>
-          </div>
-          <label class="field"><span>GSM</span><input name="gsm" type="tel" autocomplete="tel" value="${esc(profile.gsm || "")}"></label>
-          <label class="field"><span>Remarque</span><textarea name="remarque" placeholder="Flocage, retrait lors d'une sortie…"></textarea></label>
-          <button class="btn block" type="submit">Envoyer ma commande</button>
-          <p class="small muted" style="margin:10px 0 0">Votre application email s'ouvre avec la commande pré-remplie. Paiement et retrait à convenir avec le club.</p>
-        </form>` : '<div class="card empty">Votre commande est vide.</div>'}
-      </section>
+        </div>`).join("")}</div>` : '<div class="card empty">La boutique est vide pour le moment.</div>'}
+      ${cta ? `<div class="shop-cta">${cta}<p class="small muted">Le bon de commande s'ouvre dans une nouvelle page.</p></div>` : ""}
     `;
-  }
-  function bindShop() {
-    const items = (state.shop || {}).articles || [];
-    view.querySelectorAll("form.product").forEach((f) => f.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const a = items.find((x) => x.id === f.dataset.id);
-      const d = Object.fromEntries(new FormData(f));
-      cart.add({ id: a.id, nom: a.nom, prix: a.prix, taille: d.taille || "", couleur: d.couleur || "", qte: 1 });
-      toast(`${a.nom} ajouté à la commande`);
-      render(true);
-    }));
-    view.querySelectorAll("[data-q]").forEach((b) => b.addEventListener("click", () => {
-      const lines = cart.items();
-      const l = lines[+b.dataset.q];
-      l.qte += +b.dataset.d;
-      if (l.qte <= 0) lines.splice(+b.dataset.q, 1);
-      cart.save(lines);
-      render(true);
-    }));
-    const form = document.getElementById("order-form");
-    if (form) form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const f = Object.fromEntries(new FormData(form));
-      const prev = store.get("profil", {});
-      store.set("profil", Object.assign(prev, { prenom: f.prenom, nom: f.nom, gsm: f.gsm }));
-      const lines = cart.items();
-      const total = lines.reduce((s, l) => s + (Number(l.prix) || 0) * l.qte, 0);
-      const body = [
-        "Bonjour,", "", "Je souhaite commander les vêtements suivants :", "",
-        ...lines.map((l) => `• ${l.qte} × ${l.nom}${l.taille ? " — taille " + l.taille : ""}${l.couleur ? " — " + l.couleur : ""} (${fmtPrice(l.prix)})`),
-        "", total > 0 ? `Total indicatif : ${fmtPrice(total)}` : "", "",
-        `Nom : ${f.prenom} ${f.nom}`, f.gsm ? `GSM : ${f.gsm}` : "",
-        f.remarque ? `Remarque : ${f.remarque}` : "", "", "Merci !",
-      ];
-      location.href = mailto(`Commande vêtements — ${f.prenom} ${f.nom}`, body);
-      setTimeout(() => {
-        if (confirm("Commande envoyée ? Vider le panier ?")) { cart.save([]); render(true); }
-      }, 1200);
-    });
   }
 
   // Carte de membre : le membre ouvre une fois son lien personnel (#/carte/<clé>).
@@ -570,7 +481,7 @@
     [/^garage\/(.+)$/, "garage", pageCar, null],
     [/^photos$/, "photos", pagePhotos, null],
     [/^photos\/(.+)$/, "photos", pageAlbum, bindAlbum],
-    [/^boutique$/, "boutique", pageShop, bindShop],
+    [/^boutique$/, "boutique", pageShop, null],
     [/^carte(?:\/(.+))?$/, "carte", pageCard, bindCard],
   ];
 
@@ -584,7 +495,7 @@
     const [[, tab, page, bind], m] = match;
     const arg = m[1] ? decodeURIComponent(m[1]) : undefined;
     await load("members");
-    if (state.me === undefined) await resolveMe(); // carte de ce téléphone (pré-remplit la commande)
+    if (state.me === undefined) await resolveMe(); // carte enregistrée sur ce téléphone
     const html = await page(arg);
     if (id !== renderId) return;
     const y = window.scrollY;
@@ -613,8 +524,8 @@
     }
   }
 
+  store.del("cart"); store.del("profil"); // anciennes données (panier, formulaires)
   window.addEventListener("hashchange", () => render());
-  updateCartBadge();
   render();
 
   if ("serviceWorker" in navigator) {
