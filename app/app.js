@@ -311,7 +311,7 @@
       <div class="chips" id="brands"><button class="chip on" data-b="">Toutes</button>${brands.map((b) => `<button class="chip" data-b="${esc(b.toLowerCase())}">${esc(b)}</button>`).join("")}</div>
       <div class="grid" id="cars">
         ${ms.map((m) => { const r = roleOf(m); return `
-          <div class="card car${r ? " featured" : ""}" data-s="${esc((carName(m) + " " + m.prenom + " " + m.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc(m.marque.trim().toLowerCase())}">
+          <div class="card car${r ? " comite" : ""}${r && r.rang === 0 ? " featured" : ""}" data-s="${esc((carName(m) + " " + m.prenom + " " + m.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc(m.marque.trim().toLowerCase())}">
             <div class="ph">${m.photo ? `<img src="${esc(m.photo)}" alt="${esc(carName(m))}" loading="lazy">` : ICON.car}</div>
             <div class="info">
               ${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}

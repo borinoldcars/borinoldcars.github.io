@@ -13,6 +13,22 @@
   {
    "membre": "grasso-frederic",
    "fonction": "Président du club"
+  },
+  {
+   "membre": "saussez-emmanuel",
+   "fonction": "Vice-président"
+  },
+  {
+   "membre": "colmant-patrice",
+   "fonction": "Secrétaire & trésorier"
+  },
+  {
+   "membre": "jeunieaux-olivier",
+   "fonction": "Responsable logistique"
+  },
+  {
+   "membre": "vanhollebeke-pierre",
+   "fonction": "Responsable communication"
   }
  ]
 }
