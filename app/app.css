@@ -212,6 +212,16 @@ dl.facts dd { margin: 0; font-weight: 500; }
 .car .info { padding: 10px 12px 12px; }
 .car .info strong { display: block; font-family: var(--serif); font-size: 1.02rem; line-height: 1.25; }
 .car .info span { display: block; color: var(--muted); font-size: .82rem; }
+.car.featured { grid-column: 1 / -1; flex-direction: row; border-color: var(--gold); }
+.car.featured .ph { flex: 0 0 45%; aspect-ratio: auto; min-height: 150px; }
+.car.featured .info { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 14px 16px; min-width: 0; }
+.car.featured .info strong { font-size: 1.2rem; }
+.car.featured .info span { font-size: .9rem; }
+.car .info .role {
+  align-self: flex-start; margin-bottom: 6px; padding: 3px 10px; border-radius: 999px;
+  background: var(--gold); color: #2f2118; font-size: .7rem; font-weight: 700;
+  letter-spacing: .6px; text-transform: uppercase; white-space: nowrap;
+}
 
 /* ---------- Photos ---------- */
 .album { padding: 0; overflow: hidden; text-decoration: none; }
@@ -269,6 +279,7 @@ dl.facts dd { margin: 0; font-weight: 500; }
 .member-card .mc-body { display: flex; gap: 16px; align-items: flex-end; justify-content: space-between; }
 .member-card .mc-label { font-size: .7rem; letter-spacing: 1.5px; text-transform: uppercase; opacity: .65; }
 .member-card .mc-name { font: 700 1.45rem/1.15 var(--serif); margin: 2px 0 10px; }
+.member-card .mc-role { color: var(--gold); font-size: .78rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin: -4px 0 8px; }
 .member-card .mc-car { font-size: .95rem; opacity: .9; margin-bottom: 10px; }
 .member-card .qr { flex: none; background: #fff; padding: 6px; border-radius: 10px; width: 118px; }
 .member-card .qr img { width: 100%; image-rendering: pixelated; }

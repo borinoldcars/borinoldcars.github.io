@@ -4,6 +4,15 @@
  "email": "borinoldcars@gmail.com",
  "annee_carte": "2026",
  "liens": [
-  { "titre": "Facebook du club", "url": "" }
+  {
+   "titre": "Facebook du club",
+   "url": ""
+  }
+ ],
+ "comite": [
+  {
+   "membre": "grasso-frederic",
+   "fonction": "Président du club"
+  }
  ]
 }

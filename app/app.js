@@ -109,6 +109,13 @@
 
   function carName(m) { return [m.marque, m.modele].filter(Boolean).join(" ") || "Véhicule"; }
 
+  // Fonction au sein du club (config.json → "comite"), dans l'ordre où le comité y est listé.
+  function roleOf(m) {
+    const list = (state.config && state.config.comite) || [];
+    const i = list.findIndex((r) => r.membre === m.slug);
+    return i < 0 ? null : { rang: i, fonction: list[i].fonction };
+  }
+
   // ---------- Pages ----------
   async function pageHome() {
     const [cfg, evs] = await Promise.all([load("config"), load("events")]);
@@ -288,7 +295,13 @@
   }
 
   async function pageGarage() {
-    const ms = ((await load("members")).members || []).filter((m) => m.marque || m.modele);
+    await load("config");
+    const ms = ((await load("members")).members || []).filter((m) => m.marque || m.modele || roleOf(m))
+      .sort((a, b) => {
+        const ra = roleOf(a), rb = roleOf(b);
+        if (ra || rb) return ra && rb ? ra.rang - rb.rang : ra ? -1 : 1;
+        return (a.nom + " " + a.prenom).localeCompare(b.nom + " " + b.prenom, "fr");
+      });
     const byKey = new Map();
     ms.forEach((m) => { const b = m.marque.trim(); if (b && !byKey.has(b.toLowerCase())) byKey.set(b.toLowerCase(), b[0].toUpperCase() + b.slice(1)); });
     const brands = [...byKey.values()].sort((a, b) => a.localeCompare(b, "fr"));
@@ -297,11 +310,14 @@
       <div class="search"><input id="q" type="search" placeholder="Rechercher une marque, un modèle, un membre…" aria-label="Rechercher"></div>
       <div class="chips" id="brands"><button class="chip on" data-b="">Toutes</button>${brands.map((b) => `<button class="chip" data-b="${esc(b.toLowerCase())}">${esc(b)}</button>`).join("")}</div>
       <div class="grid" id="cars">
-        ${ms.map((m) => `
-          <div class="card car" data-s="${esc((carName(m) + " " + m.prenom + " " + m.nom).toLowerCase())}" data-b="${esc(m.marque.trim().toLowerCase())}">
+        ${ms.map((m) => { const r = roleOf(m); return `
+          <div class="card car${r ? " featured" : ""}" data-s="${esc((carName(m) + " " + m.prenom + " " + m.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc(m.marque.trim().toLowerCase())}">
             <div class="ph">${m.photo ? `<img src="${esc(m.photo)}" alt="${esc(carName(m))}" loading="lazy">` : ICON.car}</div>
-            <div class="info"><strong>${esc(carName(m))}</strong><span>${m.annee ? esc(m.annee) + " · " : ""}${esc(m.prenom)} ${esc(m.nom)}</span></div>
-          </div>`).join("")}
+            <div class="info">
+              ${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}
+              <strong>${esc(carName(m))}</strong><span>${m.annee ? esc(m.annee) + " · " : ""}${esc(m.prenom)} ${esc(m.nom)}</span>
+            </div>
+          </div>`; }).join("")}
       </div>
       <div class="card empty" id="nocar" hidden>Aucun véhicule ne correspond.</div>
     `;
@@ -504,6 +520,7 @@
           <div>
             <div class="mc-label">Membre</div>
             <div class="mc-name">${esc(me.prenom)}<br>${esc(me.nom)}</div>
+            ${roleOf(me) ? `<div class="mc-role">${esc(roleOf(me).fonction)}</div>` : ""}
             <div class="mc-car">${esc(carName(me))}${me.annee ? " · " + esc(me.annee) : ""}</div>
             <span class="badge ${cot[0]}">${cot[1]}</span>
           </div>
