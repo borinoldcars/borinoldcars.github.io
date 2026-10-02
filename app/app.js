@@ -104,6 +104,7 @@
         <h3>${esc(ev.titre)}${exBadge(ev)}</h3>
         <div class="event-meta">${meta}</div>
       </div>
+      ${ev.image ? `<img class="event-thumb" src="${esc(ev.image)}" alt="Affiche" loading="lazy">` : ""}
     </a>${form ? `<a class="btn block event-cta" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : ""}</div>`;
   }
 
