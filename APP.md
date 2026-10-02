@@ -9,7 +9,7 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 |---|---|---|
 | Accueil | Prochaine sortie, raccourcis | `app/data/config.json` (nom, slogan, email, liens) |
 | Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, inscription | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
-| Garage | Véhicules des membres, recherche par marque | Automatique depuis le Google Sheet des membres (colonne optionnelle `Photo` = lien d'image) |
+| Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
 | Boutique | Vêtements, panier, commande | `app/data/boutique.json` |
 | Ma carte | Carte de membre avec QR code (fonctionne hors ligne) | Automatique ; année dans `config.json` → `annee_carte` |
@@ -40,3 +40,16 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 
 Le workflow (toutes les 30 min) régénère alors `app/data/events.json`, ainsi que `app/data/members.json`
 (nom, véhicule, statut de cotisation — sans adresse, téléphone, email ni plaque).
+
+## Plusieurs véhicules par membre (optionnel)
+
+Le véhicule principal vient de la fiche du membre. Pour ses autres véhicules :
+
+1. Ajouter un onglet « Garage » au Google Sheet, **une ligne par véhicule supplémentaire**, colonnes :
+   `Nom`, `Prénom`, `Marque`, `Modèle`, `Année`, `Photo` (lien d'image, optionnel).
+   Nom et prénom doivent être écrits comme dans la liste des membres.
+2. Publier cet onglet en CSV (Fichier → Partager → Publier sur le web) et copier le lien.
+3. GitHub : Settings → Secrets and variables → Actions → nouveau secret `GARAGE_CSV_URL`.
+
+Un véhicule déjà présent sur la fiche n'est pas compté deux fois. Si un nom n'est pas reconnu, le véhicule
+est quand même affiché et le journal du workflow « Build members » le signale.

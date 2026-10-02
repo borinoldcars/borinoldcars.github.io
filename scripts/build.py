@@ -378,8 +378,56 @@ app_members = [
     }
     for _, row in df.iterrows()
 ]
+# Garage : le véhicule principal de chaque membre, puis ses autres véhicules
+# listés dans l'onglet "Garage" du Google Sheet (une ligne par véhicule).
+# Colonnes reconnues : Nom, Prénom, Marque, Modèle, Année, Photo
+def car_key(marque, modele):
+    return slugify(f"{marque} {modele}")
+
+vehicules = [
+    {k: m[k] for k in ("slug", "prenom", "nom", "marque", "modele", "annee", "photo")}
+    for m in app_members if m["marque"] or m["modele"]
+]
+
+GARAGE_CSV_URL = os.environ.get("GARAGE_CSV_URL", "").strip()
+if GARAGE_CSV_URL:
+    gr = pd.read_csv(GARAGE_CSV_URL, dtype=str).fillna("")
+    gr.columns = [norm(c) for c in gr.columns]
+    by_name = {}
+    for m in app_members:
+        by_name[slugify(f"{m['nom']}-{m['prenom']}")] = m
+        by_name.setdefault(slugify(f"{m['prenom']}-{m['nom']}"), m)
+    seen = {(v["slug"], car_key(v["marque"], v["modele"])) for v in vehicules}
+    unmatched = []
+    for _, r in gr.iterrows():
+        get = lambda *names: next((clean(r[n]) for n in names if n in r and clean(r[n])), "")
+        nom, prenom = get("nom"), get("prenom")
+        marque = get("marque", "marque du vehicule")
+        modele = get("modele", "modele du vehicule")
+        if not (marque or modele):
+            continue
+        owner = by_name.get(slugify(f"{nom}-{prenom}"))
+        if not owner:
+            unmatched.append(f"{prenom} {nom}")
+        slug = owner["slug"] if owner else ""
+        if (slug, car_key(marque, modele)) in seen:
+            continue
+        seen.add((slug, car_key(marque, modele)))
+        vehicules.append({
+            "slug": slug,
+            "prenom": owner["prenom"] if owner else prenom,
+            "nom": owner["nom"] if owner else nom,
+            "marque": marque,
+            "modele": modele,
+            "annee": get("annee", "annee de la premiere mise en circulation"),
+            "photo": get("photo", "photo du vehicule"),
+        })
+    print(f"Garage : {len(vehicules)} véhicules.")
+    if unmatched:
+        print("Garage : propriétaires introuvables dans la liste des membres :", ", ".join(unmatched))
+
 (APP_DATA_DIR / "members.json").write_text(
-    json.dumps({"members": app_members}, ensure_ascii=False, indent=1),
+    json.dumps({"members": app_members, "vehicules": vehicules}, ensure_ascii=False, indent=1),
     encoding="utf-8",
 )
 

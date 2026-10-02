@@ -294,28 +294,39 @@
     a.remove();
   }
 
+  // Un véhicule par carte : data.vehicules (généré par build.py) ou, à défaut, le véhicule principal de chaque membre.
+  function vehicles(data) {
+    if (Array.isArray(data.vehicules)) return data.vehicules;
+    return (data.members || []).filter((m) => m.marque || m.modele);
+  }
+
   async function pageGarage() {
     await load("config");
-    const ms = ((await load("members")).members || []).filter((m) => m.marque || m.modele || roleOf(m))
+    const vs = vehicles(await load("members")).slice()
       .sort((a, b) => {
         const ra = roleOf(a), rb = roleOf(b);
         if (ra || rb) return ra && rb ? ra.rang - rb.rang : ra ? -1 : 1;
         return (a.nom + " " + a.prenom).localeCompare(b.nom + " " + b.prenom, "fr");
       });
     const byKey = new Map();
-    ms.forEach((m) => { const b = m.marque.trim(); if (b && !byKey.has(b.toLowerCase())) byKey.set(b.toLowerCase(), b[0].toUpperCase() + b.slice(1)); });
+    vs.forEach((v) => { const b = (v.marque || "").trim(); if (b && !byKey.has(b.toLowerCase())) byKey.set(b.toLowerCase(), b[0].toUpperCase() + b.slice(1)); });
     const brands = [...byKey.values()].sort((a, b) => a.localeCompare(b, "fr"));
+    let featuredDone = false;
     return `
-      <div class="page-head"><h1>Le garage</h1><p>${ms.length} véhicules de nos membres.</p></div>
+      <div class="page-head"><h1>Le garage</h1><p>${vs.length} véhicules de nos membres.</p></div>
       <div class="search"><input id="q" type="search" placeholder="Rechercher une marque, un modèle, un membre…" aria-label="Rechercher"></div>
       <div class="chips" id="brands"><button class="chip on" data-b="">Toutes</button>${brands.map((b) => `<button class="chip" data-b="${esc(b.toLowerCase())}">${esc(b)}</button>`).join("")}</div>
       <div class="grid" id="cars">
-        ${ms.map((m) => { const r = roleOf(m); return `
-          <div class="card car${r ? " comite" : ""}${r && r.rang === 0 ? " featured" : ""}" data-s="${esc((carName(m) + " " + m.prenom + " " + m.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc(m.marque.trim().toLowerCase())}">
-            <div class="ph">${m.photo ? `<img src="${esc(m.photo)}" alt="${esc(carName(m))}" loading="lazy">` : ICON.car}</div>
+        ${vs.map((v) => {
+          const r = roleOf(v);
+          const featured = r && r.rang === 0 && !featuredDone;
+          if (featured) featuredDone = true;
+          return `
+          <div class="card car${r ? " comite" : ""}${featured ? " featured" : ""}" data-s="${esc((carName(v) + " " + v.prenom + " " + v.nom + " " + (r ? r.fonction : "")).toLowerCase())}" data-b="${esc((v.marque || "").trim().toLowerCase())}">
+            <div class="ph">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}" loading="lazy">` : ICON.car}</div>
             <div class="info">
               ${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}
-              <strong>${esc(carName(m))}</strong><span>${m.annee ? esc(m.annee) + " · " : ""}${esc(m.prenom)} ${esc(m.nom)}</span>
+              <strong>${esc(carName(v))}</strong><span>${v.annee ? esc(v.annee) + " · " : ""}${esc(v.prenom)} ${esc(v.nom)}</span>
             </div>
           </div>`; }).join("")}
       </div>
@@ -508,6 +519,8 @@
           </div>
         </div>`;
     }
+    const myCars = vehicles(data).filter((v) => v.slug === me.slug);
+    if (!myCars.length) myCars.push(me);
     const cot = { oui: ["ok", "Cotisation en ordre"], non: ["ko", "Cotisation non réglée"] }[me.cotisation] || ["na", "Cotisation à vérifier"];
     return `
       <div class="page-head"><h1>Ma carte de membre</h1></div>
@@ -521,7 +534,7 @@
             <div class="mc-label">Membre</div>
             <div class="mc-name">${esc(me.prenom)}<br>${esc(me.nom)}</div>
             ${roleOf(me) ? `<div class="mc-role">${esc(roleOf(me).fonction)}</div>` : ""}
-            <div class="mc-car">${esc(carName(me))}${me.annee ? " · " + esc(me.annee) : ""}</div>
+            <div class="mc-car">${myCars.map((v) => esc(carName(v)) + (v.annee ? " · " + esc(v.annee) : "")).join("<br>")}</div>
             <span class="badge ${cot[0]}">${cot[1]}</span>
           </div>
           <a class="qr" href="members/${encodeURIComponent(me.slug)}.html" aria-label="Ouvrir ma fiche membre"><img src="qrs/${encodeURIComponent(me.slug)}.png" alt="QR code de vérification"></a>
