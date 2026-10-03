@@ -11,7 +11,7 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 | Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, bouton d'inscription Tally | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
-| Boutique | Articles du club (photos, prix, tailles) et bouton « Commander » vers le bon de commande Tally | `app/data/boutique.json` (+ photos dans `app/boutique/`) |
+| Boutique | Articles du club (photos, prix, tailles) ; un article touché s'affiche en grand avec un bouton « Commander » vers le bon de commande Tally | `app/data/boutique.json` (+ photos dans `app/boutique/`) |
 | Ma carte | Carte de membre avec QR code (fonctionne hors ligne), visible seulement via le lien personnel du membre | Voir « Cartes de membre » ; année dans `config.json` → `annee_carte` |
 
 Les inscriptions aux sorties se font uniquement sur le formulaire Tally dont le lien est noté dans la
