@@ -3,12 +3,12 @@
  "slogan": "Le charme de l'ancien, l'esprit de la passion",
  "email": "borinoldcars@gmail.com",
  "annee_carte": "2026",
- "liens": [
-  {
-   "titre": "Facebook du club",
-   "url": ""
-  }
- ],
+ "reseaux": {
+  "facebook": "",
+  "instagram": "",
+  "tiktok": ""
+ },
+ "liens": [],
  "comite": [
   {
    "membre": "grasso-frederic",

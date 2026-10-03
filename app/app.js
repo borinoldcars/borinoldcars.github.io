@@ -102,6 +102,20 @@
     return i < 0 ? null : { rang: i, fonction: list[i].fonction };
   }
 
+  // Réseaux sociaux du club (config.json → reseaux) ; un bouton n'apparaît que si son lien est rempli.
+  const SOCIAL = [
+    ["facebook", "Facebook", '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.5-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.4V21z"/></svg>'],
+    ["instagram", "Instagram", '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="fill" cx="17.2" cy="6.8" r="1.1"/></svg>'],
+    ["tiktok", "TikTok", '<svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M16.4 3c.3 2.2 1.6 3.6 3.8 3.8v3c-1.4.1-2.6-.3-3.8-1.1v6.1c0 3.4-2.6 5.7-5.6 5.7-3.2 0-5.4-2.6-5.2-5.6.2-2.9 2.8-5.1 5.9-4.7v3.1c-1.4-.4-2.9.5-3 2-.1 1.4 1 2.4 2.3 2.4 1.4 0 2.3-1 2.3-2.5V3z"/></svg>'],
+  ];
+  function socialLinks(cfg) {
+    const r = cfg.reseaux || {};
+    const items = SOCIAL.filter(([k]) => /^https?:\/\//i.test(r[k] || ""));
+    if (!items.length) return "";
+    return `<div class="social">${items.map(([k, label, icon]) =>
+      `<a class="card" href="${esc(r[k])}" target="_blank" rel="noopener" aria-label="${label} du club">${icon}<span>${label}</span></a>`).join("")}</div>`;
+  }
+
   // ---------- Pages ----------
   async function pageHome() {
     const [cfg, evs] = await Promise.all([load("config"), load("events")]);
@@ -127,6 +141,7 @@
           <a class="card" href="#/photos">${ICON.photo}Photos</a>
           <a class="card" href="#/boutique">${ICON.shirt}Boutique</a>
         </div>
+        ${socialLinks(cfg)}
       </section>
 
       ${(cfg.liens || []).filter((l) => l.url).length ? `
