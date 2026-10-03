@@ -1,5 +1,5 @@
 /* Service worker : l'app fonctionne hors ligne (carte de membre comprise). */
-const CACHE = "boc-v14";
+const CACHE = "boc-v15";
 const SHELL = [
   "./",
   "index.html",
