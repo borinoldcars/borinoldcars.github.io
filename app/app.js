@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 2";
+  const APP_VERSION = "3 oct. 2026 · 3";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -187,7 +187,7 @@
 
 
   async function pageEvent(id) {
-    await load("config");
+    await Promise.all([load("config"), load("photos")]);
     const ev = ((await load("events")).events || []).find((e) => e.id === id);
     if (!ev) return `<a class="back" href="#/agenda">‹ Agenda</a><div class="card empty">Événement introuvable.</div>`;
     const d = parseDate(ev.date);
@@ -216,6 +216,7 @@
         ${mapLink ? `<a class="btn secondary" href="${mapLink}" target="_blank" rel="noopener">Itinéraire</a>` : ""}
       </div>
       ${inscription}
+      ${albumForEvent(ev) ? `<a class="btn block event-photos" href="#/photos/${encodeURIComponent(albumForEvent(ev).id)}">${ICON.photo.replace("<svg", '<svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7"')} Voir les photos de l'événement</a>` : ""}
       ${ev.image ? `<button class="poster" id="poster" aria-label="Agrandir l'affiche"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}" onerror="this.parentNode.remove()"></button>` : ""}
     `;
   }
@@ -346,13 +347,27 @@
     }));
   }
 
+  // Photos d'un album : liens d'images (« photos ») ou fichiers Google Drive partagés (« drive »).
+  function albumPhotos(a) {
+    const drive = (a.drive || []).map((id) => ({
+      thumb: `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w480`,
+      full: `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`,
+    }));
+    return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive);
+  }
+  // Album lié à une sortie : même date (ou « evenement » = id de la sortie).
+  function albumForEvent(ev) {
+    return ((state.photos && state.photos.albums) || []).find((a) => a.evenement === ev.id || (a.date && a.date === ev.date));
+  }
+
   async function pagePhotos() {
     const albums = ((await load("photos")).albums || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     return `
       <div class="page-head"><h1>Photos</h1><p>Les souvenirs de nos sorties.</p></div>
       ${albums.length ? `<div class="grid">${albums.map((a) => {
-        const cover = a.couverture || (a.photos || [])[0];
-        const n = (a.photos || []).length;
+        const list = albumPhotos(a);
+        const cover = a.couverture || (list[0] && list[0].thumb);
+        const n = list.length;
         return `<a class="card album" href="#/photos/${encodeURIComponent(a.id)}">
           <div class="cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy">` : ICON.photo}</div>
           <div class="info"><strong>${esc(a.titre)}${exBadge(a)}</strong><span>${a.date ? esc(longDate(a.date)) : ""}${n ? ` · ${n} photo${n > 1 ? "s" : ""}` : ""}</span></div>
@@ -364,19 +379,20 @@
   async function pageAlbum(id) {
     const a = ((await load("photos")).albums || []).find((x) => x.id === id);
     if (!a) return `<a class="back" href="#/photos">‹ Photos</a><div class="card empty">Album introuvable.</div>`;
-    const photos = a.photos || [];
+    const photos = albumPhotos(a);
     return `
       <a class="back" href="#/photos">‹ Photos</a>
       <div class="page-head"><h1>${esc(a.titre)}${exBadge(a)}</h1><p>${a.date ? esc(longDate(a.date)) : ""}</p></div>
-      ${a.lien ? `<p><a class="btn secondary" href="${esc(a.lien)}" target="_blank" rel="noopener">Voir l'album complet</a></p>` : ""}
-      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p)}" alt="" loading="lazy"></button>`).join("")}</div>`
+      ${a.lien ? `<p><a class="btn secondary" href="${esc(a.lien)}" target="_blank" rel="noopener">Ouvrir l'album dans Google Drive</a></p>` : ""}
+      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
         : '<div class="card empty">Pas encore de photos dans cet album.</div>'}
     `;
   }
   function bindAlbum(id) {
     const a = ((state.photos || {}).albums || []).find((x) => x.id === id);
     if (!a) return;
-    view.querySelectorAll(".mosaic button").forEach((b) => b.addEventListener("click", () => openLightbox(a.photos, +b.dataset.i)));
+    const full = albumPhotos(a).map((p) => p.full);
+    view.querySelectorAll(".mosaic button").forEach((b) => b.addEventListener("click", () => openLightbox(full, +b.dataset.i)));
   }
   function openLightbox(list, i) {
     const box = document.createElement("div");

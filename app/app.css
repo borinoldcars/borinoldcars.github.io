@@ -313,3 +313,4 @@ dl.facts.card { padding: 14px 16px; }
   .quick { grid-template-columns: repeat(4, 1fr); }
 }
 .app-version { text-align: center; }
+.event-photos { margin-top: 12px; }
