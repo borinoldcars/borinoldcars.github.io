@@ -79,3 +79,9 @@ aucune carte et ne propose pas la liste des membres.
   valeur que le secret GitHub). Il remplit un onglet « Liens cartes », **à ne jamais publier**.
 - Le QR code de la carte ouvre une fiche de vérification publique limitée au nom, prénom, véhicule et
   état de la cotisation (plus d'adresse, GSM, email ni plaque).
+
+## Date d'entrée au club (« Membre depuis »)
+
+La carte de membre affiche « Membre depuis <mois année> ». La date vient d'une colonne de la liste des
+membres (« Membre depuis », « Date d'inscription » ou « Submitted at ») si elle existe, sinon du fichier
+`app/data/membres-depuis.json` (`"nom-prenom": "AAAA-MM-JJ"` ou `"AAAA"`).

@@ -416,6 +416,12 @@
     return state.me;
   }
   function memberFromStore() { return state.me || null; }
+  // « 2025-08-04 » -> « août 2025 » ; « 2026 » -> « 2026 »
+  function sinceText(v) {
+    const m = /^(\d{4})(?:-(\d{2}))?/.exec(v || "");
+    if (!m) return "";
+    return m[2] ? new Date(+m[1], +m[2] - 1, 1).toLocaleDateString("fr-BE", { month: "long", year: "numeric" }) : m[1];
+  }
 
   async function pageCard(key) {
     const [cfg, data] = await Promise.all([load("config"), load("members")]);
@@ -459,6 +465,7 @@
             <div class="mc-name">${esc(me.prenom)}<br>${esc(me.nom)}</div>
             ${roleOf(me) ? `<div class="mc-role">${esc(roleOf(me).fonction)}</div>` : ""}
             <div class="mc-car">${myCars.map((v) => esc(carName(v)) + (v.annee ? " · " + esc(v.annee) : "")).join("<br>")}</div>
+            ${sinceText(me.depuis) ? `<div class="mc-since">Membre depuis ${esc(sinceText(me.depuis))}</div>` : ""}
             <span class="badge ${cot[0]}">${cot[1]}</span>
           </div>
           <a class="qr" href="members/${encodeURIComponent(me.slug)}.html" aria-label="Ouvrir ma fiche membre"><img src="qrs/${encodeURIComponent(me.slug)}.png" alt="QR code de vérification"></a>
