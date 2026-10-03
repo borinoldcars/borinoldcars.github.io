@@ -274,6 +274,17 @@
    "cotisation": "na",
    "photo": "",
    "cle": "d67550823a99b320cdcb30a31d82a9b04bff2054b53995001d5ddaf30fbc3382"
+  },
+  {
+   "slug": "namur-didier",
+   "prenom": "Didier",
+   "nom": "Namur",
+   "marque": "Porsche",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": "",
+   "cle": "207b23faab56a2f375460d3fcbbe47e67fda9ee4219cb696c6f77c0726d4fbf6"
   }
  ],
  "vehicules": [
@@ -838,6 +849,16 @@
    "histoire": "Véhicule avec trois vitesses à l'origine modifié avec une boîte de vitesse de ID19 à 4 rapports",
    "photo": "",
    "lien": ""
+  },
+  {
+   "id": "namur-didier-porsche",
+   "slug": "namur-didier",
+   "prenom": "Didier",
+   "nom": "Namur",
+   "marque": "Porsche",
+   "modele": "",
+   "annee": "",
+   "photo": ""
   }
  ]
 }
