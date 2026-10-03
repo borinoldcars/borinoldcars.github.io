@@ -2,6 +2,7 @@
 (function () {
   "use strict";
 
+  const APP_VERSION = "3 oct. 2026 · 2";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -134,7 +135,32 @@
       </section>` : ""}
 
       <section class="section small muted" id="install-hint"></section>
+      <section class="section small muted app-version">
+        Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button>
+      </section>
     `;
+  }
+
+  function bindHome() {
+    const b = document.getElementById("force-update");
+    if (b) b.addEventListener("click", forceUpdate);
+  }
+
+  // Efface la copie hors ligne de l'app et recharge la dernière version depuis le site.
+  // La carte de membre (gardée dans le stockage du navigateur) n'est pas effacée.
+  async function forceUpdate() {
+    toast("Mise à jour…");
+    try {
+      if (navigator.serviceWorker) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+    } catch (e) { /* on recharge quand même */ }
+    location.replace(location.pathname + "?v=" + Date.now() + "#/");
   }
 
   async function pageAgenda() {
@@ -498,7 +524,7 @@
 
   // ---------- Routeur ----------
   const routes = [
-    [/^$/, "accueil", pageHome, null],
+    [/^$/, "accueil", pageHome, bindHome],
     [/^agenda$/, "agenda", pageAgenda, bindAgenda],
     [/^agenda\/(.+)$/, "agenda", pageEvent, bindEvent],
     [/^garage$/, "garage", pageGarage, bindGarage],
