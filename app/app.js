@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 7";
+  const APP_VERSION = "3 oct. 2026 · 8";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -616,10 +616,35 @@
     window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}));
   }
 
+  // Vérifie auprès du site si une version plus récente existe ; si oui, recharge l'app
+  // (une seule tentative par version, pour ne jamais boucler).
+  async function checkVersion() {
+    try {
+      const r = await fetch("app/version.json?t=" + Date.now(), { cache: "no-store" });
+      const v = (await r.json()).version;
+      if (!v || v === APP_VERSION) return;
+      let tried = null;
+      try { tried = sessionStorage.getItem("boc_reload_for"); } catch (e) { /* ignoré */ }
+      if (tried === v) return;
+      try { sessionStorage.setItem("boc_reload_for", v); } catch (e) { /* ignoré */ }
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update().catch(() => {});
+      }
+      if (window.caches) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((k) => caches.delete(k)));
+      }
+      location.reload();
+    } catch (e) { /* hors ligne : on garde la version actuelle */ }
+  }
+  window.addEventListener("load", checkVersion);
+
   // Au retour dans l'app (téléphone déverrouillé, app réouverte), relire les données à jour.
   let hiddenAt = 0;
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) { hiddenAt = Date.now(); return; }
+    checkVersion();
     if (Date.now() - hiddenAt > 60000) {
       ["config", "events", "members", "photos", "shop"].forEach((k) => { state[k] = null; });
       state.me = undefined;
