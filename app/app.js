@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 10";
+  const APP_VERSION = "3 oct. 2026 · 11";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
