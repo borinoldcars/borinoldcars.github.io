@@ -1,6 +1,18 @@
 {
  "events": [
   {
+   "id": "2026-06-28-jurbise-classic-tour",
+   "date": "2026-06-28",
+   "heure": "08:00",
+   "fin": "18:00",
+   "titre": "Jurbise Classic Tour",
+   "lieu": "Parc Communal de Jurbise",
+   "description": "Expo-balade au départ du parc communal de Jurbise : 3 roadbooks proposés, élection du plus beau véhicule et tombola.",
+   "prix": "30€/conducteur, 20€/passager, 15€/enfant",
+   "inscription": "",
+   "image": "https://drive.google.com/thumbnail?id=16Vx6vmUvtzrIy1v-pLe9VTlRTOALyBjI&sz=w1600"
+  },
+  {
    "id": "2026-07-12-dour-auto-retro",
    "date": "2026-07-12",
    "heure": "10:00",
