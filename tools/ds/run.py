@@ -46,3 +46,22 @@ if req["mode"] == "grid":
         for y in range(0, H, 200):
             d.line([(0, y * s), (sm.width, y * s)], fill="yellow"); d.text((2, y * s + 2), str(y), fill="yellow")
         sm.save(f"{OUT}/grid-{name}.jpg", quality=85)
+
+if req["mode"] == "crop":
+    from rembg import remove, new_session
+    sam = new_session("sam"); fine = new_session("isnet-general-use")
+    for name, job in req["jobs"].items():
+        im = thumb(job["id"], 2000)
+        x1, y1, x2, y2 = job["box"]
+        prompt = [{"type": "rectangle", "data": job["box"], "label": 1}]
+        prompt += [{"type": "point", "data": p, "label": 1} for p in job.get("pos", [])]
+        prompt += [{"type": "point", "data": p, "label": 0} for p in job.get("neg", [])]
+        m_sam = remove(im, session=sam, sam_prompt=prompt, only_mask=True).convert("L")
+        m_sam = m_sam.point(lambda v: 255 if v > 127 else 0).filter(ImageFilter.MaxFilter(job.get("grow", 15))).filter(ImageFilter.GaussianBlur(2))
+        m = 60; box = (max(0, x1 - m), max(0, y1 - m), min(im.width, x2 + m), min(im.height, y2 + m))
+        m_c = remove(im.crop(box), session=fine, only_mask=True).convert("L")
+        m_fine = Image.new("L", im.size, 0); m_fine.paste(m_c, box[:2])
+        alpha = ImageChops.multiply(m_fine, m_sam).point(lambda v: 0 if v < 40 else (255 if v > 215 else v))
+        out = im.convert("RGBA"); out.putalpha(alpha)
+        out = out.crop(alpha.point(lambda v: 255 if v > 20 else 0).getbbox())
+        out.save(f"{OUT}/cut-{name}.png")

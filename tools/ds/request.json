@@ -1,24 +1,305 @@
 {
-"mode": "grid",
-"items": {
-"ami8-988": "13AY20hDIlpy0tfwRleYNufl2C3iY4TWy",
-"ami8-185": "1x2niqs-G_lV6GDQhZjnPMtWFfYhsu7FF",
-"camaro-361": "1vg90788tepkfGZCNCmWeNpbd1EEY2EoP",
-"camaro-362": "1cy1thXpYwM1DIcFgHHLxXfHvLnuIM3uu",
-"r16-385": "10LyTeOaX8BoNfQw6KynW5nfKoG5NP1Bx",
-"r16-386": "13hg5qIcbx75O7L1UehcOnJkSA8vKoGeb",
-"giulia-353": "1-QfMJiDb_cMg4QOBtib2PHAIhkjBrjDB",
-"fiat127-129": "1KjEDW7v5fbzIXG5qQZKoK-meAgrqCZjF",
-"calibra-245": "1k5G2RbkN5Wf619X3B1xLLelSnOQ5aYhZ",
-"calibra-83": "1lETjgYqEtjoa-u9dGBB1rFp_5wgK97Zc",
-"caterham-67": "1WCpVHo8UT1b1tyrAMUAowURfcxODI2BV",
-"p996-29": "16--5XcX4IZHm3vFTKP8RqsYW4EOqGuFT",
-"rolls-1069": "1BCzAxgMo6IT5fu5V4ueEtAgyineDJBWz",
-"rolls-1093": "1TV7b3igXGTH7lBZaXVZOzqzr2OAvaZoU",
-"cougar-332": "1NwzjR0_Ho-TnX9GEx3r4YOpa3bvfeTnG",
-"pontiac-5": "1K0eOhLlC1SdDdZlXNbcnmYjSbgRsnb8m",
-"traction-298": "19QW31sIF7LEF6TV-qP2P5kYJ8KCmZljS",
-"rekord-915": "1xelsF6GDVs71soemkvkAEEf4NiHdv1ek",
-"golfcab-92": "1GChsgisECH9GU8_wTNRMrqlwNPQyMG6-"
+"mode": "crop",
+"jobs": {
+"ami8-988": {
+"id": "13AY20hDIlpy0tfwRleYNufl2C3iY4TWy",
+"box": [
+230,
+1030,
+1660,
+2080
+],
+"pos": [
+[
+945,
+1555
+]
+],
+"neg": [
+[
+100,
+1500
+],
+[
+1980,
+1450
+]
+],
+"grow": 15
+},
+"ami8-185": {
+"id": "1x2niqs-G_lV6GDQhZjnPMtWFfYhsu7FF",
+"box": [
+300,
+715,
+505,
+870
+],
+"pos": [
+[
+402,
+792
+]
+],
+"neg": [],
+"grow": 15
+},
+"camaro-361": {
+"id": "1vg90788tepkfGZCNCmWeNpbd1EEY2EoP",
+"box": [
+40,
+140,
+1950,
+1000
+],
+"pos": [
+[
+995,
+570
+]
+],
+"neg": [
+[
+100,
+200
+],
+[
+560,
+80
+],
+[
+1300,
+100
+]
+],
+"grow": 15
+},
+"r16-385": {
+"id": "10LyTeOaX8BoNfQw6KynW5nfKoG5NP1Bx",
+"box": [
+10,
+40,
+1980,
+1340
+],
+"pos": [
+[
+995,
+690
+]
+],
+"neg": [
+[
+300,
+100
+]
+],
+"grow": 15
+},
+"giulia-353": {
+"id": "1-QfMJiDb_cMg4QOBtib2PHAIhkjBrjDB",
+"box": [
+20,
+20,
+1940,
+1330
+],
+"pos": [
+[
+980,
+675
+]
+],
+"neg": [
+[
+1700,
+150
+]
+],
+"grow": 15
+},
+"fiat127-129": {
+"id": "1KjEDW7v5fbzIXG5qQZKoK-meAgrqCZjF",
+"box": [
+130,
+850,
+1995,
+2070
+],
+"pos": [
+[
+1062,
+1460
+]
+],
+"neg": [
+[
+1550,
+1050
+]
+],
+"grow": 15
+},
+"calibra-245": {
+"id": "1k5G2RbkN5Wf619X3B1xLLelSnOQ5aYhZ",
+"box": [
+16,
+400,
+1140,
+1140
+],
+"pos": [
+[
+578,
+770
+]
+],
+"neg": [
+[
+300,
+700
+],
+[
+100,
+650
+]
+],
+"grow": 15
+},
+"caterham-67": {
+"id": "1WCpVHo8UT1b1tyrAMUAowURfcxODI2BV",
+"box": [
+245,
+410,
+1500,
+1410
+],
+"pos": [
+[
+872,
+910
+]
+],
+"neg": [
+[
+1350,
+550
+]
+],
+"grow": 15
+},
+"p996-29": {
+"id": "16--5XcX4IZHm3vFTKP8RqsYW4EOqGuFT",
+"box": [
+136,
+424,
+1125,
+1040
+],
+"pos": [
+[
+630,
+732
+]
+],
+"neg": [
+[
+160,
+430
+]
+],
+"grow": 15
+},
+"rolls-1069": {
+"id": "1BCzAxgMo6IT5fu5V4ueEtAgyineDJBWz",
+"box": [
+130,
+935,
+1590,
+1860
+],
+"pos": [
+[
+860,
+1397
+]
+],
+"neg": [],
+"grow": 15
+},
+"cougar-332": {
+"id": "1NwzjR0_Ho-TnX9GEx3r4YOpa3bvfeTnG",
+"box": [
+660,
+350,
+1700,
+900
+],
+"pos": [
+[
+1180,
+625
+]
+],
+"neg": [
+[
+600,
+500
+],
+[
+1780,
+450
+]
+],
+"grow": 15
+},
+"pontiac-5": {
+"id": "1K0eOhLlC1SdDdZlXNbcnmYjSbgRsnb8m",
+"box": [
+10,
+560,
+1430,
+1330
+],
+"pos": [
+[
+720,
+945
+]
+],
+"neg": [
+[
+240,
+450
+]
+],
+"grow": 15
+},
+"rekord-915": {
+"id": "1xelsF6GDVs71soemkvkAEEf4NiHdv1ek",
+"box": [
+800,
+430,
+1770,
+1180
+],
+"pos": [
+[
+1285,
+805
+]
+],
+"neg": [
+[
+650,
+600
+],
+[
+1600,
+450
+]
+],
+"grow": 15
+}
 }
 }
