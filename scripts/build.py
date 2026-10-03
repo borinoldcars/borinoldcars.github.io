@@ -560,9 +560,13 @@ def drive_folder_images(folder_id):
     files = []
     for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
         fid, title = m.group(1), m.group(2).strip()
+        # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
+        if title.startswith("._"):
+            continue
         if title.lower().endswith(IMAGE_EXT):
             files.append((title.lower(), fid))
-    return [fid for _, fid in sorted(files)]
+    natural = lambda t: [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t[0])]
+    return [fid for _, fid in sorted(files, key=natural)]
 
 photos_path = APP_DATA_DIR / "photos.json"
 try:
