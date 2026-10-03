@@ -314,3 +314,4 @@ dl.facts.card { padding: 14px 16px; }
 }
 .app-version { text-align: center; }
 .event-photos { margin-top: 12px; }
+.drive-folder { display: block; width: 100%; height: 75vh; min-height: 420px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }

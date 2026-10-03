@@ -1,6 +1,18 @@
 {
  "events": [
   {
+   "id": "2026-09-20-portes-ouvertes-des-pompiers-de-dour",
+   "date": "2026-09-20",
+   "heure": "09:00",
+   "fin": "",
+   "titre": "Portes ouvertes des Pompiers de Dour",
+   "lieu": "Caserne des pompiers de Dour",
+   "description": "",
+   "prix": "",
+   "inscription": "",
+   "image": "https://drive.google.com/thumbnail?id=1hnII76QpvucBVOOBrlrzvqej1GWOwT_f&sz=w1600"
+  },
+  {
    "id": "2026-09-27-la-randour-classics",
    "date": "2026-09-27",
    "heure": "08:30",
