@@ -36,3 +36,13 @@ if req["mode"] == "scan":
                     d.text((x + 10, y + 100), "ERREUR", fill="red")
                 d.text((x + 6, y + H + 4), f"#{s + k} {it['name'][-34:]}", fill="black")
             sheet.save(f"{OUT}/sheet-{s // (C * R):03d}.jpg", quality=80)
+
+if req["mode"] == "grid":
+    for name, fid in req["items"].items():
+        im = thumb(fid, 2000); W, H = im.size
+        s = 1000 / max(W, H); sm = im.resize((int(W * s), int(H * s))); d = ImageDraw.Draw(sm)
+        for x in range(0, W, 200):
+            d.line([(x * s, 0), (x * s, sm.height)], fill="yellow"); d.text((x * s + 2, 2), str(x), fill="yellow")
+        for y in range(0, H, 200):
+            d.line([(0, y * s), (sm.width, y * s)], fill="yellow"); d.text((2, y * s + 2), str(y), fill="yellow")
+        sm.save(f"{OUT}/grid-{name}.jpg", quality=85)
