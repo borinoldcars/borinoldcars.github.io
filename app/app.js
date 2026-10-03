@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 11";
+  const APP_VERSION = "3 oct. 2026 · 12";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -441,16 +441,49 @@
     return `
       <div class="page-head"><h1>Boutique du club</h1><p>${esc(shop.note || "")}</p></div>
       ${items.length ? `<div class="grid shop-grid">${items.map((a) => `
-        <div class="card product">
+        <button type="button" class="card product" data-id="${esc(a.id)}" aria-label="Voir ${esc(a.nom)} en grand">
           <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" width="600" height="600" decoding="async">` : ICON.shirt}</div>
           <div class="info">
             <strong>${esc(a.nom)}${exBadge(a)}</strong>
             <span class="price">${fmtPrice(a.prix)}</span>
             ${a.tailles && a.tailles.length ? `<span class="small muted">Tailles ${esc(a.tailles[0])} à ${esc(a.tailles[a.tailles.length - 1])}</span>` : ""}
           </div>
-        </div>`).join("")}</div>` : '<div class="card empty">La boutique est vide pour le moment.</div>'}
+        </button>`).join("")}</div>` : '<div class="card empty">La boutique est vide pour le moment.</div>'}
       ${cta ? `<div class="shop-cta">${cta}<p class="small muted">Le bon de commande s'ouvre dans une nouvelle page.</p></div>` : ""}
     `;
+  }
+
+  // Boutique : un article touché s'affiche en grand, avec le bouton « Commander » (Tally).
+  function bindShop() {
+    const shop = state.shop || {};
+    const order = /^https?:\/\//i.test(shop.commande || "") ? shop.commande : "";
+    view.querySelectorAll(".product[data-id]").forEach((b) => b.addEventListener("click", () => {
+      const a = (shop.articles || []).find((x) => x.id === b.dataset.id);
+      if (a) openProduct(a, order);
+    }));
+  }
+  function openProduct(a, order) {
+    const box = document.createElement("div");
+    box.className = "lightbox product-view";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", a.nom);
+    box.innerHTML = `
+      <button class="close" aria-label="Fermer">×</button>
+      <div class="pv">
+        <div class="pv-img">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}">` : ICON.shirt}</div>
+        <div class="pv-info">
+          <strong>${esc(a.nom)}</strong>
+          <span class="price">${fmtPrice(a.prix)}</span>
+          ${a.tailles && a.tailles.length ? `<span class="small">Tailles : ${a.tailles.map(esc).join(", ")}</span>` : ""}
+        </div>
+        ${order ? `<a class="btn block" href="${esc(order)}" target="_blank" rel="noopener">Commander</a>` : ""}
+      </div>`;
+    const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+    box.addEventListener("click", (e) => { if (e.target === box || e.target.classList.contains("close")) close(); });
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(box);
+    box.querySelector(".close").focus();
   }
 
   // Carte de membre : le membre ouvre une fois son lien personnel (#/carte/<clé>).
@@ -559,7 +592,7 @@
     [/^garage\/(.+)$/, "garage", pageCar, null],
     [/^photos$/, "photos", pagePhotos, null],
     [/^photos\/(.+)$/, "photos", pageAlbum, bindAlbum],
-    [/^boutique$/, "boutique", pageShop, null],
+    [/^boutique$/, "boutique", pageShop, bindShop],
     [/^carte(?:\/(.+))?$/, "carte", pageCard, bindCard],
   ];
 
