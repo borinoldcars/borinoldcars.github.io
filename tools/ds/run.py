@@ -37,3 +37,12 @@ elif req["mode"] == "cutout":
         cut = remove(im, session=sess, post_process_mask=True)
         cut = cut.crop(cut.getbbox())
         cut.save(f"{OUT}/cut-{fid}.png")
+
+if req["mode"] == "sam":
+    from rembg import remove, new_session
+    sess = new_session("sam")
+    for job in req["jobs"]:
+        im = thumb(job["id"], 2000)
+        cut = remove(im, session=sess, sam_prompt=job["prompt"], post_process_mask=True)
+        cut = cut.crop(cut.getbbox())
+        cut.save(f"{OUT}/sam-{job['id']}.png")
