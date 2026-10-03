@@ -1,7 +1,19 @@
 {
  "events": [
   {
-   "id": "2026-10-11-dour-auto-rtro",
+   "id": "2026-09-27-la-randour-classics",
+   "date": "2026-09-27",
+   "heure": "08:30",
+   "fin": "20:00",
+   "titre": "La RanDour Classics",
+   "lieu": "Centre Athéna",
+   "description": "Rendez-vous au centre Athéna de Dour pour une balade de 90 km, roadbook en main ! L'itinéraire vous emmènera de l'autre côté de la frontière, jusqu'à Maroilles, avant de se terminer en toute convivialité autour d'un barbecue au Manuel de l'Automobile, chez Philippe Castiaux à Quaregnon.",
+   "prix": "20€/conducteur, 15€/passager, 5€/pain saucisse",
+   "inscription": "",
+   "image": "https://drive.google.com/thumbnail?id=1xVGlONCxdsVo0s8_vQK8g9LirdP4bwI_&sz=w1600"
+  },
+  {
+   "id": "2026-10-11-dour-auto-retro",
    "date": "2026-10-11",
    "heure": "10:00",
    "fin": "14:00",
