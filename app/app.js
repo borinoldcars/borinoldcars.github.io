@@ -435,7 +435,13 @@
           <p>Votre carte s'ouvre avec le <strong>lien personnel</strong> que le club vous a envoyé.</p>
           <p>Ouvrez ce lien une fois sur ce téléphone : la carte y restera enregistrée, même sans connexion.</p>
           <p class="small muted">Pas reçu de lien ? Demandez-le à <a href="mailto:${mail}">${mail}</a>.</p>
-        </div>`;
+        </div>
+        <form class="card stack" id="key-form" style="margin-top:12px">
+          <p><strong>La carte ne s'affiche pas ?</strong> Copiez le lien reçu par email et collez-le ici :</p>
+          <input id="key-input" type="text" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://borinoldcars.github.io/#/carte/…" aria-label="Lien personnel de la carte">
+          <button class="btn block" type="submit">Afficher ma carte</button>
+          <p class="small" id="key-error" hidden><span class="badge ko">Lien non reconnu</span> Vérifiez que vous avez copié le lien en entier.</p>
+        </form>`;
     }
     const myCars = vehicles(data).filter((v) => v.slug === me.slug);
     if (!myCars.length) myCars.push(me);
@@ -463,6 +469,16 @@
     `;
   }
   function bindCard() {
+    const form = document.getElementById("key-form");
+    if (form) form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const m = /([0-9a-f]{20})/i.exec(document.getElementById("key-input").value || "");
+      const me = m && await memberForKey(m[1].toLowerCase());
+      if (!me) { document.getElementById("key-error").hidden = false; return; }
+      store.set("carte", m[1].toLowerCase());
+      state.me = me;
+      render();
+    });
     const forget = document.getElementById("forget");
     if (forget) forget.addEventListener("click", () => {
       store.del("carte");
