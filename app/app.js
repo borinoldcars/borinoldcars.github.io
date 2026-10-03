@@ -465,7 +465,8 @@
             <div class="mc-name">${esc(me.prenom)}<br>${esc(me.nom)}</div>
             ${roleOf(me) ? `<div class="mc-role">${esc(roleOf(me).fonction)}</div>` : ""}
             <div class="mc-car">${myCars.map((v) => esc(carName(v)) + (v.annee ? " · " + esc(v.annee) : "")).join("<br>")}</div>
-            ${sinceText(me.depuis) ? `<div class="mc-since">Membre depuis ${esc(sinceText(me.depuis))}</div>` : ""}
+            ${(cfg.fondateurs || []).includes(me.slug) ? '<div class="mc-since">Membre fondateur</div>'
+              : sinceText(me.depuis) ? `<div class="mc-since">Membre depuis ${esc(sinceText(me.depuis))}</div>` : ""}
             <span class="badge ${cot[0]}">${cot[1]}</span>
           </div>
           <a class="qr" href="members/${encodeURIComponent(me.slug)}.html" aria-label="Ouvrir ma fiche membre"><img src="qrs/${encodeURIComponent(me.slug)}.png" alt="QR code de vérification"></a>

@@ -85,3 +85,4 @@ aucune carte et ne propose pas la liste des membres.
 La carte de membre affiche « Membre depuis <mois année> ». La date vient d'une colonne de la liste des
 membres (« Membre depuis », « Date d'inscription » ou « Submitted at ») si elle existe, sinon du fichier
 `app/data/membres-depuis.json` (`"nom-prenom": "AAAA-MM-JJ"` ou `"AAAA"`).
+Les membres listés dans `config.json` → `fondateurs` affichent « Membre fondateur » à la place.
