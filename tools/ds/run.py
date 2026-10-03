@@ -61,3 +61,21 @@ if req["mode"] == "refine":
         out = im.convert("RGBA"); out.putalpha(alpha)
         out = out.crop(alpha.point(lambda v: 255 if v > 20 else 0).getbbox())
         out.save(f"{OUT}/fin-{job['id']}.png")
+
+if req["mode"] == "crop":
+    from rembg import remove, new_session
+    from PIL import ImageFilter, ImageChops
+    sam = new_session("sam"); fine = new_session(req.get("model", "isnet-general-use"))
+    for job in req["jobs"]:
+        im = thumb(job["id"], 2000)
+        m_sam = remove(im, session=sam, sam_prompt=job["prompt"], only_mask=True).convert("L")
+        m_sam = m_sam.point(lambda v: 255 if v > 127 else 0).filter(ImageFilter.MaxFilter(job.get("grow", 15))).filter(ImageFilter.GaussianBlur(2))
+        box = job["crop"]; c = im.crop(box)
+        m_c = remove(c, session=fine, only_mask=True).convert("L")
+        m_fine = Image.new("L", im.size, 0); m_fine.paste(m_c, box[:2])
+        alpha = ImageChops.multiply(m_fine, m_sam)
+        alpha = alpha.point(lambda v: 0 if v < 40 else (255 if v > 215 else v))
+        out = im.convert("RGBA"); out.putalpha(alpha)
+        out = out.crop(alpha.point(lambda v: 255 if v > 20 else 0).getbbox())
+        out.save(f"{OUT}/crop-{job['id']}.png")
+        m_fine.save(f"{OUT}/mcrop-{job['id']}.png")
