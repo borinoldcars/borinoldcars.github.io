@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Test des barres</title>
+<style>
+  :root { --bar-h: 64px; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.4 Georgia, serif; background: #e5decf; color: #2f2118; }
+  .top { background: #2f2118; color: #f1e4cc; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; font-weight: bold; z-index: 5; }
+  .bottom { background: #c0392b; color: #fff; height: calc(var(--bar-h) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 5; left: 0; right: 0; }
+  .card { margin: 12px 16px; padding: 16px; background: #f4efe5; border-radius: 12px; }
+  .choice { display: flex; gap: 8px; margin: 12px 16px; }
+  .choice a { flex: 1; text-align: center; padding: 12px 6px; border-radius: 10px; background: #f4efe5; color: #2f2118; text-decoration: none; font-weight: bold; border: 2px solid #d9bb8d; }
+  .choice a.on { background: #2f2118; color: #f1e4cc; }
+  #diag { font: 13px/1.5 Menlo, monospace; white-space: pre-wrap; }
+  .filler { height: 140px; margin: 12px 16px; border-radius: 12px; background: #d8ceb9; display: grid; place-items: center; color: #6b5a48; }
+
+  /* Variante A : comme l'application actuelle */
+  body.A { padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom)); }
+  body.A .top { position: sticky; top: 0; }
+  body.A .bottom { position: fixed; bottom: 0; }
+
+  /* Variante B : barre fixe recalée par JavaScript sur la zone réellement visible */
+  body.B { padding-bottom: calc(var(--bar-h) + env(safe-area-inset-bottom)); }
+  body.B .top { position: sticky; top: 0; }
+  body.B .bottom { position: fixed; bottom: 0; will-change: transform; }
+
+  /* Variante C : la page ne défile pas, hauteur mesurée par JavaScript */
+  html.C, body.C { height: 100%; overflow: hidden; }
+  body.C { display: flex; flex-direction: column; height: var(--app-h, 100%); }
+  body.C .top, body.C .bottom { position: relative; flex: none; }
+  body.C #scroller { flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+</style>
+</head>
+<body>
+<div class="top">Borin'Old Cars – page de test</div>
+<div id="scroller">
+  <div class="card">
+    <b>Test du bandeau du bas</b><br>
+    Choisissez une variante, puis faites défiler la page vers le bas et vers le haut.
+    Le bandeau <b>rouge</b> doit rester collé en bas de l'écran, et le bandeau brun en haut.
+  </div>
+  <div class="choice"><a href="?v=A" data-v="A">A</a><a href="?v=B" data-v="B">B</a><a href="?v=C" data-v="C">C</a></div>
+  <div class="card"><b>Mesures</b> (faites une capture d'écran après avoir fait défiler)<div id="diag"></div></div>
+  <div class="filler">1</div><div class="filler">2</div><div class="filler">3</div><div class="filler">4</div>
+  <div class="filler">5</div><div class="filler">6</div><div class="filler">7</div><div class="filler">8</div>
+  <div class="card"><a href="./#/">← Revenir à l'application</a></div>
+</div>
+<div class="bottom" id="bar">BANDEAU DU BAS</div>
+<script>
+(function () {
+  var v = (new URLSearchParams(location.search).get("v") || "A").toUpperCase();
+  if (!/^[ABC]$/.test(v)) v = "A";
+  document.body.className = v; document.documentElement.className = v;
+  document.querySelectorAll(".choice a").forEach(function (a) { a.classList.toggle("on", a.dataset.v === v); });
+  var bar = document.getElementById("bar"), vv = window.visualViewport;
+  var standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+  function appHeight() {
+    // Hauteur réellement disponible : en app installée sur iPhone, l'écran entier.
+    var h = vv ? vv.height : window.innerHeight;
+    if (standalone && /iphone|ipod/i.test(navigator.userAgent)) h = Math.max(h, screen.height);
+    return h;
+  }
+  function fixB() {
+    if (v !== "B" || !vv) return;
+    var off = vv.offsetTop + vv.height - window.innerHeight;
+    bar.style.transform = off ? "translateY(" + off + "px)" : "";
+  }
+  function fixC() { if (v === "C") document.body.style.setProperty("--app-h", appHeight() + "px"); }
+  function diag() {
+    var r = bar.getBoundingClientRect();
+    document.getElementById("diag").textContent =
+      "variante " + v + " · app installée : " + (standalone ? "oui" : "non") +
+      "\ninnerHeight " + window.innerHeight + " · clientHeight " + document.documentElement.clientHeight +
+      "\nvisualViewport " + (vv ? Math.round(vv.height) + " (offset " + Math.round(vv.offsetTop) + ")" : "—") +
+      "\nscreen " + screen.width + "×" + screen.height +
+      "\nbandeau : haut " + Math.round(r.top) + " / bas " + Math.round(r.bottom) +
+      "\nscrollY " + Math.round(window.scrollY) +
+      "\n" + (navigator.userAgent.match(/OS [\d_]+/) || [""])[0].replace(/_/g, ".");
+  }
+  function all() { fixB(); fixC(); diag(); }
+  window.addEventListener("scroll", all, { passive: true });
+  window.addEventListener("resize", all);
+  document.getElementById("scroller").addEventListener("scroll", diag, { passive: true });
+  if (vv) { vv.addEventListener("resize", all); vv.addEventListener("scroll", all); }
+  all(); setTimeout(all, 300);
+})();
+</script>
+</body>
+</html>
