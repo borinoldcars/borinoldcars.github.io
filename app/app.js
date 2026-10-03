@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 13";
+  const APP_VERSION = "3 oct. 2026 · 14";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -656,6 +656,10 @@
           appId: ONESIGNAL_APP_ID,
           serviceWorkerPath: "sw.js", // notre service worker charge celui de OneSignal
           serviceWorkerParam: { scope: "/" },
+          welcomeNotification: {
+            title: "Borin'Old Cars",
+            message: "Merci ! Vous recevrez désormais les nouvelles du club.",
+          },
         });
         push.os = OneSignal;
         OneSignal.User.PushSubscription.addEventListener("change", pushBox);
