@@ -1,29 +1,427 @@
 {
-"mode": "grid",
-"items": {
-"saussez-alfa-spider-po1": "1ffve_Xw011TeaXXDzn-omwoC0bwONxxH",
-"saussez-alfa-spider-r48": "1qKRW7Gjx4s2xM7NscgyUnEy4Slvgkl-l",
-"jeunieaux-o-passat-po0": "1cVPINJxbntYsk2nl8ZLnzw8MlDaS1KiM",
-"jeunieaux-m-golf-r11": "1JaICVaIox1ntEp1CJm2addVWWrT5niT0",
-"jeunieaux-m-golf-r5": "1uk_87ETLKw90DVcN5eYRxaie4eJVLFiZ",
-"golf-po27": "1BYPgzNG7T-JLqXf0w4OtBnvH-BvDe7kn",
-"lagniau-r5-d30": "1D2ygYqdzX63v9W-VDj3AJK5MCWkYnpg2",
-"lagniau-r5-r45": "1VcG3-NU2iAG-wPuywK9LzSB8ltaw95a4",
-"deruytter-cox-d14": "1mpLU1EcKEPtUrMvJ8zp9GxRul5OIvK7x",
-"heyckmans-2cv-r16": "1yXVmi0Fmca6k2t6FZ5fj9Zamh_9xRxYh",
-"heyckmans-2cv-r17": "15WXm3lUx4wORGClKAwvzg1jNHo9OuvSF",
-"grasso-alfa33-r43": "1cgEx74rFddHRzkteDH1PACXSrm7YaPiq",
-"grasso-alfa33-po4": "1v76e28SOcUYgkraHNTrlSMVfgJJNMiJe",
-"vansnick-cox-d29": "1ZhtDF_GCTbjFIvlHgoCxV3Td4b41_hCk",
-"urbain-fiat500-d10": "1kjC1kBy5xU7dRGAP0hzICGq2_CZmWUnz",
-"urbain-fiat500-d58": "1El4usAA3XFQk1OPmr1Rotja9dVpjxAhN",
-"glineur-306-po26": "15VNsqjDUaG5cUNoMI0L0ekgqg5kP4uQX",
-"tilkin-306-po34": "1ZlZs63QVzKufLkwtM09RdYypjWBkZVbU",
-"signore-jag-r21": "133zHDzDarT3HmgRNO7McwZINpswlbXMa",
-"grasso-bmw-d16": "15VYXw5VKgT5RQkbBsefuQFJvzO2erN_i",
-"mespouille-triumph-d22": "1XQU27qAjk5P7qF7CareddvPLhJlW8Kyg",
-"namur-porsche-d26": "1YKOBUUbkf6EAZf82bmZmD-KaJ3VzbG_x",
-"knippenberg-caterham-d7-5": "15IYavijACcC6P8qcvrVgDI4q4myEqy-c",
-"signore-traction-r14": "1VnaDzt8BgdNTDHrPAbmpmNDJKMrUMH5L"
+"mode": "crop",
+"jobs": {
+"saussez-alfa-spider-po1": {
+"id": "1ffve_Xw011TeaXXDzn-omwoC0bwONxxH",
+"box": [
+350,
+860,
+1430,
+1820
+],
+"pos": [
+[
+890,
+1340
+]
+],
+"neg": [
+[
+300,
+600
+],
+[
+1100,
+700
+]
+],
+"grow": 15
+},
+"jeunieaux-o-passat-po0": {
+"id": "1cVPINJxbntYsk2nl8ZLnzw8MlDaS1KiM",
+"box": [
+120,
+580,
+1400,
+1580
+],
+"pos": [
+[
+760,
+1080
+]
+],
+"neg": [
+[
+1300,
+900
+]
+],
+"grow": 15
+},
+"jeunieaux-m-golf-r5": {
+"id": "1uk_87ETLKw90DVcN5eYRxaie4eJVLFiZ",
+"box": [
+450,
+490,
+1500,
+1060
+],
+"pos": [
+[
+975,
+775
+]
+],
+"neg": [],
+"grow": 15
+},
+"golf-po27": {
+"id": "1BYPgzNG7T-JLqXf0w4OtBnvH-BvDe7kn",
+"box": [
+1370,
+540,
+1990,
+1000
+],
+"pos": [
+[
+1680,
+770
+]
+],
+"neg": [
+[
+1100,
+600
+],
+[
+1400,
+250
+]
+],
+"grow": 15
+},
+"lagniau-r5-d30": {
+"id": "1D2ygYqdzX63v9W-VDj3AJK5MCWkYnpg2",
+"box": [
+190,
+170,
+1660,
+1190
+],
+"pos": [
+[
+925,
+680
+]
+],
+"neg": [
+[
+100,
+500
+]
+],
+"grow": 15
+},
+"deruytter-cox-d14": {
+"id": "1mpLU1EcKEPtUrMvJ8zp9GxRul5OIvK7x",
+"box": [
+180,
+120,
+1870,
+1170
+],
+"pos": [
+[
+1025,
+645
+]
+],
+"neg": [
+[
+1700,
+300
+],
+[
+1900,
+600
+]
+],
+"grow": 15
+},
+"heyckmans-2cv-r17": {
+"id": "15WXm3lUx4wORGClKAwvzg1jNHo9OuvSF",
+"box": [
+320,
+420,
+1880,
+1250
+],
+"pos": [
+[
+1100,
+835
+]
+],
+"neg": [],
+"grow": 15
+},
+"grasso-alfa33-po4": {
+"id": "1v76e28SOcUYgkraHNTrlSMVfgJJNMiJe",
+"box": [
+60,
+770,
+1450,
+1600
+],
+"pos": [
+[
+755,
+1185
+]
+],
+"neg": [
+[
+100,
+900
+],
+[
+1450,
+1800
+]
+],
+"grow": 15
+},
+"vansnick-cox-d29": {
+"id": "1ZhtDF_GCTbjFIvlHgoCxV3Td4b41_hCk",
+"box": [
+120,
+180,
+1830,
+1420
+],
+"pos": [
+[
+975,
+800
+]
+],
+"neg": [
+[
+300,
+500
+],
+[
+1880,
+700
+]
+],
+"grow": 15
+},
+"urbain-fiat500-d10": {
+"id": "1kjC1kBy5xU7dRGAP0hzICGq2_CZmWUnz",
+"box": [
+190,
+30,
+1750,
+1390
+],
+"pos": [
+[
+970,
+710
+]
+],
+"neg": [
+[
+1600,
+400
+]
+],
+"grow": 15
+},
+"glineur-306-po26": {
+"id": "15VNsqjDUaG5cUNoMI0L0ekgqg5kP4uQX",
+"box": [
+270,
+650,
+1690,
+1380
+],
+"pos": [
+[
+980,
+1015
+]
+],
+"neg": [
+[
+1100,
+500
+]
+],
+"grow": 15
+},
+"tilkin-306-po34": {
+"id": "1ZlZs63QVzKufLkwtM09RdYypjWBkZVbU",
+"box": [
+40,
+400,
+1510,
+1170
+],
+"pos": [
+[
+775,
+785
+]
+],
+"neg": [
+[
+1300,
+550
+]
+],
+"grow": 15
+},
+"signore-jag-r21": {
+"id": "133zHDzDarT3HmgRNO7McwZINpswlbXMa",
+"box": [
+0,
+370,
+1810,
+1310
+],
+"pos": [
+[
+905,
+840
+]
+],
+"neg": [],
+"grow": 15
+},
+"grasso-bmw-d16": {
+"id": "15VYXw5VKgT5RQkbBsefuQFJvzO2erN_i",
+"box": [
+120,
+160,
+1930,
+1070
+],
+"pos": [
+[
+1025,
+615
+]
+],
+"neg": [
+[
+1500,
+300
+]
+],
+"grow": 15
+},
+"mespouille-triumph-d22": {
+"id": "1XQU27qAjk5P7qF7CareddvPLhJlW8Kyg",
+"box": [
+100,
+250,
+1880,
+1080
+],
+"pos": [
+[
+990,
+665
+]
+],
+"neg": [
+[
+400,
+300
+],
+[
+100,
+250
+]
+],
+"grow": 15
+},
+"namur-porsche-d26": {
+"id": "1YKOBUUbkf6EAZf82bmZmD-KaJ3VzbG_x",
+"box": [
+760,
+380,
+1890,
+1260
+],
+"pos": [
+[
+1325,
+820
+]
+],
+"neg": [
+[
+500,
+600
+]
+],
+"grow": 15
+},
+"knippenberg-caterham-d7-5": {
+"id": "15IYavijACcC6P8qcvrVgDI4q4myEqy-c",
+"box": [
+210,
+780,
+1460,
+1600
+],
+"pos": [
+[
+835,
+1190
+]
+],
+"neg": [
+[
+1000,
+600
+]
+],
+"grow": 15
+},
+"signore-traction-r14": {
+"id": "1VnaDzt8BgdNTDHrPAbmpmNDJKMrUMH5L",
+"box": [
+470,
+510,
+1490,
+1020
+],
+"pos": [
+[
+980,
+765
+]
+],
+"neg": [
+[
+1750,
+650
+]
+],
+"grow": 15
+},
+"saussez-alfa-spider-r48": {
+"id": "1qKRW7Gjx4s2xM7NscgyUnEy4Slvgkl-l",
+"box": [
+470,
+590,
+1240,
+1010
+],
+"pos": [
+[
+855,
+800
+]
+],
+"neg": [],
+"grow": 15
+}
 }
 }
