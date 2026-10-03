@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 20";
+  const APP_VERSION = "3 oct. 2026 · 21";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -633,11 +633,12 @@
     if (state.me === undefined) await resolveMe(); // carte enregistrée sur ce téléphone
     const html = await page(arg);
     if (id !== renderId) return;
-    const y = window.scrollY;
+    const sc = document.getElementById("scroller") || document.scrollingElement;
+    const y = sc.scrollTop;
     view.innerHTML = html;
     if (bind) bind(arg);
     document.querySelectorAll(".tabbar a").forEach((a) => a.classList.toggle("active", a.dataset.tab === tab));
-    if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    sc.scrollTop = keepScroll ? y : 0;
     if (tab === "accueil") installHint();
   }
 
