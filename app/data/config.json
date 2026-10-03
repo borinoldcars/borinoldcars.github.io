@@ -39,6 +39,19 @@
   "vanhollebeke-pierre"
  ],
  "photos_vehicules": {
-  "vanhollebeke-pierre-citroen-ds": "app/garage/ds-vanhollebeke-pierre.webp"
+  "vanhollebeke-pierre-citroen-ds": "app/garage/ds-vanhollebeke-pierre.webp",
+  "heyckmans-steven-citroen-2cv": "app/garage/heyckmans-steven-citroen-2cv.webp",
+  "lagniau-henri-renault-super-5": "app/garage/lagniau-henri-renault-super-5.webp",
+  "olivier-deruytter-volkswagen-coccinelle": "app/garage/olivier-deruytter-volkswagen-coccinelle.webp",
+  "vansnick-patricia-volkswagen-cox": "app/garage/vansnick-patricia-volkswagen-cox.webp",
+  "urbain-claude-fiat-500-gardiniera-d": "app/garage/urbain-claude-fiat-500-gardiniera-d.webp",
+  "signore-philippo-jaguar-mk-2": "app/garage/signore-philippo-jaguar-mk-2.webp",
+  "grasso-frederic-alfa-romeo-33-1-3s-boxer-4c": "app/garage/grasso-frederic-alfa-romeo-33-1-3s-boxer-4c.webp",
+  "jeunieaux-olivier-volkswagen-passat-b35i": "app/garage/jeunieaux-olivier-volkswagen-passat-b35i.webp",
+  "glineur-philippe-peugeot-306": "app/garage/glineur-philippe-peugeot-306.webp",
+  "jeunieaux-marc-volkswagen-golf": "app/garage/jeunieaux-marc-volkswagen-golf.webp",
+  "saussez-emmanuel-alfa-romeo-spider": "app/garage/saussez-emmanuel-alfa-romeo-spider.webp",
+  "tilkin-denis-peugeot-306": "app/garage/tilkin-denis-peugeot-306.webp",
+  "grasso-frederic-bmw-318is": "app/garage/grasso-frederic-bmw-318is.webp"
  }
 }
