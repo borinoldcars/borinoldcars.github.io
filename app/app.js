@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 29";
+  const APP_VERSION = "3 oct. 2026 · 30";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -69,12 +69,15 @@
 
 
   // ---------- Rendu des éléments ----------
+  // Ruban rose (Octobre rose) : sorties marquées "ruban": "rose" dans events.json.
+  const RIBBON = '<svg viewBox="0 0 40 64"><path d="M20 3C13.5 3 9 8.2 9 14.6c0 5.2 3.2 9.9 6.6 14.2L3.5 56.5l7.8 3.2L20 38.3l8.7 21.4 7.8-3.2-12.1-27.7c3.4-4.3 6.6-9 6.6-14.2C31 8.2 26.5 3 20 3zm0 6.8c2.9 0 4.8 2.2 4.8 5 0 3.1-2 6.3-4.8 9.7-2.8-3.4-4.8-6.6-4.8-9.7 0-2.8 1.9-5 4.8-5z"/></svg>';
   function eventItem(ev) {
     const d = parseDate(ev.date);
     const past = d && d < today();
     const meta = [ev.heure, ev.lieu].filter(Boolean).map(esc).join(" · ");
     const form = !past && formLink(ev);
-    return `<div class="card event-card${past ? " past" : ""}"><a class="event" href="#/agenda/${encodeURIComponent(ev.id)}">
+    const rose = ev.ruban === "rose";
+    return `<div class="card event-card${past ? " past" : ""}${rose ? " ruban-rose" : ""}">${rose ? `<span class="ribbon" aria-hidden="true">${RIBBON}</span><span class="ribbon-tag">Octobre rose</span>` : ""}<a class="event" href="#/agenda/${encodeURIComponent(ev.id)}">
       <div class="datebox">
         <div class="m">${d ? MONTHS[d.getMonth()] : ""}</div>
         <div class="d">${d ? d.getDate() : "?"}</div>
