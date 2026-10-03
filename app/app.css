@@ -212,7 +212,7 @@ dl.facts dd { margin: 0; font-weight: 500; }
 
 /* ---------- Garage ---------- */
 .car { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
-.car .ph { aspect-ratio: 4 / 3; background: var(--surface-2); display: grid; place-items: center; }
+.car .ph { position: relative; height: 0; padding-bottom: 75%; overflow: hidden; background: var(--surface-2); }
 .car .ph img { width: 100%; height: 100%; object-fit: cover; }
 .car .ph svg { width: 56%; fill: none; stroke: var(--muted); stroke-width: 1.1; opacity: .7; }
 .car .info { padding: 10px 12px 12px; }
@@ -220,12 +220,12 @@ dl.facts dd { margin: 0; font-weight: 500; }
 .car .info span { display: block; color: var(--muted); font-size: .82rem; }
 .car.comite { border-color: var(--gold); }
 .car.featured { grid-column: 1 / -1; flex-direction: row; }
-.car.featured .ph { flex: 0 0 40%; aspect-ratio: auto; min-height: 150px; }
+.car.featured .ph { flex: 0 0 40%; height: auto; padding-bottom: 0; min-height: 150px; }
 .car.featured .info { display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 14px 16px; min-width: 0; }
 .car.featured .info strong { font-size: 1.2rem; }
 .car.featured .info span { font-size: .9rem; }
 .car { text-decoration: none; color: inherit; }
-.car-hero { border-radius: var(--radius); overflow: hidden; background: var(--surface-2); aspect-ratio: 16 / 9; display: grid; place-items: center; margin-bottom: 16px; max-width: 100%; }
+.car-hero { position: relative; height: 0; padding-bottom: 56.25%; border-radius: var(--radius); overflow: hidden; background: var(--surface-2); margin-bottom: 16px; }
 .car-hero img { width: 100%; height: 100%; object-fit: cover; }
 .car-hero svg { width: 50%; fill: none; stroke: var(--muted); stroke-width: 1.1; opacity: .7; }
 .owner { color: var(--muted); margin-bottom: 16px; }
@@ -241,14 +241,14 @@ dl.facts.card { padding: 14px 16px; }
 
 /* ---------- Photos ---------- */
 .album { padding: 0; overflow: hidden; text-decoration: none; }
-.album .cover { aspect-ratio: 5 / 7; max-width: 100%; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
+.album .cover { position: relative; height: 0; padding-bottom: 140%; overflow: hidden; background: var(--surface-2); }
 .album .cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .album .cover svg { width: 40%; fill: none; stroke: var(--muted); stroke-width: 1.2; opacity: .7; }
 .album .info { padding: 10px 12px 12px; }
 .album .info strong { display: block; font-family: var(--serif); }
 .album .info span { color: var(--muted); font-size: .82rem; }
 .mosaic { display: grid; gap: 4px; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-.mosaic button { padding: 0; border: 0; background: var(--surface-2); aspect-ratio: 1; cursor: zoom-in; border-radius: 6px; overflow: hidden; }
+.mosaic button { position: relative; display: block; width: 100%; height: 0; padding: 0 0 100%; border: 0; background: var(--surface-2); cursor: zoom-in; border-radius: 6px; overflow: hidden; }
 .mosaic img { width: 100%; height: 100%; object-fit: cover; }
 .lightbox {
   position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.92);
@@ -315,3 +315,13 @@ dl.facts.card { padding: 14px 16px; }
 .app-version { text-align: center; }
 .event-photos { margin-top: 12px; }
 .drive-folder { display: block; width: 100%; height: 75vh; min-height: 420px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
+
+/* Contenu des cadres à proportions fixes : image plein cadre, pictogramme centré. */
+.car .ph > img, .car-hero > img, .album .cover > img, .mosaic button > img {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;
+}
+.album .cover > img { object-position: top; }
+.car .ph > svg, .car-hero > svg, .album .cover > svg {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+}
+.car.featured .ph > svg { position: absolute; }
