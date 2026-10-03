@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 24";
+  const APP_VERSION = "3 oct. 2026 · 25";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -633,11 +633,12 @@
     if (state.me === undefined) await resolveMe(); // carte enregistrée sur ce téléphone
     const html = await page(arg);
     if (id !== renderId) return;
-    const y = window.scrollY;
+    const sc = scroller();
+    const y = sc.scrollTop;
     view.innerHTML = html;
     if (bind) bind(arg);
     document.querySelectorAll(".tabbar a").forEach((a) => a.classList.toggle("active", a.dataset.tab === tab));
-    if (keepScroll) window.scrollTo(0, y); else window.scrollTo(0, 0);
+    sc.scrollTop = keepScroll ? y : 0;
     if (tab === "accueil") installHint();
   }
 
@@ -722,6 +723,25 @@
       pushBox();
     };
   }
+
+  // ---------- Mise en page « C » (essai) : ?layout=c l'active sur cet appareil, ?layout=a la retire ----------
+  const layoutParam = new URLSearchParams(location.search).get("layout");
+  if (layoutParam === "c") store.set("layout", "c");
+  if (layoutParam === "a") store.del("layout");
+  const layoutC = store.get("layout", "") === "c";
+  function appHeight() {
+    const ios = /iphone|ipod/i.test(navigator.userAgent);
+    if (ios && isStandalone()) return window.innerWidth > window.innerHeight ? screen.width : screen.height;
+    return window.innerHeight;
+  }
+  if (layoutC) {
+    document.documentElement.classList.add("layout-c");
+    const setH = () => document.documentElement.style.setProperty("--app-h", appHeight() + "px");
+    setH();
+    window.addEventListener("resize", setH);
+    window.addEventListener("orientationchange", () => setTimeout(setH, 300));
+  }
+  const scroller = () => (layoutC && document.getElementById("scroller")) || document.scrollingElement || document.documentElement;
 
   store.del("cart"); store.del("profil"); // anciennes données (panier, formulaires)
   window.addEventListener("hashchange", () => render());
