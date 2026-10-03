@@ -241,8 +241,8 @@ dl.facts.card { padding: 14px 16px; }
 
 /* ---------- Photos ---------- */
 .album { padding: 0; overflow: hidden; text-decoration: none; }
-.album .cover { aspect-ratio: 4 / 3; background: var(--surface-2); display: grid; place-items: center; }
-.album .cover img { width: 100%; height: 100%; object-fit: cover; }
+.album .cover { aspect-ratio: 5 / 7; max-width: 100%; background: var(--surface-2); display: grid; place-items: center; overflow: hidden; }
+.album .cover img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
 .album .cover svg { width: 40%; fill: none; stroke: var(--muted); stroke-width: 1.2; opacity: .7; }
 .album .info { padding: 10px 12px 12px; }
 .album .info strong { display: block; font-family: var(--serif); }
