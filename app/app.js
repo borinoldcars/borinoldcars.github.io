@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 16";
+  const APP_VERSION = "3 oct. 2026 · 17";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -281,9 +281,14 @@
 
   // Un véhicule par carte : data.vehicules (généré par build.py) ou, à défaut, le véhicule principal de chaque membre.
   function vehicles(data) {
-    if (Array.isArray(data.vehicules)) return data.vehicules;
-    return (data.members || []).filter((m) => m.marque || m.modele).map((m) => Object.assign({ id: m.slug }, m));
+    const list = Array.isArray(data.vehicules) ? data.vehicules
+      : (data.members || []).filter((m) => m.marque || m.modele).map((m) => Object.assign({ id: m.slug }, m));
+    // Photos ajoutées à la main (config.json → photos_vehicules) : prioritaires, jamais écrasées par la mise à jour.
+    const extra = (state.config && state.config.photos_vehicules) || {};
+    return list.map((v) => extra[v.id] ? Object.assign({}, v, { photo: extra[v.id] }) : v);
   }
+  // Photo détourée (fond transparent) : affichée en entier, sans recadrage.
+  const isCutout = (u) => /\.(png|webp)(\?|$)/i.test(u || "") && !/^https?:/i.test(u || "");
 
   async function pageGarage() {
     await load("config");
@@ -308,7 +313,7 @@
           if (featured) featuredDone = true;
           return `
           <a class="card car${r ? " comite" : ""}${featured ? " featured" : ""}" href="#/garage/${encodeURIComponent(v.id)}" data-s="${esc([carName(v), v.version, v.couleur, v.annee, v.prenom, v.nom, r ? r.fonction : ""].join(" ").toLowerCase())}" data-b="${esc((v.marque || "").trim().toLowerCase())}">
-            <div class="ph">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}" loading="lazy">` : ICON.car}</div>
+            <div class="ph${isCutout(v.photo) ? " cutout" : ""}">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}" loading="lazy">` : ICON.car}</div>
             <div class="info">
               ${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}
               <strong>${esc(carFullName(v))}</strong><span>${v.annee ? esc(v.annee) + " · " : ""}${esc(v.prenom)} ${esc(v.nom)}</span>
@@ -336,7 +341,7 @@
     const autres = vehicles(state.members).filter((x) => x.slug && x.slug === v.slug && x.id !== v.id);
     return `
       <a class="back" href="#/garage">‹ Garage</a>
-      <div class="car-hero">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}">` : ICON.car}</div>
+      <div class="car-hero${isCutout(v.photo) ? " cutout" : ""}">${v.photo ? `<img src="${esc(v.photo)}" alt="${esc(carName(v))}">` : ICON.car}</div>
       <h1>${esc(carName(v))}${v.version ? ` <span class="muted" style="font-weight:400">${esc(v.version)}</span>` : ""}</h1>
       <p class="owner">${r ? `<span class="badge role-badge">${esc(r.fonction)}</span> ` : ""}${esc(v.prenom)} ${esc(v.nom)}</p>
       ${facts.length ? `<dl class="facts card">${facts.map((f) => `<dt>${f[0]}</dt><dd>${esc(f[1])}</dd>`).join("")}</dl>` : ""}
