@@ -312,3 +312,4 @@ dl.facts.card { padding: 14px 16px; }
 @media (min-width: 700px) {
   .quick { grid-template-columns: repeat(4, 1fr); }
 }
+.app-version { text-align: center; }
