@@ -46,3 +46,18 @@ if req["mode"] == "sam":
         cut = remove(im, session=sess, sam_prompt=job["prompt"], post_process_mask=True)
         cut = cut.crop(cut.getbbox())
         cut.save(f"{OUT}/sam-{job['id']}.png")
+
+if req["mode"] == "refine":
+    from rembg import remove, new_session
+    from PIL import ImageFilter, ImageChops
+    sam = new_session("sam"); fine = new_session(req.get("model", "birefnet-general"))
+    for job in req["jobs"]:
+        im = thumb(job["id"], 2000)
+        m_sam = remove(im, session=sam, sam_prompt=job["prompt"], only_mask=True).convert("L")
+        m_sam = m_sam.point(lambda v: 255 if v > 127 else 0).filter(ImageFilter.MaxFilter(41)).filter(ImageFilter.GaussianBlur(6))
+        m_fine = remove(im, session=fine, only_mask=True).convert("L")
+        m_sam.save(f"{OUT}/msam-{job['id']}.png"); m_fine.save(f"{OUT}/mfine-{job['id']}.png")
+        alpha = ImageChops.multiply(m_fine, m_sam)
+        out = im.convert("RGBA"); out.putalpha(alpha)
+        out = out.crop(alpha.point(lambda v: 255 if v > 20 else 0).getbbox())
+        out.save(f"{OUT}/fin-{job['id']}.png")
