@@ -295,6 +295,7 @@ dl.facts.card { padding: 14px 16px; }
 .member-card .mc-label { font-size: .7rem; letter-spacing: 1.5px; text-transform: uppercase; opacity: .65; }
 .member-card .mc-name { font: 700 1.45rem/1.15 var(--serif); margin: 2px 0 10px; }
 .member-card .mc-role { color: var(--gold); font-size: .78rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin: -4px 0 8px; }
+.member-card .mc-since { font-size: .85rem; opacity: .8; margin: -4px 0 10px; }
 .member-card .mc-car { font-size: .95rem; opacity: .9; margin-bottom: 10px; }
 .member-card .qr { flex: none; background: #fff; padding: 6px; border-radius: 10px; width: 118px; }
 .member-card .qr img { width: 100%; image-rendering: pixelated; }

@@ -384,6 +384,25 @@ def clean(x):
     return re.sub(r"\s+", " ", str(x)).strip()
 
 APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Date d'entrée au club : colonne de la liste si elle existe, sinon app/data/membres-depuis.json.
+try:
+    MEMBRES_DEPUIS = json.loads((APP_DATA_DIR / "membres-depuis.json").read_text(encoding="utf-8"))
+except (OSError, ValueError):
+    MEMBRES_DEPUIS = {}
+
+def member_since(row):
+    for col in df.columns:
+        if norm(col) in ("membre depuis", "date d'inscription", "inscrit le", "submitted at"):
+            v = clean(row[col])
+            m = re.match(r"^(\d{4})-(\d{2})-(\d{2})", v) or re.match(r"^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})", v)
+            if m:
+                g = m.groups()
+                return "-".join(g) if len(g[0]) == 4 else f"{g[2]}-{int(g[1]):02d}-{int(g[0]):02d}"
+            if re.fullmatch(r"\d{4}", v):
+                return v
+    return MEMBRES_DEPUIS.get(row["slug"], "")
+
 app_members = [
     {
         "slug": row["slug"],
@@ -395,6 +414,7 @@ app_members = [
         "cotisation": cot_status(row["Cotisation"]),
         "photo": clean(row["Photo"]),
         "cle": card_lock(row["slug"]),
+        "depuis": member_since(row),
     }
     for _, row in df.iterrows()
 ]
