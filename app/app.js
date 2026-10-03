@@ -552,6 +552,26 @@
   render();
 
   if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    // Quand une nouvelle version de l'app prend la main, recharger une fois pour l'afficher.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !reloaded) { reloaded = true; location.reload(); }
+    });
+    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}));
   }
+
+  // Au retour dans l'app (téléphone déverrouillé, app réouverte), relire les données à jour.
+  let hiddenAt = 0;
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { hiddenAt = Date.now(); return; }
+    if (Date.now() - hiddenAt > 60000) {
+      ["config", "events", "members", "photos", "shop"].forEach((k) => { state[k] = null; });
+      state.me = undefined;
+      render(true);
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+        navigator.serviceWorker.getRegistration().then((r) => r && r.update()).catch(() => {});
+      }
+    }
+  });
 })();

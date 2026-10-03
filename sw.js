@@ -1,5 +1,5 @@
 /* Service worker : l'app fonctionne hors ligne (carte de membre comprise). */
-const CACHE = "boc-v7";
+const CACHE = "boc-v8";
 const SHELL = [
   "./",
   "index.html",
@@ -32,8 +32,10 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET" || new URL(req.url).origin !== location.origin) return;
+  // « no-cache » : toujours redemander au serveur s'il y a une nouvelle version
+  // (sinon le navigateur peut resservir une ancienne copie pendant ~10 min).
   e.respondWith(
-    fetch(req)
+    fetch(req, { cache: "no-cache" })
       .then((res) => {
         if (res.ok) {
           const copy = res.clone();
