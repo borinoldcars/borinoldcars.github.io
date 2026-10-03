@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 4";
+  const APP_VERSION = "3 oct. 2026 · 5";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -355,13 +355,13 @@
     }));
     return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive);
   }
-  // Couverture d'un album : « couverture », sinon la première photo, sinon l'affiche de la sortie liée.
+  // Couverture d'un album : « couverture », sinon l'affiche de la sortie liée, sinon la première photo.
   function albumCover(a) {
     if (a.couverture) return a.couverture;
-    const list = albumPhotos(a);
-    if (list[0]) return list[0].thumb;
     const ev = ((state.events && state.events.events) || []).find((e) => a.evenement === e.id || (a.date && a.date === e.date));
-    return ev && ev.image ? ev.image : "";
+    if (ev && ev.image) return ev.image;
+    const list = albumPhotos(a);
+    return list[0] ? list[0].thumb : "";
   }
   // Album lié à une sortie : même date (ou « evenement » = id de la sortie).
   function albumForEvent(ev) {
@@ -394,8 +394,9 @@
       <a class="back" href="#/photos">‹ Photos</a>
       <div class="page-head"><h1>${esc(a.titre)}${exBadge(a)}</h1><p>${a.date ? esc(longDate(a.date)) : ""}</p></div>
       ${folder ? `<p><a class="btn secondary" href="${esc(folder)}" target="_blank" rel="noopener">Ouvrir l'album dans Google Drive</a></p>` : ""}
-      ${a.dossier ? `<iframe class="drive-folder" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(a.dossier)}#grid" title="Photos : ${esc(a.titre)}" loading="lazy"></iframe>
-        <p class="small muted">Touchez une photo pour l'ouvrir en grand.</p>` : photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
+      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
+        : a.dossier ? `<iframe class="drive-folder" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(a.dossier)}#grid" title="Photos : ${esc(a.titre)}" loading="lazy"></iframe>
+        <p class="small muted">Touchez une photo pour l'ouvrir en grand.</p>`
         : '<div class="card empty">Pas encore de photos dans cet album.</div>'}
     `;
   }

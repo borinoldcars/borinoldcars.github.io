@@ -29,7 +29,9 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 **Album** (`photos.json`) : `id`, `titre`, `date` et **`dossier`** (identifiant du dossier Google Drive partagé
 « Tous les utilisateurs disposant du lien » : la page de l'album affiche tout le dossier, nouvelles photos
 comprises). À défaut : `photos` (liens d'images) ou `drive` (identifiants de photos). Couverture : `couverture`,
-sinon l'affiche de la sortie liée. Une sortie de l'agenda à la même `date` affiche le bouton
+sinon l'affiche de la sortie liée.
+La mise à jour automatique (toutes les 30 min) lit chaque `dossier` et remplit `drive` avec la liste des
+photos : l'album s'affiche alors en vignettes. Tant que la liste est vide, l'album montre le dossier Drive. Une sortie de l'agenda à la même `date` affiche le bouton
 « Voir les photos de l'événement » (ou indiquer `evenement` = id de la sortie).
 
 **Boutique** (`boutique.json`) : `commande` (lien du bon de commande Tally), `note`, et `articles` :
