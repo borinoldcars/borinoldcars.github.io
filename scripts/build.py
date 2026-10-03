@@ -41,6 +41,14 @@ try:
     PREVIOUS_LOCKS = {m["slug"]: m.get("cle", "") for m in _previous.get("members", [])}
 except (OSError, ValueError):
     PREVIOUS_LOCKS = {}
+# Empreintes pré-enregistrées pour des membres qui n'apparaissent pas encore dans la liste.
+try:
+    _pre = json.loads(Path("app/data/cartes-cles.json").read_text(encoding="utf-8"))
+    for _slug, _lock in _pre.items():
+        if not _slug.startswith("_") and not PREVIOUS_LOCKS.get(_slug):
+            PREVIOUS_LOCKS[_slug] = _lock
+except (OSError, ValueError):
+    pass
 
 def card_lock(slug):
     if CARD_SECRET:
