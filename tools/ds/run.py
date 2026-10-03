@@ -68,3 +68,16 @@ if req["mode"] == "crop":
 if req["mode"] == "big":
     for name, fid in req["items"].items():
         im = thumb(fid, 1600); im.save(f"{OUT}/big-{name}.jpg", quality=85)
+if req["mode"] == "samonly":
+    from rembg import remove, new_session
+    sam = new_session("sam")
+    for name, job in req["jobs"].items():
+        im = thumb(job["id"], 2000)
+        prompt = [{"type": "rectangle", "data": job["box"], "label": 1}]
+        prompt += [{"type": "point", "data": p, "label": 1} for p in job.get("pos", [])]
+        prompt += [{"type": "point", "data": p, "label": 0} for p in job.get("neg", [])]
+        m = remove(im, session=sam, sam_prompt=prompt, only_mask=True).convert("L")
+        m = m.point(lambda v: 255 if v > 127 else 0).filter(ImageFilter.MedianFilter(7)).filter(ImageFilter.GaussianBlur(1.2))
+        out = im.convert("RGBA"); out.putalpha(m)
+        out = out.crop(m.point(lambda v: 255 if v > 20 else 0).getbbox())
+        out.save(f"{OUT}/sam-{name}.png")

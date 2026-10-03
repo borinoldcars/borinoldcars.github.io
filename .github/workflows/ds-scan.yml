@@ -15,7 +15,7 @@ jobs:
       - run: pip install pillow requests
       - name: Install rembg (cutout only)
         run: |
-          if grep -q '"crop"' tools/ds/request.json; then pip install "rembg[cpu]"; fi
+          if grep -qE "\"(crop|samonly)\"" tools/ds/request.json; then pip install "rembg[cpu]"; fi
       - run: python tools/ds/run.py
       - name: Commit results
         run: |
