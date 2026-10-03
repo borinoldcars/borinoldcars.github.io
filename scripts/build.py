@@ -544,6 +544,47 @@ print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche 
     encoding="utf-8",
 )
 
+# ---- 6 bis) Albums photos : liste des photos de chaque dossier Google Drive ----
+# Pour chaque album de app/data/photos.json qui a un « dossier » (dossier Drive partagé
+# « Tous les utilisateurs disposant du lien »), on lit la vue publique du dossier et on
+# enregistre les identifiants des photos (« drive »), triés par nom de fichier.
+# En cas d'échec, la liste déjà enregistrée est conservée.
+import urllib.request
+
+IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif")
+
+def drive_folder_images(folder_id):
+    url = f"https://drive.google.com/embeddedfolderview?id={folder_id}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
+    html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
+    files = []
+    for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
+        fid, title = m.group(1), m.group(2).strip()
+        if title.lower().endswith(IMAGE_EXT):
+            files.append((title.lower(), fid))
+    return [fid for _, fid in sorted(files)]
+
+photos_path = APP_DATA_DIR / "photos.json"
+try:
+    photos_data = json.loads(photos_path.read_text(encoding="utf-8"))
+except (OSError, ValueError):
+    photos_data = {}
+changed = False
+for album in photos_data.get("albums", []):
+    if not album.get("dossier"):
+        continue
+    try:
+        ids = drive_folder_images(album["dossier"])
+    except Exception as e:  # réseau, page modifiée… : on garde l'existant
+        print(f"Photos : dossier de « {album.get('titre')} » illisible ({e}).")
+        continue
+    if ids and ids != album.get("drive"):
+        album["drive"] = ids
+        changed = True
+    print(f"Photos : « {album.get('titre')} » : {len(ids)} photo(s) dans le dossier.")
+if changed:
+    photos_path.write_text(json.dumps(photos_data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+
 # ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
 # Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
 # Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive)
