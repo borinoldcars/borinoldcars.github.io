@@ -3,7 +3,7 @@
 // Notifications (OneSignal) : à charger au démarrage du service worker. En cas d'échec
 // (hors ligne, bloqueur), l'app fonctionne normalement, sans notifications.
 try { importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js"); } catch (e) { /* ignoré */ }
-const CACHE = "boc-v27";
+const CACHE = "boc-v28";
 const SHELL = [
   "./",
   "index.html",
