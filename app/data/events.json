@@ -1,6 +1,18 @@
 {
  "events": [
   {
+   "id": "2026-10-11-dour-auto-rtro",
+   "date": "2026-10-11",
+   "heure": "10:00",
+   "fin": "14:00",
+   "titre": "Dour Auto Rétro",
+   "lieu": "Grand Place de Dour",
+   "description": "Statique Mensuel qui cette fois met à l'honneur Think Pink",
+   "prix": "GRATUIT",
+   "inscription": "",
+   "image": "https://drive.google.com/thumbnail?id=1QVkGqflD_6WKldn9RQBwGbcHsiGUydvb&sz=w1600"
+  },
+  {
    "id": "2026-12-18-dour-by-lights",
    "date": "2026-12-18",
    "heure": "16:30",
