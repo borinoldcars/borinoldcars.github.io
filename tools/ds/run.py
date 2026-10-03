@@ -33,6 +33,7 @@ elif req["mode"] == "cutout":
     sess = new_session(req.get("model", "isnet-general-use"))
     for fid in req["ids"]:
         im = thumb(fid, 2000)
+        im.save(f"{OUT}/big-{fid}.jpg", quality=88)
         cut = remove(im, session=sess, post_process_mask=True)
         cut = cut.crop(cut.getbbox())
         cut.save(f"{OUT}/cut-{fid}.png")
