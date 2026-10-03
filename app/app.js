@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 14";
+  const APP_VERSION = "3 oct. 2026 · 15";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -708,13 +708,27 @@
   render();
 
   if ("serviceWorker" in navigator) {
-    // Quand une nouvelle version de l'app prend la main, recharger une fois pour l'afficher.
+    // Quand une nouvelle version de l'app prend la main, recharger pour l'afficher —
+    // au plus une fois par 30 secondes, pour ne jamais boucler.
     const hadController = !!navigator.serviceWorker.controller;
-    let reloaded = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => {
-      if (hadController && !reloaded) { reloaded = true; location.reload(); }
+      if (!hadController) return;
+      let last = 0;
+      try { last = +sessionStorage.getItem("boc_sw_reload") || 0; } catch (e) { /* ignoré */ }
+      if (Date.now() - last < 30000) return;
+      try { sessionStorage.setItem("boc_sw_reload", String(Date.now())); } catch (e) { /* ignoré */ }
+      location.reload();
     });
-    window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}));
+    // OneSignal enregistre aussi sw.js (avec des paramètres dans l'adresse) : si un sw.js est
+    // déjà en place, on le met seulement à jour au lieu de le remplacer.
+    window.addEventListener("load", async () => {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        const w = reg && (reg.active || reg.waiting || reg.installing);
+        if (w && /\/sw\.js$/.test(new URL(w.scriptURL).pathname)) await reg.update();
+        else await navigator.serviceWorker.register("sw.js");
+      } catch (e) { /* hors ligne : on garde l'existant */ }
+    });
   }
 
   // Vérifie auprès du site si une version plus récente existe ; si oui, recharge l'app
