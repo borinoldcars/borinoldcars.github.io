@@ -348,3 +348,10 @@ button.product:active { transform: scale(.98); }
   position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
 }
 .car.featured .ph > svg { position: absolute; }
+
+/* Photo détourée : voiture entière sur un fond doux, alignée à gauche (photo recadrée côté arrière). */
+.car .ph.cutout, .car-hero.cutout { background: radial-gradient(120% 90% at 55% 70%, var(--surface) 0%, var(--surface-2) 75%); }
+.car .ph.cutout > img, .car-hero.cutout > img {
+  object-fit: contain; object-position: left center; box-sizing: border-box; padding: 5% 5% 5% 0;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, .25));
+}
