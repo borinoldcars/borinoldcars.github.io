@@ -1,5 +1,9 @@
 /* Service worker : l'app fonctionne hors ligne (carte de membre comprise). */
-const CACHE = "boc-v19";
+
+// Notifications (OneSignal) : à charger au démarrage du service worker. En cas d'échec
+// (hors ligne, bloqueur), l'app fonctionne normalement, sans notifications.
+try { importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js"); } catch (e) { /* ignoré */ }
+const CACHE = "boc-v20";
 const SHELL = [
   "./",
   "index.html",
