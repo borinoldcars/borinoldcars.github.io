@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 28";
+  const APP_VERSION = "3 oct. 2026 · 29";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -466,7 +466,7 @@
       <div class="page-head"><h1>Boutique du club</h1><p>${esc(shop.note || "")}</p></div>
       ${items.length ? `<div class="grid shop-grid">${items.map((a) => `
         <button type="button" class="card product" data-id="${esc(a.id)}" aria-label="Voir ${esc(a.nom)} en grand">
-          <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" width="600" height="600" decoding="async">` : ICON.shirt}</div>
+          <div class="ph">${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.nom)}" width="600" height="600">` : ICON.shirt}</div>
           <div class="info">
             <strong>${esc(a.nom)}${exBadge(a)}</strong>
             <span class="price">${fmtPrice(a.prix)}</span>
