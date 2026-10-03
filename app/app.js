@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 3";
+  const APP_VERSION = "3 oct. 2026 · 4";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -355,21 +355,30 @@
     }));
     return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive);
   }
+  // Couverture d'un album : « couverture », sinon la première photo, sinon l'affiche de la sortie liée.
+  function albumCover(a) {
+    if (a.couverture) return a.couverture;
+    const list = albumPhotos(a);
+    if (list[0]) return list[0].thumb;
+    const ev = ((state.events && state.events.events) || []).find((e) => a.evenement === e.id || (a.date && a.date === e.date));
+    return ev && ev.image ? ev.image : "";
+  }
   // Album lié à une sortie : même date (ou « evenement » = id de la sortie).
   function albumForEvent(ev) {
     return ((state.photos && state.photos.albums) || []).find((a) => a.evenement === ev.id || (a.date && a.date === ev.date));
   }
 
   async function pagePhotos() {
+    await load("events");
     const albums = ((await load("photos")).albums || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     return `
       <div class="page-head"><h1>Photos</h1><p>Les souvenirs de nos sorties.</p></div>
       ${albums.length ? `<div class="grid">${albums.map((a) => {
         const list = albumPhotos(a);
-        const cover = a.couverture || (list[0] && list[0].thumb);
+        const cover = albumCover(a);
         const n = list.length;
         return `<a class="card album" href="#/photos/${encodeURIComponent(a.id)}">
-          <div class="cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy">` : ICON.photo}</div>
+          <div class="cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy" onerror="this.remove()">` : ICON.photo}</div>
           <div class="info"><strong>${esc(a.titre)}${exBadge(a)}</strong><span>${a.date ? esc(longDate(a.date)) : ""}${n ? ` · ${n} photo${n > 1 ? "s" : ""}` : ""}</span></div>
         </a>`;
       }).join("")}</div>` : '<div class="card empty">Aucun album pour le moment.</div>'}
@@ -380,11 +389,13 @@
     const a = ((await load("photos")).albums || []).find((x) => x.id === id);
     if (!a) return `<a class="back" href="#/photos">‹ Photos</a><div class="card empty">Album introuvable.</div>`;
     const photos = albumPhotos(a);
+    const folder = a.dossier ? `https://drive.google.com/drive/folders/${encodeURIComponent(a.dossier)}` : a.lien;
     return `
       <a class="back" href="#/photos">‹ Photos</a>
       <div class="page-head"><h1>${esc(a.titre)}${exBadge(a)}</h1><p>${a.date ? esc(longDate(a.date)) : ""}</p></div>
-      ${a.lien ? `<p><a class="btn secondary" href="${esc(a.lien)}" target="_blank" rel="noopener">Ouvrir l'album dans Google Drive</a></p>` : ""}
-      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
+      ${folder ? `<p><a class="btn secondary" href="${esc(folder)}" target="_blank" rel="noopener">Ouvrir l'album dans Google Drive</a></p>` : ""}
+      ${a.dossier ? `<iframe class="drive-folder" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(a.dossier)}#grid" title="Photos : ${esc(a.titre)}" loading="lazy"></iframe>
+        <p class="small muted">Touchez une photo pour l'ouvrir en grand.</p>` : photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
         : '<div class="card empty">Pas encore de photos dans cet album.</div>'}
     `;
   }

@@ -26,9 +26,10 @@ Les entrées marquées `"exemple": true` sont des exemples à remplacer ou suppr
 **Événement** (`events.json`) : `id` (unique), `date` (`AAAA-MM-JJ`), `heure`, `fin` (`HH:MM`), `titre`, `lieu`,
 `description`, `prix`, `inscription` (lien Tally), `image` (lien).
 
-**Album** (`photos.json`) : `id`, `titre`, `date`, `lien` (dossier Google Drive ou album complet, optionnel),
-`photos` (liste de liens d'images) et/ou `drive` (liste d'identifiants de photos Google Drive partagées
-« Tous les utilisateurs disposant du lien »). Une sortie de l'agenda à la même `date` affiche le bouton
+**Album** (`photos.json`) : `id`, `titre`, `date` et **`dossier`** (identifiant du dossier Google Drive partagé
+« Tous les utilisateurs disposant du lien » : la page de l'album affiche tout le dossier, nouvelles photos
+comprises). À défaut : `photos` (liens d'images) ou `drive` (identifiants de photos). Couverture : `couverture`,
+sinon l'affiche de la sortie liée. Une sortie de l'agenda à la même `date` affiche le bouton
 « Voir les photos de l'événement » (ou indiquer `evenement` = id de la sortie).
 
 **Boutique** (`boutique.json`) : `commande` (lien du bon de commande Tally), `note`, et `articles` :
