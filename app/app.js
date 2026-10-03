@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 25";
+  const APP_VERSION = "3 oct. 2026 · 26";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -153,7 +153,7 @@
       <section class="section" id="push-box" hidden></section>
       <section class="section small muted" id="install-hint"></section>
       <section class="section small muted app-version">
-        Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button> · <a href="test-barres.html">Test d'affichage</a>
+        Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button>
       </section>
     `;
   }
@@ -724,24 +724,20 @@
     };
   }
 
-  // ---------- Mise en page « C » (essai) : ?layout=c l'active sur cet appareil, ?layout=a la retire ----------
-  const layoutParam = new URLSearchParams(location.search).get("layout");
-  if (layoutParam === "c") store.set("layout", "c");
-  if (layoutParam === "a") store.del("layout");
-  const layoutC = store.get("layout", "") === "c";
+  // ---------- Hauteur d'écran ----------
+  // La page ne défile pas : seul #scroller défile entre les deux barres. Sur iPhone (app installée),
+  // la hauteur annoncée peut rester bloquée « clavier ouvert » : on prend alors celle de l'écran.
   function appHeight() {
     const ios = /iphone|ipod/i.test(navigator.userAgent);
     if (ios && isStandalone()) return window.innerWidth > window.innerHeight ? screen.width : screen.height;
     return window.innerHeight;
   }
-  if (layoutC) {
-    document.documentElement.classList.add("layout-c");
-    const setH = () => document.documentElement.style.setProperty("--app-h", appHeight() + "px");
-    setH();
-    window.addEventListener("resize", setH);
-    window.addEventListener("orientationchange", () => setTimeout(setH, 300));
-  }
-  const scroller = () => (layoutC && document.getElementById("scroller")) || document.scrollingElement || document.documentElement;
+  const setAppHeight = () => document.documentElement.style.setProperty("--app-h", appHeight() + "px");
+  setAppHeight();
+  window.addEventListener("resize", setAppHeight);
+  window.addEventListener("orientationchange", () => setTimeout(setAppHeight, 300));
+  store.del("layout"); // ancien réglage d'essai
+  const scroller = () => document.getElementById("scroller") || document.scrollingElement || document.documentElement;
 
   store.del("cart"); store.del("profil"); // anciennes données (panier, formulaires)
   window.addEventListener("hashchange", () => render());
