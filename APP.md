@@ -7,7 +7,7 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 
 | Onglet | Contenu | Où modifier |
 |---|---|---|
-| Accueil | Prochaine sortie, raccourcis | `app/data/config.json` (nom, slogan, email, liens) |
+| Accueil | Prochaine sortie, raccourcis, boutons Facebook / Instagram / TikTok | `app/data/config.json` (nom, slogan, email, liens, `reseaux`) |
 | Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, bouton d'inscription Tally | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |

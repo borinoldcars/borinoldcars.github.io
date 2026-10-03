@@ -186,6 +186,11 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brass); out
 .quick a { display: flex; align-items: center; gap: 10px; padding: 14px; text-decoration: none; font-weight: 600; }
 .quick svg { width: 26px; height: 26px; flex: none; fill: none; stroke: var(--brass); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
 
+.social { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 10px; }
+.social a { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 6px; text-decoration: none; font-weight: 600; font-size: .9rem; }
+.social svg { width: 26px; height: 26px; fill: none; stroke: var(--brass); stroke-width: 1.7; }
+.social svg .fill { fill: var(--brass); stroke: none; }
+
 /* ---------- Agenda ---------- */
 .event-card { display: flex; flex-direction: column; gap: 12px; }
 .event { display: flex; gap: 14px; text-decoration: none; }
