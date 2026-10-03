@@ -91,3 +91,16 @@ La carte de membre affiche « Membre depuis <mois année> ». La date vient d'un
 membres (« Membre depuis », « Date d'inscription » ou « Submitted at ») si elle existe, sinon du fichier
 `app/data/membres-depuis.json` (`"nom-prenom": "AAAA-MM-JJ"` ou `"AAAA"`).
 Les membres listés dans `config.json` → `fondateurs` affichent « Membre fondateur » à la place.
+
+## Notifications (OneSignal)
+
+L'accueil affiche un encart « Notifications du club » avec le bouton « Recevoir les notifications ».
+Les messages s'envoient depuis https://dashboard.onesignal.com (compte du club, offre gratuite) :
+Messages → New Message → Push, puis titre, texte, éventuellement une image et un lien
+(par exemple `https://borinoldcars.github.io/#/agenda`).
+
+- Android / tablette : fonctionne depuis Chrome ou l'app installée.
+- iPhone : uniquement si l'app est installée sur l'écran d'accueil (iOS 16.4 ou plus récent).
+- L'identifiant de l'app OneSignal est `ONESIGNAL_APP_ID` dans `app/app.js` ; `sw.js` charge le
+  service worker de OneSignal. Dans OneSignal, Settings → Push & In-App → Web doit indiquer
+  l'adresse `https://borinoldcars.github.io` (intégration « Custom Code »).

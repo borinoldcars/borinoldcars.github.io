@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 12";
+  const APP_VERSION = "3 oct. 2026 · 13";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -62,6 +62,7 @@
     shirt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4 4 6.5 5.5 11 7 10.3V20h10v-9.7l1.5.7L20 6.5 15.5 4a3.5 3.5 0 0 1-7 0z"/></svg>',
     cal: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
     garage: '<svg viewBox="0 0 24 24"><path d="M4 15.5 5.6 10a2 2 0 0 1 1.9-1.4h9a2 2 0 0 1 1.9 1.4l1.6 5.5"/><rect x="3" y="13.5" width="18" height="4.5" rx="1.5"/><circle cx="7" cy="18.5" r="1.5"/><circle cx="17" cy="18.5" r="1.5"/></svg>',
+    bell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
     card: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M6 15h5M6 11.5h3"/><rect x="14" y="9" width="4.5" height="4.5" rx=".5"/></svg>',
   };
 
@@ -134,6 +135,7 @@
         <div class="btn-row">${cfg.liens.filter((l) => l.url).map((l) => `<a class="btn secondary" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.titre)}</a>`).join("")}</div>
       </section>` : ""}
 
+      <section class="section" id="push-box" hidden></section>
       <section class="section small muted" id="install-hint"></section>
       <section class="section small muted app-version">
         Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button>
@@ -144,16 +146,18 @@
   function bindHome() {
     const b = document.getElementById("force-update");
     if (b) b.addEventListener("click", forceUpdate);
+    pushBox();
   }
 
   // Efface la copie hors ligne de l'app et recharge la dernière version depuis le site.
-  // La carte de membre (gardée dans le stockage du navigateur) n'est pas effacée.
+  // La carte de membre (gardée dans le stockage du navigateur) n'est pas effacée, ni
+  // l'abonnement aux notifications (le service worker est mis à jour, pas supprimé).
   async function forceUpdate() {
     toast("Mise à jour…");
     try {
-      if (navigator.serviceWorker) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(regs.map((r) => r.unregister()));
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) await reg.update().catch(() => {});
       }
       if (window.caches) {
         const keys = await caches.keys();
@@ -623,16 +627,76 @@
   function installHint() {
     const el = document.getElementById("install-hint");
     if (!el) return;
-    const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
-    if (standalone) { el.innerHTML = ""; return; }
+    if (isStandalone()) { el.innerHTML = ""; return; }
     if (deferredPrompt) {
       el.innerHTML = `<button class="btn secondary block" id="install">Installer l'application sur ce téléphone</button>`;
       document.getElementById("install").onclick = async () => { deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt = null; installHint(); };
-    } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-      el.innerHTML = `<div class="card">Pour installer l'application : touchez <strong>Partager</strong> puis <strong>« Sur l'écran d'accueil »</strong>.</div>`;
+    } else if (isIOS()) {
+      el.innerHTML = `<div class="card">Pour installer l'application : touchez <strong>Partager</strong> puis <strong>« Sur l'écran d'accueil »</strong>. Une fois l'application ouverte depuis sa nouvelle icône, vous pourrez aussi recevoir les notifications du club.</div>`;
     } else {
       el.innerHTML = "";
     }
+  }
+
+  // ---------- Notifications (OneSignal) ----------
+  // Le membre s'abonne depuis l'accueil ; les messages s'envoient depuis dashboard.onesignal.com.
+  // Sur iPhone, les notifications ne fonctionnent que si l'app est installée sur l'écran d'accueil.
+  const ONESIGNAL_APP_ID = "32d3deb5-9787-4200-b63d-b4225f3f1ae8";
+  const SITE_HOST = "borinoldcars.github.io";
+  const push = { os: null, failed: false };
+  const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+
+  function initPush() {
+    if (location.hostname !== SITE_HOST || !("serviceWorker" in navigator)) return;
+    window.OneSignalDeferred = window.OneSignalDeferred || [];
+    window.OneSignalDeferred.push(async (OneSignal) => {
+      try {
+        await OneSignal.init({
+          appId: ONESIGNAL_APP_ID,
+          serviceWorkerPath: "sw.js", // notre service worker charge celui de OneSignal
+          serviceWorkerParam: { scope: "/" },
+        });
+        push.os = OneSignal;
+        OneSignal.User.PushSubscription.addEventListener("change", pushBox);
+        OneSignal.Notifications.addEventListener("permissionChange", pushBox);
+      } catch (e) {
+        push.failed = true;
+      }
+      pushBox();
+    });
+    const s = document.createElement("script");
+    s.src = "https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";
+    s.defer = true;
+    s.onerror = () => { push.failed = true; pushBox(); };
+    document.head.appendChild(s);
+  }
+
+  function pushBox() {
+    const el = document.getElementById("push-box");
+    if (!el) return;
+    const show = (html) => { el.hidden = false; el.innerHTML = html; };
+    const head = `<div class="push-head">${ICON.bell}<strong>Notifications du club</strong></div>`;
+    const os = push.os;
+    // iPhone sans installation : pas de notifications possibles ; l'encart d'installation l'explique.
+    if ((isIOS() && !isStandalone()) || !os || push.failed || !os.Notifications.isPushSupported()) { el.hidden = true; el.innerHTML = ""; return; }
+    if (typeof Notification !== "undefined" && Notification.permission === "denied") {
+      show(`<div class="card push">${head}<p>Les notifications sont bloquées sur cet appareil. Pour les activer : <strong>Réglages</strong> du téléphone → <strong>Notifications</strong> → <strong>Borin'Old Cars</strong> (ou, dans Chrome, le cadenas à côté de l'adresse → Notifications).</p></div>`);
+      return;
+    }
+    if (os.Notifications.permission && os.User.PushSubscription.optedIn) {
+      show(`<div class="card push on">${head}<p>Activées sur cet appareil : vous serez prévenu des nouvelles sorties, rappels et photos.</p><button class="linkbtn" id="push-off">Ne plus recevoir les notifications</button></div>`);
+      document.getElementById("push-off").onclick = async () => { await os.User.PushSubscription.optOut(); pushBox(); };
+      return;
+    }
+    show(`<div class="card push">${head}<p>Soyez prévenu des nouvelles sorties, des rappels et des nouvelles photos.</p><button class="btn block" id="push-on">Recevoir les notifications</button></div>`);
+    document.getElementById("push-on").onclick = async () => {
+      try {
+        if (os.Notifications.permission) await os.User.PushSubscription.optIn();
+        else await os.Notifications.requestPermission();
+      } catch (e) { /* refus ou fermeture : l'encart reste affiché */ }
+      pushBox();
+    };
   }
 
   store.del("cart"); store.del("profil"); // anciennes données (panier, formulaires)
@@ -672,6 +736,7 @@
     } catch (e) { /* hors ligne : on garde la version actuelle */ }
   }
   window.addEventListener("load", checkVersion);
+  initPush();
 
   // Au retour dans l'app (téléphone déverrouillé, app réouverte), relire les données à jour.
   let hiddenAt = 0;

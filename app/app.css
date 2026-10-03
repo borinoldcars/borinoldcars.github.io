@@ -263,6 +263,13 @@ dl.facts.card { padding: 14px 16px; }
 .lightbox .prev { left: 10px; top: 50%; transform: translateY(-50%); }
 .lightbox .next { right: 10px; top: 50%; transform: translateY(-50%); }
 
+/* ---------- Notifications ---------- */
+.push p { margin: 8px 0 12px; }
+.push.on p { margin-bottom: 6px; }
+.push-head { display: flex; align-items: center; gap: 10px; }
+.push-head svg { width: 24px; height: 24px; fill: none; stroke: var(--red); stroke-width: 1.7; stroke-linejoin: round; }
+.push-head strong { font-family: var(--serif); font-size: 1.1rem; }
+
 /* ---------- Boutique ---------- */
 .product { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
 .product .ph { display: flex; align-items: center; justify-content: center; height: 170px; padding: 10px; background: var(--surface-2); overflow: hidden; }
