@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "3 oct. 2026 · 23";
+  const APP_VERSION = "3 oct. 2026 · 24";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -153,7 +153,7 @@
       <section class="section" id="push-box" hidden></section>
       <section class="section small muted" id="install-hint"></section>
       <section class="section small muted app-version">
-        Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button>
+        Version ${APP_VERSION} · <button class="linkbtn" id="force-update">Mettre à jour l'application</button> · <a href="test-barres.html">Test d'affichage</a>
       </section>
     `;
   }
