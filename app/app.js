@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "4 oct. 2026 · 33";
+  const APP_VERSION = "4 oct. 2026 · 34";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -62,6 +62,8 @@
     shirt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4 4 6.5 5.5 11 7 10.3V20h10v-9.7l1.5.7L20 6.5 15.5 4a3.5 3.5 0 0 1-7 0z"/></svg>',
     cal: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
     garage: '<svg viewBox="0 0 24 24"><path d="M4 15.5 5.6 10a2 2 0 0 1 1.9-1.4h9a2 2 0 0 1 1.9 1.4l1.6 5.5"/><rect x="3" y="13.5" width="18" height="4.5" rx="1.5"/><circle cx="7" cy="18.5" r="1.5"/><circle cx="17" cy="18.5" r="1.5"/></svg>',
+    doc: '<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/></svg>',
+    download: '<svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>',
     bell: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>',
     card: '<svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M6 15h5M6 11.5h3"/><rect x="14" y="9" width="4.5" height="4.5" rx=".5"/></svg>',
   };
@@ -587,10 +589,42 @@
         </div>
       </div>
       <p class="small muted" style="margin-top:14px">Présentez ce QR code lors des événements : il ouvre votre fiche officielle et l'état de votre cotisation.</p>
+      ${ficheButtons(cfg, myCars)}
       <p class="small"><button class="linkbtn" id="forget">Retirer ma carte de ce téléphone</button></p>
     `;
   }
+  // Fiches véhicule (PDF sur Google Drive) : config.json → fiches_vehicules { "id-du-véhicule": "id-du-fichier-Drive" }.
+  function ficheButtons(cfg, cars) {
+    const fiches = cfg.fiches_vehicules || {};
+    const list = cars.filter((v) => v.id && fiches[v.id]);
+    if (!list.length) return "";
+    return `<section class="section fiches">
+      <h2>${list.length > 1 ? "Mes fiches véhicule" : "Ma fiche véhicule"}</h2>
+      <div class="stack">${list.map((v) => `<button type="button" class="btn secondary block fiche-btn" data-fiche="${esc(fiches[v.id])}" data-nom="${esc(carName(v))}">
+        ${ICON.doc}<span>Fiche véhicule · ${esc(carName(v))}${v.annee ? " " + esc(v.annee) : ""}</span></button>`).join("")}</div>
+    </section>`;
+  }
+  function openFiche(fileId, nom) {
+    const id = encodeURIComponent(fileId);
+    const box = document.createElement("div");
+    box.className = "pdf-view";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-label", "Fiche véhicule " + nom);
+    box.innerHTML = `
+      <div class="pdf-head"><strong>Fiche véhicule · ${esc(nom)}</strong><button class="pdf-close" aria-label="Fermer">×</button></div>
+      <iframe src="https://drive.google.com/file/d/${id}/preview" title="Fiche véhicule ${esc(nom)}" allow="autoplay"></iframe>
+      <div class="pdf-foot">
+        <a class="btn block" href="https://drive.google.com/uc?export=download&id=${id}" target="_blank" rel="noopener">${ICON.download}Télécharger le PDF</a>
+      </div>`;
+    const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
+    const onKey = (e) => { if (e.key === "Escape") close(); };
+    box.querySelector(".pdf-close").addEventListener("click", close);
+    document.addEventListener("keydown", onKey);
+    document.body.appendChild(box);
+  }
+
   function bindCard() {
+    view.querySelectorAll(".fiche-btn").forEach((b) => b.addEventListener("click", () => openFiche(b.dataset.fiche, b.dataset.nom)));
     const form = document.getElementById("key-form");
     if (form) form.addEventListener("submit", async (e) => {
       e.preventDefault();

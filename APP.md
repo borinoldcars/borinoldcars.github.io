@@ -104,3 +104,12 @@ Messages → New Message → Push, puis titre, texte, éventuellement une image 
 - L'identifiant de l'app OneSignal est `ONESIGNAL_APP_ID` dans `app/app.js` ; `sw.js` charge le
   service worker de OneSignal. Dans OneSignal, Settings → Push & In-App → Web doit indiquer
   l'adresse `https://borinoldcars.github.io` (intégration « Custom Code »).
+
+## Fiches véhicule (PDF)
+
+Sur la page « Ma carte de membre », un bouton « Fiche véhicule » par voiture du membre ouvre la fiche
+PDF (aperçu dans l'application) avec un bouton « Télécharger le PDF ». Les fiches sont dans le dossier
+Google Drive du club (partagé « Tous les utilisateurs disposant du lien »). Correspondance véhicule → fichier :
+`config.json` → `fiches_vehicules` (`"id-du-véhicule": "id-du-fichier-Drive"`). Pour une nouvelle fiche,
+ajouter le PDF dans le dossier et l'associer au véhicule. Remplacer le contenu d'un PDF existant
+(Drive : « Gérer les versions ») garde le même lien.
