@@ -65,5 +65,26 @@
   "mottry-jean-opel-rekord": "app/garage/mottry-jean-opel-rekord.webp",
   "signore-philippo-rolls-royce-silver-shadow": "app/garage/signore-philippo-rolls-royce-silver-shadow.webp",
   "grasso-hugo-fiat-127": "app/garage/grasso-hugo-fiat-127.webp"
+ },
+ "fiches_vehicules": {
+  "colmant-patrice-renault-16": "1NDbFeINIpBpKm93Feb-PSOYOJjiApOLE",
+  "glineur-philippe-peugeot-306": "1nspW2gObPztG6_lAywk8M8Rur0SWT-Kt",
+  "grasso-frederic-alfa-romeo-33-1-3s-boxer-4c": "1atrgZOmWUrWYNhLbi6MfH1e7wqehsU_p",
+  "heyckmans-steven-citroen-2cv": "1UA-690ljKCyTV6gYgz9VnhnlGSBRO5l-",
+  "jeunieaux-marc-volkswagen-golf": "1HqL4EMj3w1hR4C757oKtCcffjYc_yRKp",
+  "jeunieaux-olivier-volkswagen-passat-b35i": "17aXZN6mldMwyCTNurGbXwoWMQapVIN1u",
+  "lagniau-henri-renault-super-5": "10VOworQzpWCu-sonAwSI6iPDQNdBq6Lv",
+  "olivier-deruytter-volkswagen-coccinelle": "11rmph7nlxdxma51fUAuW4sGiMb5Ekf5_",
+  "saussez-emmanuel-alfa-romeo-giulia": "10gtT1Sc3TEV4wVMnCQv6ZQnWNzjBhHaf",
+  "saussez-emmanuel-alfa-romeo-spider": "1TmrLcv2Xzas54DSVt3CMzFT7_IszOCmO",
+  "signore-philippo-citroen-traction-avant": "1XyTeuXrDmIod9ok10nFlMTPLRUB06JU5",
+  "signore-philippo-jaguar-mk-2": "1RGowhj7XaxrxM8KYmldWbEWCd8lhrxD-",
+  "signore-philippo-rolls-royce-silver-shadow": "1ni2CW2TJS-eZMKj5QwFPh_n05E7q9Yz-",
+  "tilkin-denis-peugeot-306": "1LTSFvGbmjdhzJEwlhorSo_wLysNPmUtV",
+  "urbain-claude-fiat-500-gardiniera-d": "1Ui4oj9vUiFEjIUCFmpTZ-5I-Um9T3wtw",
+  "vanhollebeke-pierre-citroen-ami-8": "1-0urybHzH4B5tvXhX5TUyNwCgxvP0ZDL",
+  "vanhollebeke-pierre-citroen-ds": "12WWlkjz96JNXitGHB3T_mYoMNzalKIOK",
+  "vellemans-hubert-ford-mercury": "18t8pTQtUxYyxV0ywHGMS0c0lPOlZ5ieo",
+  "vellemans-hubert-volkswagen-golf-1": "1Y5xLh0FP3z7RL7Mmjhz-hcFQnWN5cULF"
  }
 }
