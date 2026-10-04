@@ -113,3 +113,12 @@ Google Drive du club (partagé « Tous les utilisateurs disposant du lien »). C
 `config.json` → `fiches_vehicules` (`"id-du-véhicule": "id-du-fichier-Drive"`). Pour une nouvelle fiche,
 ajouter le PDF dans le dossier et l'associer au véhicule. Remplacer le contenu d'un PDF existant
 (Drive : « Gérer les versions ») garde le même lien.
+
+## Site vitrine
+
+Site public de présentation du club : https://borinoldcars.github.io/site/ (dossier `site/`).
+Il lit les mêmes fichiers que l'application (`app/data/` : slogan, email, réseaux, comité, agenda,
+garage, albums, boutique) : rien à mettre à jour en double. Les boutons « Détails », les voitures et les
+albums ouvrent la page correspondante dans l'application. Sur la vitrine, les propriétaires sont affichés
+avec leur prénom et l'initiale du nom. Les textes de présentation (« Le club », « Nous rejoindre ») se
+modifient directement dans `site/index.html`.
