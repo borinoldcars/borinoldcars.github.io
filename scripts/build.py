@@ -546,56 +546,13 @@ print(f"Garage : {len(vehicules)} véhicules ({len(sheet_cars)} depuis la Fiche 
     encoding="utf-8",
 )
 
-# ---- 6 bis) Albums photos : liste des photos de chaque dossier Google Drive ----
-# Pour chaque album de app/data/photos.json qui a un « dossier » (dossier Drive partagé
-# « Tous les utilisateurs disposant du lien »), on lit la vue publique du dossier et on
-# enregistre les identifiants des photos (« drive »), triés par nom de fichier.
-# En cas d'échec, la liste déjà enregistrée est conservée.
-import urllib.request
-
-IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif")
-
-def drive_folder_images(folder_id):
-    url = f"https://drive.google.com/embeddedfolderview?id={folder_id}"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
-    html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
-    files = []
-    for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
-        fid, title = m.group(1), m.group(2).strip()
-        # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
-        if title.startswith("._"):
-            continue
-        if title.lower().endswith(IMAGE_EXT):
-            files.append((title.lower(), fid))
-    natural = lambda t: [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t[0])]
-    return [fid for _, fid in sorted(files, key=natural)]
-
-photos_path = APP_DATA_DIR / "photos.json"
-try:
-    photos_data = json.loads(photos_path.read_text(encoding="utf-8"))
-except (OSError, ValueError):
-    photos_data = {}
-changed = False
-for album in photos_data.get("albums", []):
-    if not album.get("dossier"):
-        continue
-    try:
-        ids = drive_folder_images(album["dossier"])
-    except Exception as e:  # réseau, page modifiée… : on garde l'existant
-        print(f"Photos : dossier de « {album.get('titre')} » illisible ({e}).")
-        continue
-    if ids and ids != album.get("drive"):
-        album["drive"] = ids
-        changed = True
-    print(f"Photos : « {album.get('titre')} » : {len(ids)} photo(s) dans le dossier.")
-if changed:
-    photos_path.write_text(json.dumps(photos_data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-
 # ---- 7) Agenda (optionnel) : onglet Google Sheet publié en CSV ----
 # Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
-# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive)
+# Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive),
+# Ruban (« rose »), Album (lien d'un dossier Google Drive : l'album photos de la sortie est créé)
 EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
 ev = None
+event_albums = []  # colonne « Album » : lien du dossier Google Drive des photos de la sortie
 if EVENTS_CSV_URL:
     try:
         ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
@@ -652,6 +609,9 @@ if ev is not None:
             "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
             "image": image_url(col(r, "affiche", "image", "photo")),
         })
+        m = re.search(r"/folders/([\w-]+)|[?&]id=([\w-]+)", col(r, "album", "photos", "dossier photos"))
+        if m:
+            event_albums.append({"titre": titre, "date": date, "dossier": m.group(1) or m.group(2)})
         ruban = col(r, "ruban").lower() if "ruban" in ev.columns else old_rubans.get(date, "")
         if ruban:
             events[-1]["ruban"] = ruban
@@ -661,5 +621,63 @@ if ev is not None:
         encoding="utf-8",
     )
     print(f"Agenda : {len(events)} événement(s).")
+
+# ---- 8) Albums photos : liste des photos de chaque dossier Google Drive ----
+# Pour chaque album de app/data/photos.json qui a un « dossier » (dossier Drive partagé
+# « Tous les utilisateurs disposant du lien »), on lit la vue publique du dossier et on
+# enregistre les identifiants des photos (« drive »), triés par nom de fichier.
+# En cas d'échec, la liste déjà enregistrée est conservée.
+import urllib.request
+
+IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif")
+
+def drive_folder_images(folder_id):
+    url = f"https://drive.google.com/embeddedfolderview?id={folder_id}"
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
+    html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
+    files = []
+    for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
+        fid, title = m.group(1), m.group(2).strip()
+        # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
+        if title.startswith("._"):
+            continue
+        if title.lower().endswith(IMAGE_EXT):
+            files.append((title.lower(), fid))
+    natural = lambda t: [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t[0])]
+    return [fid for _, fid in sorted(files, key=natural)]
+
+photos_path = APP_DATA_DIR / "photos.json"
+try:
+    photos_data = json.loads(photos_path.read_text(encoding="utf-8"))
+except (OSError, ValueError):
+    photos_data = {}
+changed = False
+# Albums déclarés dans l'agenda (colonne « Album ») : créés s'ils n'existent pas encore.
+albums = photos_data.setdefault("albums", [])
+for ea in event_albums:
+    if any(al.get("dossier") == ea["dossier"] for al in albums):
+        continue
+    same_date = next((al for al in albums if al.get("date") == ea["date"]), None)
+    if same_date:
+        same_date["dossier"] = ea["dossier"]
+    else:
+        albums.append({"id": slugify(f"{ea['titre']}-{ea['date']}"), "titre": ea["titre"], "date": ea["date"], "dossier": ea["dossier"], "drive": []})
+        print(f"Photos : nouvel album « {ea['titre']} » ({ea['date']}).")
+    changed = True
+albums.sort(key=lambda al: al.get("date", ""), reverse=True)
+for album in albums:
+    if not album.get("dossier"):
+        continue
+    try:
+        ids = drive_folder_images(album["dossier"])
+    except Exception as e:  # réseau, page modifiée… : on garde l'existant
+        print(f"Photos : dossier de « {album.get('titre')} » illisible ({e}).")
+        continue
+    if ids and ids != album.get("drive"):
+        album["drive"] = ids
+        changed = True
+    print(f"Photos : « {album.get('titre')} » : {len(ids)} photo(s) dans le dossier.")
+if changed:
+    photos_path.write_text(json.dumps(photos_data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 print(f"Généré {len(generated_slugs)} fiches et QR.")
