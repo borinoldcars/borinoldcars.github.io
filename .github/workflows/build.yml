@@ -31,7 +31,8 @@ jobs:
         env:
           CSV_URL: ${{ secrets.CSV_URL }}
           MEMBERS_CODE: ${{ secrets.MEMBERS_CODE }}   # ton secret code (anglais)
-          EVENTS_CSV_URL: ${{ secrets.EVENTS_CSV_URL }} # optionnel : onglet "Agenda" publié en CSV
+          # Onglet "Agenda" publié en CSV (pas secret : l'agenda est public)
+          EVENTS_CSV_URL: ${{ secrets.EVENTS_CSV_URL || 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQKbmUN2DEvgvnpDTJhRwuq2IupWY8i9-Eh5hUKQKEm89IRAQ0ZdGPqKKfsmdk7xJpS8q3ShYeBvuL9/pub?gid=1626462741&single=true&output=csv' }}
           GARAGE_CSV_URL: ${{ secrets.GARAGE_CSV_URL }} # optionnel : "Fiche Véhicule" publiée en CSV
           CARD_SECRET: ${{ secrets.CARD_SECRET }}       # clé des liens personnels des cartes de membre
           # SHEET_LINK: ${{ secrets.SHEET_LINK }}     # optionnel si tu le crées
