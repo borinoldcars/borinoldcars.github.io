@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "4 oct. 2026 · 34";
+  const APP_VERSION = "5 oct. 2026 · 35";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -544,7 +544,7 @@
     let invalid = false;
     if (key) {
       const m = await memberForKey(key);
-      if (m) { store.set("carte", key); state.me = m; } else invalid = true;
+      if (m) { store.set("carte", key); state.me = m; track(); } else invalid = true;
       history.replaceState(null, "", "#/carte"); // la clé ne reste pas dans la barre d'adresse
     }
     const me = await resolveMe();
@@ -735,6 +735,7 @@
   }
 
   function pushBox() {
+    track();
     const el = document.getElementById("push-box");
     if (!el) return;
     const show = (html) => { el.hidden = false; el.innerHTML = html; };
@@ -759,6 +760,33 @@
       } catch (e) { /* refus ou fermeture : l'encart reste affiché */ }
       pushBox();
     };
+  }
+
+  // ---------- Suivi d'utilisation ----------
+  // Le comité voit dans le Google Sheet (onglet « Utilisation ») qui a ouvert l'app, installée ou non,
+  // avec ou sans notifications. Seule la clé de carte est envoyée (le script retrouve le nom),
+  // une fois par jour, ou dès qu'un de ces états change. Config : config.json → "suivi_url".
+  async function track() {
+    try {
+      const key = store.get("carte", null);
+      const cfg = await load("config");
+      if (!key || !cfg.suivi_url || location.hostname !== SITE_HOST) return;
+      const os = push.os;
+      const info = {
+        installe: isStandalone(),
+        notif: !!(os && os.Notifications.permission && os.User.PushSubscription.optedIn),
+        appareil: /iphone|ipod/i.test(navigator.userAgent) ? "iPhone" : isIOS() ? "iPad"
+          : /android/i.test(navigator.userAgent) ? "Android" : "Ordinateur",
+      };
+      const sig = [key, new Date().toDateString(), info.installe, info.notif].join("|");
+      if (store.get("suivi", "") === sig) return;
+      await fetch(cfg.suivi_url, {
+        method: "POST", mode: "no-cors", keepalive: true,
+        headers: { "Content-Type": "text/plain" },
+        body: JSON.stringify({ cle: key, version: APP_VERSION, ...info }),
+      });
+      store.set("suivi", sig);
+    } catch (e) { /* hors ligne : on réessaiera à la prochaine ouverture */ }
   }
 
   // ---------- Hauteur d'écran ----------
@@ -828,6 +856,7 @@
   }
   window.addEventListener("load", checkVersion);
   initPush();
+  setTimeout(track, 8000); // au cas où OneSignal ne se charge pas
 
   // Au retour dans l'app (téléphone déverrouillé, app réouverte), relire les données à jour.
   let hiddenAt = 0;
