@@ -114,13 +114,16 @@ Google Drive du club (partagé « Tous les utilisateurs disposant du lien »). C
 ajouter le PDF dans le dossier et l'associer au véhicule. Remplacer le contenu d'un PDF existant
 (Drive : « Gérer les versions ») garde le même lien.
 
-## Site vitrine
+## Site vitrine (borinoldcars.be)
 
-Site public de présentation du club : https://borinoldcars.github.io/site/ (dossier `site/`).
-Il lit les mêmes fichiers que l'application (`app/data/` : slogan, email, réseaux, comité, agenda,
-garage, albums, boutique) : rien à mettre à jour en double. Le site a ses propres pages (agenda complet, fiche de
-chaque sortie, garage avec recherche, fiche de chaque voiture, albums photos) : il ne renvoie pas vers
-l'application, réservée aux membres (seul un lien « Espace membres » en pied de page y mène). Sur la vitrine, les propriétaires sont affichés
-avec leur prénom et l'initiale du nom. Le bouton « Demander à adhérer » ouvre le formulaire d'adhésion Tally
-(https://tally.so/r/OD46PM). Les textes de présentation (« Le club », « Nous rejoindre ») se
-modifient directement dans `site/index.html`.
+Le site public du club, https://borinoldcars.be, est dans un dépôt séparé : `borinoldcars/borinoldcars.be`
+(GitHub Pages, domaine géré chez Wix). L'application reste ici, sur https://borinoldcars.github.io/.
+
+La vitrine lit les fichiers de l'application à leur adresse publique
+(`https://borinoldcars.github.io/app/data/` : slogan, email, `adresse`, réseaux, comité, agenda, garage,
+albums, boutique) et les photos du garage et de la boutique : rien à mettre à jour en double. En conséquence :
+- ne pas renommer ces fichiers ni leurs champs sans adapter `site.js` dans le dépôt de la vitrine ;
+- la vitrine n'affiche que le prénom et l'initiale du nom des membres, et aucune donnée de carte de membre.
+
+Le bouton « Demander à adhérer » de la vitrine ouvre une page avec le formulaire d'adhésion Tally intégré
+(https://tally.so/r/OD46PM).
