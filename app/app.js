@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "5 oct. 2026 · 35";
+  const APP_VERSION = "5 oct. 2026 · 36";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -394,12 +394,13 @@
   }
   // Album lié à une sortie : même date (ou « evenement » = id de la sortie).
   function albumForEvent(ev) {
-    return ((state.photos && state.photos.albums) || []).find((a) => a.evenement === ev.id || (a.date && a.date === ev.date));
+    return ((state.photos && state.photos.albums) || []).find((a) => (a.evenement === ev.id || (a.date && a.date === ev.date)) && albumPhotos(a).length);
   }
 
   async function pagePhotos() {
     await load("events");
-    const albums = ((await load("photos")).albums || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+    // Un album encore vide (dossier Drive pas encore partagé ou rempli) n'est pas affiché.
+    const albums = ((await load("photos")).albums || []).filter((a) => albumPhotos(a).length).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     return `
       <div class="page-head"><h1>Photos</h1><p>Les souvenirs de nos sorties.</p></div>
       ${albums.length ? `<div class="grid">${albums.map((a) => {
