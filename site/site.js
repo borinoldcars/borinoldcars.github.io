@@ -200,7 +200,7 @@
     // Garage : les voitures du comité (à défaut, les premières en photo).
     const comite = D.cars.filter(roleOf);
     $("#cars").innerHTML = (comite.length ? comite : D.cars.filter((v) => v.photo).slice(0, 8)).map(carCard).join("")
-      + `<div class="more"><a class="btn outline" href="#voitures">Voir les ${D.cars.length} voitures</a></div>`;
+      + `<div class="more"><a class="btn outline" href="#voitures">Voir les voitures des membres</a></div>`;
 
     // Albums + quelques photos de la dernière sortie.
     $("#albums").innerHTML = D.albums.slice(0, 3).map(albumCard).join("");
