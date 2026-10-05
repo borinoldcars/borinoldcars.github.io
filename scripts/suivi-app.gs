@@ -1,9 +1,9 @@
 /**
  * Borin'Old Cars — suivi de l'application : qui l'a ouverte, installée, avec les notifications.
  *
- * À coller dans le même projet Apps Script que liens-cartes.gs (Google Sheet des membres :
- * Extensions → Apps Script → « + » → Script, nommé suivi-app). Il réutilise CARD_SECRET,
- * ONGLET_MEMBRES_GID, norm_, slugify_ et cle_ de liens-cartes.gs.
+ * À coller dans le projet Apps Script du Google Sheet des membres (Extensions → Apps Script).
+ * Le script est autonome ; il a seulement besoin de la propriété de script CARD_SECRET
+ * (Paramètres du projet → Propriétés du script), la même que le secret GitHub CARD_SECRET.
  *
  * Mise en service :
  * 1. Déployer → Nouveau déploiement → type « Application Web »
@@ -17,6 +17,7 @@
  */
 
 var ONGLET_SUIVI = "Utilisation";
+var SUIVI_GID_MEMBRES = 27480806; // onglet des membres publié en CSV (gid du lien CSV_URL)
 var ENTETES_SUIVI = ["Nom", "Prénom", "Application installée", "Notifications", "Appareil",
   "Première ouverture", "Dernière ouverture", "Jours d'utilisation", "Version"];
 
@@ -83,7 +84,7 @@ function ongletSuivi_() {
 function ligneDe_(sh, m) {
   var vals = sh.getDataRange().getValues();
   for (var i = 1; i < vals.length; i++) {
-    if (norm_(vals[i][0]) === norm_(m.nom) && norm_(vals[i][1]) === norm_(m.prenom)) return i + 1;
+    if (sNorm_(vals[i][0]) === sNorm_(m.nom) && sNorm_(vals[i][1]) === sNorm_(m.prenom)) return i + 1;
   }
   return 0;
 }
@@ -102,20 +103,36 @@ function membresParCle_() {
   var secret = PropertiesService.getScriptProperties().getProperty("CARD_SECRET");
   if (!secret) throw new Error("Ajoutez la propriété de script CARD_SECRET.");
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var src = ss.getSheets().filter(function (s) { return s.getSheetId() === ONGLET_MEMBRES_GID; })[0];
-  if (!src) throw new Error("Onglet des membres introuvable (gid " + ONGLET_MEMBRES_GID + ").");
+  var src = ss.getSheets().filter(function (s) { return s.getSheetId() === SUIVI_GID_MEMBRES; })[0];
+  if (!src) throw new Error("Onglet des membres introuvable (gid " + SUIVI_GID_MEMBRES + ").");
   var rows = src.getDataRange().getDisplayValues();
-  var h = rows.findIndex(function (r) { return r.some(function (c) { return norm_(c) === "nom"; }); });
-  var iNom = rows[h].findIndex(function (c) { return norm_(c) === "nom"; });
-  var iPrenom = rows[h].findIndex(function (c) { return norm_(c) === "prenom"; });
+  var h = rows.findIndex(function (r) { return r.some(function (c) { return sNorm_(c) === "nom"; }); });
+  var iNom = rows[h].findIndex(function (c) { return sNorm_(c) === "nom"; });
+  var iPrenom = rows[h].findIndex(function (c) { return sNorm_(c) === "prenom"; });
 
   var vus = {}, out = {};
   rows.slice(h + 1).forEach(function (r) {
-    var base = slugify_(r[iNom] + "-" + r[iPrenom]);
+    var base = sSlug_(r[iNom] + "-" + r[iPrenom]);
     vus[base] = (vus[base] || 0) + 1;
     var slug = vus[base] === 1 ? base : base + "-" + vus[base];
-    out[cle_(secret, slug)] = { nom: r[iNom].trim(), prenom: r[iPrenom].trim() };
+    out[sCle_(secret, slug)] = { nom: r[iNom].trim(), prenom: r[iPrenom].trim() };
   });
   cache.put("membres_par_cle", JSON.stringify(out), 600);
   return out;
+}
+
+// Mêmes règles que scripts/build.py (norm + slugify) et card_key().
+function sNorm_(s) {
+  return String(s).trim().toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/\u2019/g, "'").replace(/\s+/g, " ");
+}
+
+function sSlug_(s) {
+  return sNorm_(s).replace(/[^a-z0-9]+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") || "membre";
+}
+
+function sCle_(secret, slug) {
+  var sig = Utilities.computeHmacSha256Signature("carte:" + slug, secret);
+  return sig.map(function (b) { return ((b + 256) % 256).toString(16).padStart(2, "0"); }).join("").slice(0, 20);
 }
