@@ -22,7 +22,7 @@
 
 <header class="nav" id="top">
   <div class="wrap nav-in">
-    <a href="#top" class="brand">
+    <a href="#" class="brand">
       <img src="../app/icons/logo.png" alt="" width="40" height="36">
       <span>Borin'Old Cars</span>
     </a>
@@ -90,7 +90,7 @@
     <div class="wrap">
       <div class="head">
         <div><p class="kicker">Agenda</p><h2>Prochaines sorties</h2></div>
-        <a class="link" href="../#/agenda">Tout l'agenda dans l'app ›</a>
+        <a class="link" href="#sorties">Tout l'agenda ›</a>
       </div>
       <div class="events" id="events"><p class="muted">Chargement de l'agenda…</p></div>
     </div>
@@ -100,7 +100,7 @@
     <div class="wrap">
       <div class="head">
         <div><p class="kicker">Le garage</p><h2>Les voitures de nos membres</h2></div>
-        <a class="link" href="../#/garage">Voir les fiches dans l'app ›</a>
+        <a class="link" href="#voitures">Toutes les voitures ›</a>
       </div>
       <div class="cars" id="cars"></div>
     </div>
@@ -110,7 +110,7 @@
     <div class="wrap">
       <div class="head">
         <div><p class="kicker">En images</p><h2>Albums des dernières sorties</h2></div>
-        <a class="link" href="../#/photos">Tous les albums ›</a>
+        <a class="link" href="#albums">Tous les albums ›</a>
       </div>
       <div class="albums" id="albums"></div>
     </div>
@@ -144,26 +144,27 @@
         <p><a data-mail data-mail-text href="mailto:borinoldcars@gmail.com">borinoldcars@gmail.com</a></p>
         <p class="muted">Rendez-vous mensuel : Grand Place de Dour, lors de la Dour Auto Rétro.</p>
         <div class="social" id="social"></div>
-        <hr>
-        <h3>L'application du club</h3>
-        <p class="muted">Agenda, inscriptions, photos et carte de membre, sur votre téléphone.</p>
-        <a class="btn outline" href="../">Ouvrir l'application</a>
       </div>
     </div>
   </section>
 </main>
 
+<div id="page" class="page" hidden></div>
+
 <footer class="footer">
   <div class="wrap foot-in">
     <div class="brand"><img src="../app/icons/logo.png" alt="" width="40" height="36"><span>Borin'Old Cars</span></div>
     <p>© <span id="year">2026</span> Borin'Old Cars · Club de véhicules anciens du Borinage</p>
-    <a href="#top">Haut de page ↑</a>
+    <nav class="foot-links"><a href="../">Espace membres</a><a href="#top">Haut de page ↑</a></nav>
   </div>
 </footer>
 
 <div class="lightbox" id="lightbox" hidden>
   <button class="lb-close" aria-label="Fermer">×</button>
+  <button class="lb-nav lb-prev" aria-label="Photo précédente">‹</button>
   <img alt="">
+  <button class="lb-nav lb-next" aria-label="Photo suivante">›</button>
+  <span class="lb-count"></span>
 </div>
 
 <script src="site.js"></script>

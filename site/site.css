@@ -235,3 +235,64 @@ p { margin: 0 0 1em; }
   .car .info, .item .info { padding: 10px 12px 12px; font-size: .92rem; }
   .strip { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* Pages internes (agenda complet, fiches, albums) */
+.page { padding: 28px 0 72px; min-height: 70vh; }
+.back { display: inline-block; color: var(--brass); font-weight: 700; text-decoration: none; margin-bottom: 18px; }
+.back:hover { text-decoration: underline; }
+.page-head { margin-bottom: 28px; }
+.page-head h1 { font-size: clamp(1.9rem, 5vw, 2.8rem); text-wrap: balance; }
+.list-title { font-size: 1.35rem; margin: 40px 0 18px; }
+.wide { grid-column: 1 / -1; }
+.empty { padding: 24px; background: var(--surface); border-radius: var(--radius); color: var(--muted); }
+.more { grid-column: 1 / -1; text-align: center; margin-top: 12px; }
+.event h3 a { text-decoration: none; }
+.event h3 a:hover { text-decoration: underline; }
+.event .poster { display: block; }
+.event.past { opacity: .85; }
+.event.past .date { background: var(--surface-2); color: var(--muted); }
+.car-ico { width: 56px; height: 56px; fill: none; stroke: var(--muted); stroke-width: 1.4; opacity: .6; }
+
+.search input {
+  width: 100%; max-width: 520px; font: inherit; padding: .7em 1em; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--surface); color: var(--ink);
+}
+.search input:focus { outline: 2px solid var(--brass); outline-offset: 1px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 14px 0 22px; scrollbar-width: none; }
+.chip {
+  flex: none; font: inherit; font-size: .9rem; padding: .4em 1em; border-radius: 999px; cursor: pointer;
+  border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+}
+.chip.on { background: var(--btn-bg); border-color: var(--btn-bg); color: var(--btn-ink); }
+
+.detail { display: grid; gap: 28px; align-items: start; }
+@media (min-width: 860px) { .detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 48px; } }
+.detail-body { min-width: 0; }
+.detail-body h1 { font-size: clamp(1.8rem, 4.5vw, 2.6rem); text-wrap: balance; margin-top: .3em; }
+.detail-poster { padding: 0; border: 0; background: var(--surface-2); border-radius: var(--radius); overflow: hidden; cursor: zoom-in; box-shadow: var(--shadow); width: 100%; }
+.detail-poster img { width: 100%; }
+.pill { display: inline-block; font-size: .8rem; font-weight: 700; padding: .25em .8em; border-radius: 999px; background: var(--surface-2); color: var(--muted); margin-right: 6px; }
+.rose-pill { background: var(--rose); color: #fff; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; margin: 20px 0; padding: 18px 20px; background: var(--surface); border-radius: var(--radius); }
+.facts dt { color: var(--muted); font-size: .9rem; }
+.facts dd { margin: 0; font-weight: 700; min-width: 0; }
+.facts a { color: var(--brass); }
+.story { max-width: 62ch; }
+.detail .actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 8px 0 12px; }
+.version { font-style: italic; color: var(--brass); font-size: 1.15rem; margin-top: -.3em; }
+.car-hero { display: grid; place-items: center; aspect-ratio: 4 / 3; max-width: 100%; padding: 16px; border-radius: var(--radius); background: radial-gradient(ellipse at 50% 70%, var(--surface-2), var(--surface) 70%); }
+.car-hero img { max-height: 100%; object-fit: contain; filter: drop-shadow(0 14px 14px rgba(0, 0, 0, .3)); }
+.car-hero .car-ico { width: 96px; height: 96px; }
+
+.mosaic { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.mosaic button { padding: 0; border: 0; background: var(--surface-2); aspect-ratio: 1; overflow: hidden; border-radius: 6px; cursor: zoom-in; }
+.mosaic img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 560px) { .mosaic { grid-template-columns: repeat(3, 1fr); gap: 4px; } }
+
+.lb-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, .4); color: #fff; border: 0; font-size: 2.4rem; width: 48px; height: 64px; cursor: pointer; border-radius: 8px; }
+.lb-prev { left: 8px; }
+.lb-next { right: 8px; }
+.lb-count { position: absolute; bottom: 14px; left: 0; right: 0; text-align: center; color: #fff; font-size: .9rem; opacity: .8; }
+body.noscroll { overflow: hidden; }
+.foot-links { display: flex; gap: 20px; }
+.btn:focus-visible, .chip:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
