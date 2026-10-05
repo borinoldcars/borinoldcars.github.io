@@ -7,7 +7,7 @@ Sur téléphone : ouvrir le lien puis « Installer » (Android) ou Partager → 
 
 | Onglet | Contenu | Où modifier |
 |---|---|---|
-| Accueil | Prochaine sortie, raccourcis, boutons Facebook / Instagram / TikTok | `app/data/config.json` (nom, slogan, email, liens, `reseaux`) |
+| Accueil | Prochaine sortie, raccourcis, boutons Facebook / Instagram / TikTok | `app/data/config.json` (nom, slogan, email, `adresse` du club, liens, `reseaux`) |
 | Agenda | Sorties à venir / passées, ajout au calendrier, itinéraire, bouton d'inscription Tally | `app/data/events.json` **ou** onglet Google Sheet (voir plus bas) |
 | Garage | Véhicules des membres (comité en tête), recherche par marque | Automatique depuis le Google Sheet (voir « Plusieurs véhicules par membre ») ; comité dans `config.json` → `comite` ; photos ajoutées à la main (ex. voiture détourée dans `app/garage/`) dans `config.json` → `photos_vehicules` (`"id-du-véhicule": "chemin ou lien"`) |
 | Photos | Albums d'événements + visionneuse | `app/data/photos.json` |
@@ -113,3 +113,17 @@ Google Drive du club (partagé « Tous les utilisateurs disposant du lien »). C
 `config.json` → `fiches_vehicules` (`"id-du-véhicule": "id-du-fichier-Drive"`). Pour une nouvelle fiche,
 ajouter le PDF dans le dossier et l'associer au véhicule. Remplacer le contenu d'un PDF existant
 (Drive : « Gérer les versions ») garde le même lien.
+
+## Site vitrine (borinoldcars.be)
+
+Le site public du club, https://borinoldcars.be, est dans un dépôt séparé : `borinoldcars/borinoldcars.be`
+(GitHub Pages, domaine géré chez Wix). L'application reste ici, sur https://borinoldcars.github.io/.
+
+La vitrine lit les fichiers de l'application à leur adresse publique
+(`https://borinoldcars.github.io/app/data/` : slogan, email, `adresse`, réseaux, comité, agenda, garage,
+albums, boutique) et les photos du garage et de la boutique : rien à mettre à jour en double. En conséquence :
+- ne pas renommer ces fichiers ni leurs champs sans adapter `site.js` dans le dépôt de la vitrine ;
+- la vitrine n'affiche que le prénom et l'initiale du nom des membres, et aucune donnée de carte de membre.
+
+Le bouton « Demander à adhérer » de la vitrine ouvre une page avec le formulaire d'adhésion Tally intégré
+(https://tally.so/r/OD46PM).
