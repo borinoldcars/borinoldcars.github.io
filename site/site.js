@@ -57,7 +57,8 @@
     D.albums = (photos.albums || []).filter((a) => !a.exemple).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
     const extra = cfg.photos_vehicules || {};
     D.cars = (members.vehicules || []).map((v) => Object.assign({}, v, { photo: extra[v.id] || v.photo }))
-      .sort((a, b) => (b.photo ? 1 : 0) - (a.photo ? 1 : 0) || carName(a).localeCompare(carName(b), "fr"));
+      // Comité d'abord (dans l'ordre de config.json), puis les voitures en photo, puis par nom.
+      .sort((a, b) => rank(a) - rank(b) || (b.photo ? 1 : 0) - (a.photo ? 1 : 0) || carName(a).localeCompare(carName(b), "fr"));
   }
 
   const driveImg = (id, w) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
@@ -96,10 +97,19 @@
     </article>`;
   }
 
+  // Fonction au comité (config.json → comite) : rang et intitulé.
+  function roleOf(v) {
+    const list = D.cfg.comite || [];
+    const i = list.findIndex((r) => r.membre === v.slug);
+    return i < 0 ? null : { rang: i, fonction: list[i].fonction };
+  }
+  const rank = (v) => { const r = roleOf(v); return r ? r.rang : 999; };
+
   function carCard(v) {
+    const r = roleOf(v);
     return `<a class="car" href="${link("voiture", v.id)}" data-s="${esc([carName(v), v.version, v.couleur, v.annee, owner(v)].join(" ").toLowerCase())}" data-b="${esc((v.marque || "").trim().toLowerCase())}">
         <div class="ph">${v.photo ? `<img src="${esc(asset(v.photo))}" alt="${esc(carName(v))}" loading="lazy">` : CAR_ICON}</div>
-        <div class="info"><strong>${esc(carName(v))}</strong><span>${[v.annee, owner(v)].filter(Boolean).map(esc).join(" · ")}</span></div>
+        <div class="info">${r ? `<span class="role">${esc(r.fonction)}</span>` : ""}<strong>${esc(carName(v))}</strong><span>${[v.annee, owner(v)].filter(Boolean).map(esc).join(" · ")}</span></div>
       </a>`;
   }
 
@@ -187,9 +197,9 @@
       ? (upcoming.length ? "" : '<p class="muted wide">Pas de sortie annoncée pour le moment. Nos dernières sorties :</p>') + list.map((ev, i) => eventCard(ev, upcoming.length && i === 0)).join("")
       : '<p class="muted">L\'agenda sera bientôt publié.</p>';
 
-    // Garage : les voitures en photo.
-    const withPhoto = D.cars.filter((v) => v.photo);
-    $("#cars").innerHTML = withPhoto.slice(0, 8).map(carCard).join("")
+    // Garage : les voitures du comité (à défaut, les premières en photo).
+    const comite = D.cars.filter(roleOf);
+    $("#cars").innerHTML = (comite.length ? comite : D.cars.filter((v) => v.photo).slice(0, 8)).map(carCard).join("")
       + `<div class="more"><a class="btn outline" href="#voitures">Voir les ${D.cars.length} voitures</a></div>`;
 
     // Albums + quelques photos de la dernière sortie.
