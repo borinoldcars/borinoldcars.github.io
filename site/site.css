@@ -178,8 +178,12 @@ p { margin: 0 0 1em; }
 /* Agenda */
 .events { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
 .event { background: var(--bg); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; }
-.event .poster { aspect-ratio: 4 / 3; background: var(--surface-2); overflow: hidden; }
-.event .poster img { width: 100%; height: 100%; object-fit: cover; }
+/* Miniature de l'affiche à droite, comme dans l'application. */
+.event .top { display: flex; gap: 14px; align-items: flex-start; }
+.event .info { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: .4em; }
+.event .thumb { flex: none; width: 76px; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); box-shadow: 0 2px 6px rgba(0, 0, 0, .12); }
+.event .thumb img { width: 100%; height: 100%; object-fit: cover; }
+@media (min-width: 700px) { .event .thumb { width: 90px; } }
 .event .body { padding: 18px; display: flex; flex-direction: column; gap: .4em; flex: 1; }
 .event .date { display: inline-block; align-self: flex-start; background: #2f2118; color: #d9bb8d; font-weight: 700; padding: .25em .8em; border-radius: 6px; font-size: .88rem; }
 .event h3 { margin: .2em 0 0; font-size: 1.25rem; }
@@ -188,7 +192,7 @@ p { margin: 0 0 1em; }
 .event .price { font-weight: 700; color: var(--brass); font-size: .92rem; }
 .event .actions { margin-top: auto; padding-top: .8em; display: flex; gap: 8px; flex-wrap: wrap; }
 .event .actions .btn { padding: .55em 1.1em; font-size: .88rem; }
-.event .rose { position: absolute; top: 12px; right: 12px; z-index: 1; background: var(--rose); color: #fff; font-size: .78rem; font-weight: 700; padding: .25em .7em; border-radius: 999px; }
+.event .rose { align-self: flex-start; background: var(--rose); color: #fff; font-size: .78rem; font-weight: 700; padding: .25em .7em; border-radius: 999px; }
 .event.next { outline: 2px solid var(--gold); }
 
 /* Garage */
@@ -276,7 +280,6 @@ p { margin: 0 0 1em; }
 .more { grid-column: 1 / -1; text-align: center; margin-top: 12px; }
 .event h3 a { text-decoration: none; }
 .event h3 a:hover { text-decoration: underline; }
-.event .poster { display: block; }
 .event.past { opacity: .85; }
 .event.past .date { background: var(--surface-2); color: var(--muted); }
 .car-ico { width: 56px; height: 56px; fill: none; stroke: var(--muted); stroke-width: 1.4; opacity: .6; }

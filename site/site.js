@@ -81,13 +81,17 @@
     const album = past && albumOfEvent(ev);
     const hours = [ev.heure, ev.fin].filter(Boolean).join(" – ");
     return `<article class="event${isNext ? " next" : ""}${past ? " past" : ""}">
-      ${ev.ruban === "rose" ? '<span class="rose">Octobre rose</span>' : ""}
-      ${ev.image ? `<a class="poster" href="${link("sortie", ev.id)}" tabindex="-1"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}" loading="lazy" onerror="this.parentNode.remove()"></a>` : ""}
       <div class="body">
-        <span class="date">${esc(longDate(ev.date))}</span>
-        <h3><a href="${link("sortie", ev.id)}">${esc(ev.titre)}</a></h3>
-        <div class="meta">${[hours, ev.lieu].filter(Boolean).map(esc).join(" · ")}</div>
-        ${ev.prix ? `<div class="price">${esc(ev.prix)}</div>` : ""}
+        <div class="top">
+          <div class="info">
+            ${ev.ruban === "rose" ? '<span class="rose">Octobre rose</span>' : ""}
+            <span class="date">${esc(longDate(ev.date))}</span>
+            <h3><a href="${link("sortie", ev.id)}">${esc(ev.titre)}</a></h3>
+            <div class="meta">${[hours, ev.lieu].filter(Boolean).map(esc).join(" · ")}</div>
+            ${ev.prix ? `<div class="price">${esc(ev.prix)}</div>` : ""}
+          </div>
+          ${ev.image ? `<a class="thumb" href="${link("sortie", ev.id)}" tabindex="-1"><img src="${esc(ev.image)}" alt="Affiche : ${esc(ev.titre)}" loading="lazy" onerror="this.parentNode.remove()"></a>` : ""}
+        </div>
         <div class="actions">
           ${form ? `<a class="btn" href="${esc(form)}" target="_blank" rel="noopener">S'inscrire</a>` : ""}
           ${album ? `<a class="btn outline" href="${link("album", album.id)}">Voir les photos</a>` : ""}
