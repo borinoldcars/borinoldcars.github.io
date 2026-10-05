@@ -652,18 +652,28 @@ try:
 except (OSError, ValueError):
     photos_data = {}
 changed = False
-# Albums déclarés dans l'agenda (colonne « Album ») : créés s'ils n'existent pas encore.
+# Albums déclarés dans l'agenda (colonne « Album ») : créés s'ils n'existent pas encore,
+# et retirés quand leur lien (ou leur ligne) disparaît de l'agenda.
 albums = photos_data.setdefault("albums", [])
 for ea in event_albums:
-    if any(al.get("dossier") == ea["dossier"] for al in albums):
-        continue
-    same_date = next((al for al in albums if al.get("date") == ea["date"]), None)
-    if same_date:
-        same_date["dossier"] = ea["dossier"]
-    else:
-        albums.append({"id": slugify(f"{ea['titre']}-{ea['date']}"), "titre": ea["titre"], "date": ea["date"], "dossier": ea["dossier"], "drive": []})
+    album = next((al for al in albums if al.get("dossier") == ea["dossier"]), None) \
+        or next((al for al in albums if al.get("date") == ea["date"]), None)
+    if album is None:
+        album = {"id": slugify(f"{ea['titre']}-{ea['date']}"), "titre": ea["titre"], "date": ea["date"], "dossier": ea["dossier"], "drive": []}
+        albums.append(album)
         print(f"Photos : nouvel album « {ea['titre']} » ({ea['date']}).")
-    changed = True
+    if album.get("dossier") != ea["dossier"] or not album.get("agenda"):
+        album["dossier"], album["agenda"] = ea["dossier"], True
+        changed = True
+if ev is not None and "album" in ev.columns:
+    in_agenda = {ea["dossier"] for ea in event_albums}
+    kept = [al for al in albums if not al.get("agenda") or al.get("dossier") in in_agenda]
+    for al in albums:
+        if al not in kept:
+            print(f"Photos : album « {al.get('titre')} » retiré (plus dans l'agenda).")
+    if len(kept) != len(albums):
+        albums[:] = kept
+        changed = True
 albums.sort(key=lambda al: al.get("date", ""), reverse=True)
 for album in albums:
     if not album.get("dossier"):
