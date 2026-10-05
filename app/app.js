@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "5 oct. 2026 · 36";
+  const APP_VERSION = "5 oct. 2026 · 37";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -131,7 +131,8 @@
       <section class="hero">
         <h1>${esc(cfg.club || "Borin'Old Cars")}</h1>
         <p>${esc(cfg.slogan || "")}</p>
-        <svg class="deco" viewBox="0 0 120 70" aria-hidden="true"><path d="M8 48c0-6 3-9 9-10l14-3 14-14c3-3 7-4 11-4h22c5 0 9 2 12 6l10 12 9 2c4 1 6 4 6 8v5c0 2-2 4-4 4h-8"/><path d="M90 56H44"/><circle cx="22" cy="55" r="8"/><circle cx="96" cy="55" r="8"/></svg>
+        <img class="deco-logo" src="app/icons/logo.png" alt="" aria-hidden="true">
+        <span class="deco-car" aria-hidden="true"></span>
       </section>
 
       <section class="section">

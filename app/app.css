@@ -181,7 +181,16 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--brass); out
 }
 .hero h1 { font-size: 1.9rem; margin-bottom: 4px; }
 .hero p { opacity: .85; margin: 0; }
-.hero svg.deco { position: absolute; right: -24px; bottom: -18px; width: 190px; opacity: .14; fill: none; stroke: currentColor; stroke-width: 1.2; }
+.hero { padding-bottom: 44px; }
+.hero h1, .hero p { position: relative; }
+/* Logo du club en filigrane à droite, petite voiture dessinée d'un trait à gauche (couleur du texte). */
+.hero .deco-logo { position: absolute; right: -26px; bottom: -34px; width: 150px; opacity: .12; filter: grayscale(1) brightness(1.6); pointer-events: none; }
+.hero .deco-car {
+  position: absolute; left: 10px; bottom: 4px; width: 160px; height: 41px;
+  background: currentColor; opacity: .35; pointer-events: none;
+  -webkit-mask: url(icons/voiture-trait.png) center / contain no-repeat;
+          mask: url(icons/voiture-trait.png) center / contain no-repeat;
+}
 .quick { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .quick a { display: flex; align-items: center; gap: 10px; padding: 14px; text-decoration: none; font-weight: 600; }
 .quick svg { width: 26px; height: 26px; flex: none; fill: none; stroke: var(--brass); stroke-width: 1.7; stroke-linejoin: round; stroke-linecap: round; }
