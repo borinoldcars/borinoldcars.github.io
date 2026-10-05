@@ -154,6 +154,10 @@
         if (a.hasAttribute("data-mail-text")) a.textContent = cfg.email;
       });
     }
+    if (cfg.adresse) {
+      $("[data-adresse]").textContent = cfg.adresse;
+      $("[data-maps]").href = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(cfg.adresse);
+    }
     const r = cfg.reseaux || {};
     $("#social").innerHTML = SOCIAL.filter(([k]) => isUrl(r[k])).map(([k, label, icon]) =>
       `<a href="${esc(r[k])}" target="_blank" rel="noopener">${icon}<span>${label}</span></a>`).join("");
