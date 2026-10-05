@@ -120,5 +120,6 @@ Site public de présentation du club : https://borinoldcars.github.io/site/ (dos
 Il lit les mêmes fichiers que l'application (`app/data/` : slogan, email, réseaux, comité, agenda,
 garage, albums, boutique) : rien à mettre à jour en double. Les boutons « Détails », les voitures et les
 albums ouvrent la page correspondante dans l'application. Sur la vitrine, les propriétaires sont affichés
-avec leur prénom et l'initiale du nom. Les textes de présentation (« Le club », « Nous rejoindre ») se
+avec leur prénom et l'initiale du nom. Le bouton « Demander à adhérer » ouvre le formulaire d'adhésion Tally
+(https://tally.so/r/OD46PM). Les textes de présentation (« Le club », « Nous rejoindre ») se
 modifient directement dans `site/index.html`.
