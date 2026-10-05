@@ -103,8 +103,7 @@ function membresParCle_() {
   var secret = PropertiesService.getScriptProperties().getProperty("CARD_SECRET");
   if (!secret) throw new Error("Ajoutez la propriété de script CARD_SECRET.");
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var src = ss.getSheets().filter(function (s) { return s.getSheetId() === SUIVI_GID_MEMBRES; })[0];
-  if (!src) throw new Error("Onglet des membres introuvable (gid " + SUIVI_GID_MEMBRES + ").");
+  var src = ongletMembres_(ss);
   var rows = src.getDataRange().getDisplayValues();
   var h = rows.findIndex(function (r) { return r.some(function (c) { return sNorm_(c) === "nom"; }); });
   var iNom = rows[h].findIndex(function (c) { return sNorm_(c) === "nom"; });
@@ -122,6 +121,23 @@ function membresParCle_() {
 }
 
 // Mêmes règles que scripts/build.py (norm + slugify) et card_key().
+// L'onglet des membres : celui du gid publié, sinon le premier qui a les colonnes Nom, Prénom et Cotisation.
+function ongletMembres_(ss) {
+  var onglets = ss.getSheets();
+  var parGid = onglets.filter(function (s) { return s.getSheetId() === SUIVI_GID_MEMBRES; })[0];
+  if (parGid) return parGid;
+  for (var i = 0; i < onglets.length; i++) {
+    var haut = onglets[i].getRange(1, 1, Math.min(10, onglets[i].getMaxRows()), onglets[i].getMaxColumns()).getDisplayValues();
+    var ok = haut.some(function (r) {
+      var c = r.map(sNorm_);
+      return c.indexOf("nom") >= 0 && c.indexOf("prenom") >= 0 && c.indexOf("cotisation") >= 0;
+    });
+    if (ok) return onglets[i];
+  }
+  throw new Error("Onglet des membres introuvable dans « " + ss.getName() + " ». Onglets : " +
+    onglets.map(function (s) { return s.getName(); }).join(", "));
+}
+
 function sNorm_(s) {
   return String(s).trim().toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
