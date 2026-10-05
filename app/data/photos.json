@@ -206,7 +206,8 @@
     "1TZZGFbzvQnsvCEMZBPiNCumNowNdAt-O",
     "1uWjv4FNutk17SJi-dLvt1oghmANGbIBO",
     "1_OOI-A0RPu6D5IdvzCx9bA74p6pNbnYz"
-   ]
+   ],
+   "agenda": true
   },
   {
    "id": "portes-ouvertes-pompiers-dour-2026",
@@ -254,7 +255,8 @@
     "1Q0czbtTlA_UHpfCNi2Sh1XkgGbhhxxxK",
     "18ar8FB6n7PKR25oByikVHKHBOsuFfDo1",
     "1y0j9NAn_4Z8tDm_i4SNpoLJx2AN4-dWC"
-   ]
+   ],
+   "agenda": true
   },
   {
    "id": "dour-auto-retro-2026-08",
@@ -324,7 +326,8 @@
     "16U1kERgFttmd4Bz1T_1QJiU7hstAB2jq",
     "1El4usAA3XFQk1OPmr1Rotja9dVpjxAhN",
     "1MHdq7ZBG9-3x7W98vfGtj9n1yem10RbD"
-   ]
+   ],
+   "agenda": true
   },
   {
    "id": "dour-auto-retro-2026-07",
@@ -348,7 +351,8 @@
     "1kCaMcrv9Nm3hD8PlxX1eEomNIsDRUWFI",
     "1etdrxZB_Bx-eSBiM1dGFKdSSL5AqzxMR",
     "1ddWaPn2Ssom-WmGBcDc7qhcmI3lEexIQ"
-   ]
+   ],
+   "agenda": true
   },
   {
    "id": "jurbise-classic-tour-2026",
@@ -570,7 +574,143 @@
     "1FgFJLw_TKhdbKJqTOTXgU76nW8Hy0HWq",
     "1tdXLj5H55AXf3KTdRAzG8S4ARFFzFVWS",
     "1EqbDPV9x8nYEdNj5SllrgIr4OTC0VUNP"
-   ]
+   ],
+   "agenda": true
+  },
+  {
+   "id": "dour-auto-retro-2026-06-14",
+   "titre": "Dour Auto Retro",
+   "date": "2026-06-14",
+   "dossier": "1t_NKjTHsVT1HsIwRxovfwVHREBtVOoZt",
+   "drive": [
+    "13gldYJlfoERMJbneCd43-w10kIF-rUoW",
+    "1wQcA6BrwWRUBHFxd-ekOoDY5yEzgIQsU",
+    "1rZYW6oM8C1XY2u2GXz9ek2uwa4oInZR3",
+    "1IozDJpwoA7IF4DwtI4otNjMqeHL1nVre",
+    "1bR40EkXbigxHC2F7u249Sy8Br8C2Pw_v",
+    "1DP0W9Izsa_uU16Ob9E4PAnMyHD4kLbBW",
+    "1SFf8ZDcwPSD9i7UnsZj39jK7aiH_wIIh",
+    "1WYSjV4drbbM-EFu8POyEfGAGq_kA0rEv",
+    "1-tB1-jtsNdNnrmvtRpRCiXXHHNdwxGti",
+    "1mU0DYP1OlJlHaeKPSFGno6GQbRYlQvdw",
+    "1Jw7O_0y97ZZBbEqfdpTmJo4md1Cdyxc3",
+    "1sWOh5vEDrTnF4LdTTeoJIrJXpvezTStp",
+    "1qc2aInmDhW49vqzpHnnvUt0SDPNpiORQ",
+    "1x61Aqozv3IKhczvNSPBGf44k2g5Nnlcl",
+    "1OFpvP3On_caS2DDnLd_pj4EvE5TAMh0I",
+    "1RjW6XbKBPMfJMgvWjLK0UZI6mYAPL5dy",
+    "12aoqtKdBmu03ftXhYyGCuh2zPWk2Y9X_",
+    "1g10hmgBIh3XA-T4QPDoukfnWf44js2fk",
+    "1rkRnDam6be8MvaspdDfUNm6MHR_SGEY_",
+    "105nd37LAojOiVCvzOylXWZFw8W-4Msgs",
+    "1ZXblQNZX5-xjUv1IKqGHOynTnLXYxxKb",
+    "1ISWOonfs2wFBMiwjDh_DB_97kopeVEOY",
+    "1104uHV52uVXymYRGSj2DViQYRL1LkZ3p",
+    "1sN7mjh32e65l69K5jPasiEsxQTcHZ-GQ",
+    "1nFDGQmtij6lavgjOkES6aPcRPrFufuPq",
+    "1jqqGR6qqvWwQ1ohuxMFIE1ZmPysQSelg",
+    "1Y4g7QbX9Cfm5zPeEYRxmNQiPlctNsAag",
+    "1JK86PsKzFzEnfGBEF4cw4CK8efoUpXJC",
+    "1WJBhiExpgj8zwaJDnNnMydL2Br2O7v6z",
+    "1hRfLolploZcY9xgUDB65pVKxARI9RWse"
+   ],
+   "agenda": true
+  },
+  {
+   "id": "dour-auto-retro-2026-05-10",
+   "titre": "Dour Auto Retro",
+   "date": "2026-05-10",
+   "dossier": "1MlqMWdpz3_r4K5p9kwsZgVM-bPNSkhOl",
+   "drive": [
+    "1NY7ttKKth2nRC6g4Ly-tjtHMTU8dc5Eo",
+    "1YsK9WZjUQO7XbOSUe_vYjNtb2x9qeM-C",
+    "1RXrI78pZs3zFo9Z_gokgf0kq3Z0AtCNQ",
+    "11zMtOJKjtg36-X_91F5VSb_4mQkGxfmc",
+    "17u4ZiGg196dHv1-h8Sdh5FG_KaxL0iEw",
+    "1VucEhb7GqonEgLxIEnMdgMZHo6huSMYw",
+    "1w6YBxEXxcfhNk6kK8FT7qmJr7-5tNhAp",
+    "1dGnF-KsRXkPDpUleykkWXVhkbbcorDvv",
+    "1EjzK9RrpSD4emwoBx0szSka65jseqi1l",
+    "12LJTv20HmS2zQT88YzyK2N0vRxM_VYx0",
+    "1KaXR_G4vC7Rfd5xpUXnpxMKCnUlfq3O-",
+    "12EwArVzmcQ_rCfi8c_1iuasklCWZ1njL",
+    "13u44b3HHT9dkF-5cKQ6sq-QmYgtqfOWR",
+    "1rIfFw7Dlv_V-5fwb9idS1w9RyqdQdiFP",
+    "11QRF18g-mHxH6BR9CfKnZhvztNZVlNsW",
+    "11YKSgaTlV_dNr3fM8ThtUSTZKY-XnTof",
+    "1FHciDiKP-rzRF4wQWs_9zDKt9YEassGe",
+    "1wFGLR1ewaavT-I9PyTMssUBhgKQvSBt9",
+    "16Pd1_iqP4CmJwVYiDuNdS5GpiXPDSrf8",
+    "1tjvUxpO68Kh4XYUrZDy18SqRhPKbvBH2",
+    "1lR9JrY18-iNaQuW3xIiZNrFZJsGmgqi_",
+    "1kWGPKHsBCFcljaaObVzhGDdAzawYE0Ba",
+    "1wr4NhYrO1Bk2vBMxEjBUEm1wgtFqHZRO",
+    "1DVZZvjh9oWiqSOFvHR8FYNVraMH1MDXE",
+    "1jaU-sN_d4fbp2F74hJJn16mPkyy-nbUp",
+    "10l_tf6DxC1YkanX3-4_qEGBwO9HWzi-Q",
+    "1rLJuKKVJmilWFtLrd1dmcOJQg1NXOHsq",
+    "1qKCs6StQxZD0-4X1ubKrQnYo4fPxonI9",
+    "16vhKvTenhDOUuiKAU9ojGmcw6VuCvxLe",
+    "1XOrY6eUTj6intnPT1MVnOIo5eTWx0vns",
+    "1s4Fd0qnfw9cwSKGurFHKPuxbXu7omiH-",
+    "1m662Lz7JXUjol0ZgMfLCYzsvKDF6Ed_E",
+    "1Yb-uHlXSHwNcffOPBWuw-9B-qZgxSlWG",
+    "1yMfU22l5dZUzaN1WrFUY3l8SNr0lJiDo",
+    "14foqXxoGpIKFon6U95jirKpVHYC2KU69",
+    "1zL9JegJ16pjEUDy1-y9vYO7eCD59yi22",
+    "1X3ri3mvjiXAveqUoJ-B4lwdT3DSLPcST",
+    "1LZMuIdpAGUJ9hUI9D66vl8aIVKJWSX5s"
+   ],
+   "agenda": true
+  },
+  {
+   "id": "dour-auto-retro-2026-04-12",
+   "titre": "Dour Auto Retro",
+   "date": "2026-04-12",
+   "dossier": "1P0BWZPZ-VnEUBSA-PsjdgmbI_nNQe7lF",
+   "drive": [
+    "1jBYc8OdmlkIFf_s1H9aluH2lxdXjJ8YA",
+    "1wIq5LI52rdlYFg0BZ0ngZnK1o6BrIXN7",
+    "1BrfM7arSgBcEdYVlcTtwlaxJvRFfsdcM",
+    "1wu2twBFfD6hiQsn_DQY24GCsgIhyvcad",
+    "18BkmI3WC4afIK0kgHcth6gqarPoi6v7A",
+    "1UGn73Hg8VzJB3g7bd8TQC9cZBOQWVc8E",
+    "1SEQn5fXxiDL-7V08skIuDrqT_d9MuerS",
+    "1d6tgGgKQwbb02NPvuvg-wG_SAYOjMmjD",
+    "1P5HNrTHhB-wHgk4ybllbL88ZZ1WOeGn7",
+    "1la5CZU8BcC8ITTyP4UsGhuZs4Lgsafln",
+    "1drEW9zu5yQPFSGHGu95niMXo7at3GXTx",
+    "1JxBs-4QFMAvju1G1OxLKdNncmNaWmQcd",
+    "1-ITkEGhcxdkehCcrEE7X-KI9J8IyTSAQ",
+    "1ntu41tGMFMnLvIvzwgR_Z8LsskKbfLZl",
+    "1M8psYx2-LaVBWYO_SZcyj2nC89U32zYx",
+    "1VQqWrMF7yJYgLeB6zrYi5QAl4y1KwBZl",
+    "1miqWaWHXxwD5ha6tgfRENr5-v7R50714",
+    "1Xuu-nU5K6atyVb69dAMOzhnX_5ibh7wd",
+    "1e4ELRQ9hPYv0gybfQ6STb6UHYyOWAk3k",
+    "1LLLNg0H0-Tq67wcYIy64LajXwIVHKtJ1",
+    "1nGvPnlVqqaJZCj7apNB3K460bcXNmAA3",
+    "1NO-tXFyIO7jhzywRItD6swNLU44ZtOM5",
+    "1UifF6nDa05-ggZEmNY94inzPw36Dntmy",
+    "1ytOPsvZRCZqZq00PrabBCjHbQ1mawhVH",
+    "1SWrlKDR8QWAnU0G2d1s2efTmPqIIS0V9",
+    "1XAo2-DrxFkKmCf_CJ925PO_XRA6Njda7",
+    "1hPgDsjUXG6z8oVOniCNXWUySt1kJGuiE",
+    "12BCqT4HnNZwv8ZGOvGVffmzQxO4-zil0",
+    "1cEZY6vXKiJTRyjAO216AQ4auDy9KLzW2",
+    "1aaRxYJ1LG6aWemWOFR_dQArbtMoqFdH3",
+    "1yqg4jyXLEUFHjaxMM-1ZT0pg4VNJ-tbj",
+    "17QItJi57WFrRKWpitWF8HIQb79ePZg7g",
+    "1YTLDJWy8q0v-fsBm-8c1Bw_F36tY6X5I",
+    "1QKKvsesOGnbt-8NbVdFhsjNYysh1IMZQ",
+    "1NRkJ9ZaSYBu8LEj0ScUqVSyNmUZ5LMoN",
+    "1nGks5yYb-2jYhv0f1NVb2dmGj-wAcUlh",
+    "1_bNxaMwOGdZQM3nNJUSahXZulTsItXFK",
+    "119RVWhw5ArP60EwRJTsOyoEP-4Lglnj4",
+    "1EPvHS0CFBAwdrInXh-gNH7vrEHYMFHT4",
+    "1KE040co6P0_85N0O-qIfF7omWqkSvOfO"
+   ],
+   "agenda": true
   }
  ]
 }
