@@ -484,7 +484,9 @@ if GARAGE_CSV_URL:
             continue
         owner = by_name.get(slugify(f"{nom}-{prenom}"))
         if not owner:
+            # Plus dans la liste des membres : sa fiche ne s'affiche pas au garage.
             unmatched.append(f"{prenom} {nom}")
+            continue
         photo = get("photo", "photo du vehicule", "untitled file upload field")
         photo = photo.split(",")[0].strip() if photo.startswith("http") else ""
         lien = get("facebook / instagram / ... du vehicule", "lien")
@@ -512,7 +514,7 @@ if GARAGE_CSV_URL:
         }
         sheet_cars[(car["slug"] or car["id"], car_key(marque, modele))] = car
     if unmatched:
-        print("Garage : propriétaires introuvables dans la liste des membres :", ", ".join(sorted(set(unmatched))))
+        print("Garage : fiches ignorées (propriétaire absent de la liste des membres) :", ", ".join(sorted(set(unmatched))))
 
 def same_car(main, fiche):
     """Le véhicule de la liste des membres est-il déjà décrit par une fiche ?"""
