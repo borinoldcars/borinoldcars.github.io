@@ -163,8 +163,11 @@
     $("#comite").innerHTML = (cfg.comite || []).map((c) => {
       const m = bySlug.get(c.membre);
       if (!m) return "";
-      const car = D.cars.find((v) => v.slug === c.membre) || m;
-      return `<div class="member"><strong>${esc(m.prenom)} ${esc(m.nom)}</strong><span>${esc(c.fonction)}</span>${car.marque ? `<em>${esc(carName(car))}</em>` : ""}</div>`;
+      // Toutes ses voitures, chacune vers sa fiche.
+      const cars = D.cars.filter((v) => v.slug === c.membre).sort((x, y) => carName(x).localeCompare(carName(y), "fr"));
+      const list = cars.length ? cars.map((v) => `<li><a href="${link("voiture", v.id)}">${esc(carName(v))}</a></li>`).join("")
+        : m.marque ? `<li>${esc(carName(m))}</li>` : "";
+      return `<div class="member"><strong>${esc(m.prenom)} ${esc(m.nom)}</strong><span>${esc(c.fonction)}</span>${list ? `<ul class="member-cars">${list}</ul>` : ""}</div>`;
     }).join("");
 
     // Chiffres
