@@ -296,6 +296,4 @@ p { margin: 0 0 1em; }
 body.noscroll { overflow: hidden; }
 .foot-links { display: flex; gap: 20px; }
 .btn:focus-visible, .chip:focus-visible, a:focus-visible, button:focus-visible { outline: 2px solid var(--brass); outline-offset: 2px; }
-.address { font-style: normal; display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; margin-bottom: 1.2em; }
-.address span { font-weight: 700; }
-.address a { color: var(--brass); }
+.address { font-style: normal; font-weight: 700; margin-bottom: 1.2em; }
