@@ -595,9 +595,19 @@ if changed:
 # Colonnes reconnues : Date (JJ/MM/AAAA), Heure, Fin, Titre, Lieu, Description,
 # Prix, Inscription (lien vers un formulaire Tally / Google Forms), Affiche (lien d'image ou Google Drive)
 EVENTS_CSV_URL = os.environ.get("EVENTS_CSV_URL", "").strip()
+ev = None
 if EVENTS_CSV_URL:
-    ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
-    ev.columns = [norm(c) for c in ev.columns]
+    try:
+        ev = pd.read_csv(EVENTS_CSV_URL, dtype=str).fillna("")
+        ev.columns = [norm(c) for c in ev.columns]
+    except Exception as e:  # Sheet injoignable : on garde l'agenda déjà publié
+        print("Agenda : lecture impossible, agenda inchangé :", e)
+if ev is not None:
+    # Sans colonne « Ruban » dans le Sheet, on garde les rubans déjà publiés (par date).
+    try:
+        old_rubans = {e["date"]: e["ruban"] for e in json.loads((APP_DATA_DIR / "events.json").read_text(encoding="utf-8"))["events"] if e.get("ruban")}
+    except (OSError, ValueError, KeyError):
+        old_rubans = {}
 
     def col(r, *names):
         for n in names:
@@ -637,11 +647,14 @@ if EVENTS_CSV_URL:
             "fin": hhmm(col(r, "fin")),
             "titre": titre,
             "lieu": col(r, "lieu", "adresse"),
-            "description": col(r, "description"),
+            "description": col(r, "description").rstrip(" ,;"),
             "prix": col(r, "prix", "tarif"),
             "inscription": next((u for u in [col(r, "inscription", "formulaire", "lien")] if u.startswith("http")), ""),
             "image": image_url(col(r, "affiche", "image", "photo")),
         })
+        ruban = col(r, "ruban").lower() if "ruban" in ev.columns else old_rubans.get(date, "")
+        if ruban:
+            events[-1]["ruban"] = ruban
     events.sort(key=lambda e: e["date"])
     (APP_DATA_DIR / "events.json").write_text(
         json.dumps({"events": events}, ensure_ascii=False, indent=1),
