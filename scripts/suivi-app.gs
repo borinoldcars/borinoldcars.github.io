@@ -65,6 +65,24 @@ function preparerSuivi() {
   sh.autoResizeColumns(1, ENTETES_SUIVI.length);
 }
 
+// Crée (ou met à jour) l'onglet « Liens cartes » : Nom, Prénom et lien personnel de la carte.
+// Ne publiez jamais cet onglet sur le web : chaque lien ouvre la carte d'un membre.
+function genererLiensCartes() {
+  CacheService.getScriptCache().remove("membres_par_cle");
+  var membres = membresParCle_();
+  var out = [["Nom", "Prénom", "Lien personnel de la carte"]];
+  Object.keys(membres).forEach(function (cle) {
+    out.push([membres[cle].nom, membres[cle].prenom, "https://borinoldcars.github.io/#/carte/" + cle]);
+  });
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sh = ss.getSheetByName("Liens cartes") || ss.insertSheet("Liens cartes");
+  sh.clearContents();
+  sh.getRange(1, 1, out.length, 3).setValues(out);
+  sh.getRange(1, 1, 1, 3).setFontWeight("bold");
+  sh.setFrozenRows(1);
+  sh.autoResizeColumns(1, 3);
+}
+
 function ok_() {
   return ContentService.createTextOutput("ok");
 }
