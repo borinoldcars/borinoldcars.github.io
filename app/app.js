@@ -2,7 +2,7 @@
 (function () {
   "use strict";
 
-  const APP_VERSION = "5 oct. 2026 · 37";
+  const APP_VERSION = "11 oct. 2026 · 38";
   const DATA = "app/data/";
   const view = document.getElementById("view");
   const state = { config: null, events: null, members: null, photos: null, shop: null };
@@ -377,13 +377,20 @@
     }));
   }
 
-  // Photos d'un album : liens d'images (« photos ») ou fichiers Google Drive partagés (« drive »).
+  // Contenu d'un album : liens d'images (« photos »), photos Google Drive partagées (« drive »)
+  // puis vidéos Google Drive (« videos »), lues dans le lecteur Drive.
   function albumPhotos(a) {
-    const drive = (a.drive || []).map((id) => ({
-      thumb: `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w480`,
-      full: `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1600`,
+    const thumb = (id, w) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
+    const drive = (a.drive || []).map((id) => ({ thumb: thumb(id, 480), full: thumb(id, 1600) }));
+    const videos = (a.videos || []).map((id) => ({
+      thumb: thumb(id, 480), full: `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`, video: true,
     }));
-    return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive);
+    return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive, videos);
+  }
+  // « 12 photos · 1 vidéo »
+  function albumCount(list) {
+    const v = list.filter((p) => p.video).length, n = list.length - v;
+    return [n ? `${n} photo${n > 1 ? "s" : ""}` : "", v ? `${v} vidéo${v > 1 ? "s" : ""}` : ""].filter(Boolean).join(" · ");
   }
   // Couverture d'un album : « couverture », sinon l'affiche de la sortie liée, sinon la première photo.
   function albumCover(a) {
@@ -407,10 +414,10 @@
       ${albums.length ? `<div class="grid">${albums.map((a) => {
         const list = albumPhotos(a);
         const cover = albumCover(a);
-        const n = list.length;
+        const n = albumCount(list);
         return `<a class="card album" href="#/photos/${encodeURIComponent(a.id)}">
           <div class="cover">${cover ? `<img src="${esc(cover)}" alt="" loading="lazy" onerror="this.remove()">` : ICON.photo}</div>
-          <div class="info"><strong>${esc(a.titre)}${exBadge(a)}</strong><span>${a.date ? esc(longDate(a.date)) : ""}${n ? ` · ${n} photo${n > 1 ? "s" : ""}` : ""}</span></div>
+          <div class="info"><strong>${esc(a.titre)}${exBadge(a)}</strong><span>${a.date ? esc(longDate(a.date)) : ""}${n ? ` · ${n}` : ""}</span></div>
         </a>`;
       }).join("")}</div>` : '<div class="card empty">Aucun album pour le moment.</div>'}
     `;
@@ -425,7 +432,7 @@
       <a class="back" href="#/photos">‹ Photos</a>
       <div class="page-head"><h1>${esc(a.titre)}${exBadge(a)}</h1><p>${a.date ? esc(longDate(a.date)) : ""}</p></div>
       ${folder ? `<p><a class="btn secondary" href="${esc(folder)}" target="_blank" rel="noopener">Ouvrir l'album dans Google Drive</a></p>` : ""}
-      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}" aria-label="Agrandir la photo ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'"></button>`).join("")}</div>`
+      ${photos.length ? `<div class="mosaic">${photos.map((p, i) => `<button data-i="${i}"${p.video ? ' class="video"' : ""} aria-label="${p.video ? "Lire la vidéo" : "Agrandir la photo"} ${i + 1}"><img src="${esc(p.thumb)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">${p.video ? '<span class="play" aria-hidden="true"></span>' : ""}</button>`).join("")}</div>`
         : a.dossier ? `<iframe class="drive-folder" src="https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(a.dossier)}#grid" title="Photos : ${esc(a.titre)}" loading="lazy"></iframe>
         <p class="small muted">Touchez une photo pour l'ouvrir en grand.</p>`
         : '<div class="card empty">Pas encore de photos dans cet album.</div>'}
@@ -434,22 +441,29 @@
   function bindAlbum(id) {
     const a = ((state.photos || {}).albums || []).find((x) => x.id === id);
     if (!a) return;
-    const full = albumPhotos(a).map((p) => p.full);
+    const full = albumPhotos(a);
     view.querySelectorAll(".mosaic button").forEach((b) => b.addEventListener("click", () => openLightbox(full, +b.dataset.i)));
   }
   function openLightbox(list, i) {
     const box = document.createElement("div");
     box.className = "lightbox";
-    box.innerHTML = `<img alt=""><button class="close" aria-label="Fermer">×</button>${list.length > 1 ? '<button class="prev" aria-label="Précédente">‹</button><button class="next" aria-label="Suivante">›</button>' : ""}`;
-    const img = box.querySelector("img");
-    const show = () => { img.src = list[i]; };
+    box.innerHTML = `<img alt=""><iframe allow="autoplay; fullscreen" allowfullscreen hidden></iframe><button class="close" aria-label="Fermer">×</button>${list.length > 1 ? '<button class="prev" aria-label="Précédente">‹</button><button class="next" aria-label="Suivante">›</button>' : ""}`;
+    const img = box.querySelector("img"), frame = box.querySelector("iframe");
+    // Éléments : liens d'images, ou { full, video } (vidéo Drive dans un lecteur intégré).
+    const show = () => {
+      const it = typeof list[i] === "string" ? { full: list[i] } : list[i];
+      img.hidden = !!it.video;
+      frame.hidden = !it.video;
+      if (it.video) { img.removeAttribute("src"); frame.src = it.full; }
+      else { frame.removeAttribute("src"); img.src = it.full; }
+    };
     const move = (d) => { i = (i + d + list.length) % list.length; show(); };
     const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
     const onKey = (e) => { if (e.key === "Escape") close(); if (e.key === "ArrowLeft") move(-1); if (e.key === "ArrowRight") move(1); };
     box.addEventListener("click", (e) => {
       if (e.target.classList.contains("prev")) move(-1);
       else if (e.target.classList.contains("next")) move(1);
-      else if (e.target !== img) close();
+      else if (e.target !== img && e.target !== frame) close();
     });
     let x0 = null;
     box.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
