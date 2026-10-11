@@ -1,6 +1,14 @@
 {
  "albums": [
   {
+   "id": "dour-auto-retro-au-profit-de-think-pink-2026-10-11",
+   "titre": "Dour Auto Rétro au profit de Think Pink",
+   "date": "2026-10-11",
+   "dossier": "1lis17h8qD_Q37vHQUHFHUJEricmFZ-cR",
+   "drive": [],
+   "agenda": true
+  },
+  {
    "id": "randour-classics-2026",
    "titre": "La RanDour Classics",
    "date": "2026-09-27",
