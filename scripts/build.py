@@ -637,7 +637,7 @@ def drive_folder_files(folder_id):
     url = f"https://drive.google.com/embeddedfolderview?id={folder_id}"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
     html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
-    images, videos = [], []
+    images, videos, ignored = [], [], []
     for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
         fid, title = m.group(1), m.group(2).strip()
         # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
@@ -647,6 +647,13 @@ def drive_folder_files(folder_id):
             images.append((title.lower(), fid))
         elif title.lower().endswith(VIDEO_EXT):
             videos.append((title.lower(), fid))
+        else:
+            ignored.append(title)
+    if ignored:
+        print(f"Photos : fichiers ignorés dans le dossier {folder_id} : {', '.join(ignored[:10])}")
+    if not (images or videos or ignored) and "flip-entry" not in html:
+        login = "connexion Google demandée" if "ServiceLogin" in html or "accounts.google.com" in html else "aucun fichier visible"
+        print(f"Photos : dossier {folder_id} : {login} ({len(html)} caractères).")
     natural = lambda t: [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t[0])]
     return [fid for _, fid in sorted(images, key=natural)], [fid for _, fid in sorted(videos, key=natural)]
 
