@@ -377,14 +377,30 @@
     }));
   }
 
+  // Vidéos converties en MP4 lisible partout par le site borinoldcars.be (videos/index.json) :
+  // les vidéos d'iPhone (HEVC) n'ont que le son dans le lecteur Drive.
+  const SITE = "https://borinoldcars.be/";
+  let siteVideos = null;
+  async function loadSiteVideos() {
+    if (siteVideos) return siteVideos;
+    try {
+      const r = await fetch(SITE + "videos/index.json", { cache: "no-cache" });
+      siteVideos = r.ok ? await r.json() : {};
+    } catch (e) {
+      siteVideos = {};
+    }
+    return siteVideos;
+  }
   // Contenu d'un album : liens d'images (« photos »), photos Google Drive partagées (« drive »)
-  // puis vidéos Google Drive (« videos »), lues dans le lecteur Drive.
+  // puis vidéos (« videos ») : copie MP4 du site si elle existe, sinon le lecteur Drive.
   function albumPhotos(a) {
     const thumb = (id, w) => `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w${w}`;
     const drive = (a.drive || []).map((id) => ({ thumb: thumb(id, 480), full: thumb(id, 1600) }));
-    const videos = (a.videos || []).map((id) => ({
-      thumb: thumb(id, 480), full: `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`, video: true,
-    }));
+    const videos = (a.videos || []).map((id) => {
+      const v = (siteVideos || {})[id];
+      return v ? { thumb: SITE + v.poster, full: SITE + v.mp4, video: "mp4" }
+        : { thumb: thumb(id, 480), full: `https://drive.google.com/file/d/${encodeURIComponent(id)}/preview`, video: true };
+    });
     return (a.photos || []).map((u) => ({ thumb: u, full: u })).concat(drive, videos);
   }
   // « 12 photos · 1 vidéo »
@@ -426,6 +442,7 @@
   async function pageAlbum(id) {
     const a = ((await load("photos")).albums || []).find((x) => x.id === id);
     if (!a) return `<a class="back" href="#/photos">‹ Photos</a><div class="card empty">Album introuvable.</div>`;
+    if ((a.videos || []).length) await loadSiteVideos();
     const photos = albumPhotos(a);
     const folder = a.dossier ? `https://drive.google.com/drive/folders/${encodeURIComponent(a.dossier)}` : a.lien;
     return `
@@ -447,26 +464,30 @@
   function openLightbox(list, i) {
     const box = document.createElement("div");
     box.className = "lightbox";
-    box.innerHTML = `<img alt=""><iframe allow="autoplay; fullscreen" allowfullscreen hidden></iframe><button class="close" aria-label="Fermer">×</button>${list.length > 1 ? '<button class="prev" aria-label="Précédente">‹</button><button class="next" aria-label="Suivante">›</button>' : ""}`;
-    const img = box.querySelector("img"), frame = box.querySelector("iframe");
-    // Éléments : liens d'images, ou { full, video } (vidéo Drive dans un lecteur intégré).
+    box.innerHTML = `<img alt=""><iframe allow="autoplay; fullscreen" allowfullscreen hidden></iframe><video controls playsinline preload="metadata" hidden></video><button class="close" aria-label="Fermer">×</button>${list.length > 1 ? '<button class="prev" aria-label="Précédente">‹</button><button class="next" aria-label="Suivante">›</button>' : ""}`;
+    const img = box.querySelector("img"), frame = box.querySelector("iframe"), mp4 = box.querySelector("video");
+    // Éléments : liens d'images, ou { full, video } : video "mp4" (copie du site) ou true (lecteur Drive).
     const show = () => {
       const it = typeof list[i] === "string" ? { full: list[i] } : list[i];
+      const drive = it.video === true, file = it.video === "mp4";
       img.hidden = !!it.video;
-      frame.hidden = !it.video;
-      if (it.video) { img.removeAttribute("src"); frame.src = it.full; }
-      else { frame.removeAttribute("src"); img.src = it.full; }
+      frame.hidden = !drive;
+      mp4.hidden = !file;
+      mp4.pause();
+      if (!it.video) img.src = it.full; else img.removeAttribute("src");
+      if (drive) frame.src = it.full; else frame.removeAttribute("src");
+      if (file) { mp4.src = it.full; mp4.play().catch(() => {}); } else { mp4.removeAttribute("src"); mp4.load(); }
     };
     const move = (d) => { i = (i + d + list.length) % list.length; show(); };
-    const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
+    const close = () => { mp4.pause(); box.remove(); document.removeEventListener("keydown", onKey); };
     const onKey = (e) => { if (e.key === "Escape") close(); if (e.key === "ArrowLeft") move(-1); if (e.key === "ArrowRight") move(1); };
     box.addEventListener("click", (e) => {
       if (e.target.classList.contains("prev")) move(-1);
       else if (e.target.classList.contains("next")) move(1);
-      else if (e.target !== img && e.target !== frame) close();
+      else if (e.target !== img && e.target !== frame && e.target !== mp4) close();
     });
     let x0 = null;
-    box.addEventListener("touchstart", (e) => { x0 = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchstart", (e) => { x0 = e.target === mp4 ? null : e.touches[0].clientX; }, { passive: true });
     box.addEventListener("touchend", (e) => {
       if (x0 == null) return;
       const dx = e.changedTouches[0].clientX - x0;
