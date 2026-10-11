@@ -638,17 +638,25 @@ def drive_folder_files(folder_id):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
     html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
     images, videos, ignored = [], [], []
-    for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
+    # Un bloc par fichier : son nom, et l'icône de type fournie par Drive (…/type/video/mp4),
+    # utile quand le nom du fichier n'a pas d'extension.
+    blocks = re.split(r'(?=id="entry-)', html)
+    for block in blocks:
+        m = re.search(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', block, re.S)
+        if not m:
+            continue
         fid, title = m.group(1), m.group(2).strip()
         # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
         if title.startswith("._"):
             continue
-        if title.lower().endswith(IMAGE_EXT):
+        kind = re.search(r"type/(image|video)/", block)
+        if title.lower().endswith(IMAGE_EXT) or (kind and kind.group(1) == "image"):
             images.append((title.lower(), fid))
-        elif title.lower().endswith(VIDEO_EXT):
+        elif title.lower().endswith(VIDEO_EXT) or (kind and kind.group(1) == "video"):
             videos.append((title.lower(), fid))
         else:
-            ignored.append(title)
+            icon = re.search(r'<img[^>]*src="([^"]+)"', block)
+            ignored.append(f"{title} [{icon.group(1)[-60:] if icon else 'sans icône'}]")
     if ignored:
         print(f"Photos : fichiers ignorés dans le dossier {folder_id} : {', '.join(ignored[:10])}")
     if not (images or videos or ignored) and "flip-entry" not in html:
