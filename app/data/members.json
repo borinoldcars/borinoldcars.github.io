@@ -335,6 +335,18 @@
    "photo": "",
    "cle": "",
    "depuis": ""
+  },
+  {
+   "slug": "saidi-akrim",
+   "prenom": "Akrim",
+   "nom": "Saidi",
+   "marque": "0",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": "",
+   "cle": "",
+   "depuis": ""
   }
  ],
  "vehicules": [
@@ -926,6 +938,16 @@
    "prenom": "Rosario",
    "nom": "Nuara",
    "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "photo": ""
+  },
+  {
+   "id": "saidi-akrim-0",
+   "slug": "saidi-akrim",
+   "prenom": "Akrim",
+   "nom": "Saidi",
+   "marque": "0",
    "modele": "",
    "annee": "",
    "photo": ""
