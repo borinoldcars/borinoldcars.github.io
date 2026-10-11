@@ -630,21 +630,25 @@ if ev is not None:
 import urllib.request
 
 IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".gif")
+VIDEO_EXT = (".mp4", ".mov", ".m4v", ".webm", ".avi", ".3gp", ".mkv")
 
-def drive_folder_images(folder_id):
+def drive_folder_files(folder_id):
+    """Identifiants des photos et des vidéos d'un dossier Drive partagé, triés par nom de fichier."""
     url = f"https://drive.google.com/embeddedfolderview?id={folder_id}"
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (borinoldcars build)"})
     html = urllib.request.urlopen(req, timeout=30).read().decode("utf-8", "replace")
-    files = []
+    images, videos = [], []
     for m in re.finditer(r'id="entry-([\w-]+)".*?class="flip-entry-title">([^<]*)<', html, re.S):
         fid, title = m.group(1), m.group(2).strip()
         # « ._xxx.jpg » : fichiers cachés créés par les Mac sur les disques externes, pas des photos.
         if title.startswith("._"):
             continue
         if title.lower().endswith(IMAGE_EXT):
-            files.append((title.lower(), fid))
+            images.append((title.lower(), fid))
+        elif title.lower().endswith(VIDEO_EXT):
+            videos.append((title.lower(), fid))
     natural = lambda t: [int(x) if x.isdigit() else x for x in re.split(r"(\d+)", t[0])]
-    return [fid for _, fid in sorted(files, key=natural)]
+    return [fid for _, fid in sorted(images, key=natural)], [fid for _, fid in sorted(videos, key=natural)]
 
 photos_path = APP_DATA_DIR / "photos.json"
 try:
@@ -679,14 +683,17 @@ for album in albums:
     if not album.get("dossier"):
         continue
     try:
-        ids = drive_folder_images(album["dossier"])
+        ids, vids = drive_folder_files(album["dossier"])
     except Exception as e:  # réseau, page modifiée… : on garde l'existant
         print(f"Photos : dossier de « {album.get('titre')} » illisible ({e}).")
         continue
     if ids and ids != album.get("drive"):
         album["drive"] = ids
         changed = True
-    print(f"Photos : « {album.get('titre')} » : {len(ids)} photo(s) dans le dossier.")
+    if vids and vids != album.get("videos"):
+        album["videos"] = vids
+        changed = True
+    print(f"Photos : « {album.get('titre')} » : {len(ids)} photo(s), {len(vids)} vidéo(s) dans le dossier.")
 if changed:
     photos_path.write_text(json.dumps(photos_data, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
