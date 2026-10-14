@@ -65,22 +65,34 @@ function preparerSuivi() {
   sh.autoResizeColumns(1, ENTETES_SUIVI.length);
 }
 
-// Crée (ou met à jour) l'onglet « Liens cartes » : Nom, Prénom et lien personnel de la carte.
+// Crée (ou met à jour) l'onglet « Liens cartes » : Nom, Prénom, lien personnel de la carte
+// et son QR code (colonne D, image affichée dans la cellule).
 // Ne publiez jamais cet onglet sur le web : chaque lien ouvre la carte d'un membre.
 function genererLiensCartes() {
   CacheService.getScriptCache().remove("membres_par_cle");
   var membres = membresParCle_();
-  var out = [["Nom", "Prénom", "Lien personnel de la carte"]];
+  var out = [["Nom", "Prénom", "Lien personnel de la carte", "QR code"]];
   Object.keys(membres).forEach(function (cle) {
-    out.push([membres[cle].nom, membres[cle].prenom, "https://borinoldcars.github.io/#/carte/" + cle]);
+    out.push([membres[cle].nom, membres[cle].prenom, "https://borinoldcars.github.io/#/carte/" + cle, ""]);
   });
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sh = ss.getSheetByName("Liens cartes") || ss.insertSheet("Liens cartes");
-  sh.clearContents();
-  sh.getRange(1, 1, out.length, 3).setValues(out);
-  sh.getRange(1, 1, 1, 3).setFontWeight("bold");
+  sh.clear();
+  sh.getRange(1, 1, out.length, 4).setValues(out);
+  sh.getRange(1, 1, 1, 4).setFontWeight("bold");
   sh.setFrozenRows(1);
+  var n = out.length - 1;
+  if (n > 0) {
+    var qr = [];
+    for (var i = 2; i <= n + 1; i++) {
+      qr.push(['=IMAGE("https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=8&data="&ENCODEURL(C' + i + '))']);
+    }
+    sh.getRange(2, 4, n, 1).setFormulas(qr);
+    sh.setRowHeights(2, n, 120);
+    sh.getRange(2, 1, n, 3).setVerticalAlignment("middle");
+  }
   sh.autoResizeColumns(1, 3);
+  sh.setColumnWidth(4, 120);
 }
 
 function ok_() {
