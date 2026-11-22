@@ -359,6 +359,30 @@
    "photo": "",
    "cle": "",
    "depuis": ""
+  },
+  {
+   "slug": "dupont-olivier",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": "",
+   "cle": "",
+   "depuis": ""
+  },
+  {
+   "slug": "dupont-olivier-2",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": "",
+   "cle": "",
+   "depuis": ""
   }
  ],
  "vehicules": [
@@ -970,6 +994,26 @@
    "prenom": "Nathan",
    "nom": "Tourneur",
    "marque": "Ford mustang",
+   "modele": "",
+   "annee": "",
+   "photo": ""
+  },
+  {
+   "id": "dupont-olivier-fiat",
+   "slug": "dupont-olivier",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "photo": ""
+  },
+  {
+   "id": "dupont-olivier-2-fiat",
+   "slug": "dupont-olivier-2",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
    "modele": "",
    "annee": "",
    "photo": ""
