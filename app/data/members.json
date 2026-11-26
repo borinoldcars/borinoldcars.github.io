@@ -383,6 +383,18 @@
    "photo": "",
    "cle": "",
    "depuis": ""
+  },
+  {
+   "slug": "dupont-olivier-3",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "cotisation": "na",
+   "photo": "",
+   "cle": "",
+   "depuis": ""
   }
  ],
  "vehicules": [
@@ -1011,6 +1023,16 @@
   {
    "id": "dupont-olivier-2-fiat",
    "slug": "dupont-olivier-2",
+   "prenom": "Olivier",
+   "nom": "Dupont",
+   "marque": "Fiat",
+   "modele": "",
+   "annee": "",
+   "photo": ""
+  },
+  {
+   "id": "dupont-olivier-3-fiat",
+   "slug": "dupont-olivier-3",
    "prenom": "Olivier",
    "nom": "Dupont",
    "marque": "Fiat",
